@@ -68,33 +68,10 @@ local Library = {
 
 	OpenedFrames = {},
 	DependencyBoxes = {},
-	Flags = setmetatable({}, {
-		__index = function(_, Index)
-			local Option = Options[Index]
-	
-			if not Option then
-				return nil
-			end
-	
-			return Option.Value
-		end,
-	
-		__newindex = function(_, Index, Value)
-			local Option = Options[Index]
-	
-			if not Option or not Option.SetValue then
-				return
-			end
-	
-			Option:SetValue(Value)
-		end,
-	}),
 
 	Signals = {},
 	ScreenGui = ScreenGui,
 }
-
-getgenv().Flags = Library.Flags
 
 local RainbowStep = 0
 local Hue = 0
