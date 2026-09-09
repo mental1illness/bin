@@ -201,14 +201,14 @@ local SaveManager = {} do
 	function SaveManager:BuildConfigSection(tab)
 		assert(self.Library, 'Must set SaveManager.Library')
 
-		local section = tab:AddRightGroupbox('Configuration')
+		local section = tab:AddLeftGroupbox('Configuration')
 
 		section:AddInput('SaveManager_ConfigName',    { Text = 'Config name' })
 		section:AddDropdown('SaveManager_ConfigList', { Text = 'Config list', Values = self:RefreshConfigList(), AllowNull = true })
 
 		section:AddDivider()
 
-		section:AddButton('Create config', function()
+		section:AddButton('Create', function()
 			local name = Options.SaveManager_ConfigName.Value
 
 			if name:gsub(' ', '') == '' then 
@@ -224,7 +224,7 @@ local SaveManager = {} do
 
 			Options.SaveManager_ConfigList:SetValues(self:RefreshConfigList())
 			Options.SaveManager_ConfigList:SetValue(nil)
-		end):AddButton('Load config', function()
+		end):AddButton('Load', function()
 			local name = Options.SaveManager_ConfigList.Value
 
 			local success, err = self:Load(name)
@@ -235,7 +235,7 @@ local SaveManager = {} do
 			self.Library:Notify(string.format('Loaded config %q', name))
 		end)
 
-		section:AddButton('Overwrite config', function()
+		section:AddButton('Overwrite', function()
 			local name = Options.SaveManager_ConfigList.Value
 
 			local success, err = self:Save(name)
@@ -251,7 +251,7 @@ local SaveManager = {} do
 			Options.SaveManager_ConfigList:SetValue(nil)
 		end)
 
-		section:AddButton('Set as autoload', function()
+		section:AddButton('Autoload', function()
 			local name = Options.SaveManager_ConfigList.Value
 			writefile(self.Folder .. '/settings/autoload.txt', name)
 			SaveManager.AutoloadLabel:SetText('Current autoload config: ' .. name)
