@@ -235,7 +235,7 @@ local ThemeManager = {} do
 
 	function ThemeManager:ApplyToTab(tab)
 		assert(self.Library, 'Must set ThemeManager.Library first!')
-		local groupbox = self:AddRightGroupbox(tab)
+		local groupbox = self:CreateGroupBox(tab)
 		self:CreateThemeManager(groupbox)
 	end
 
