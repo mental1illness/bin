@@ -2794,6 +2794,7 @@ do
 	function Funcs:AddDependencyBox()
 		local Depbox = {
 			Dependencies = {},
+			ResizeTween = nil,
 		}
 
 		local Groupbox = self
@@ -2802,30 +2803,65 @@ do
 		local Holder = Library:Create("Frame", {
 			BackgroundTransparency = 1,
 			Size = UDim2.new(1, 0, 0, 0),
-			Visible = false,
+			Visible = true,
+			ClipsDescendants = true,
 			Parent = Container,
 		})
 
 		local Frame = Library:Create("Frame", {
 			BackgroundTransparency = 1,
-			Size = UDim2.new(1, 0, 1, 0),
-			Visible = true,
+			Size = UDim2.new(1, 0, 0, 0),
+			AutomaticSize = Enum.AutomaticSize.Y,
 			Parent = Holder,
 		})
 
 		local Layout = Library:Create("UIListLayout", {
 			FillDirection = Enum.FillDirection.Vertical,
 			SortOrder = Enum.SortOrder.LayoutOrder,
+			HorizontalAlignment = Enum.HorizontalAlignment.Left,
 			Parent = Frame,
 		})
 
-		function Depbox:Resize()
-			Holder.Size = UDim2.new(1, 0, 0, Layout.AbsoluteContentSize.Y)
-			Groupbox:Resize()
+		local function GetContentHeight()
+			return Layout.AbsoluteContentSize.Y
+		end
+
+		function Depbox:Resize(Instant)
+			local ContentHeight = Holder.Visible and GetContentHeight() or 0
+			local NewSize = UDim2.new(1, 0, 0, ContentHeight)
+
+			if Depbox.ResizeTween then
+				Depbox.ResizeTween:Cancel()
+				Depbox.ResizeTween = nil
+			end
+
+			if Instant then
+				Holder.Size = NewSize
+			else
+				Depbox.ResizeTween = TweenService:Create(
+					Holder,
+					TweenInfo.new(
+						0.18,
+						Enum.EasingStyle.Quart,
+						Enum.EasingDirection.Out
+					),
+					{
+						Size = NewSize
+					}
+				)
+
+				Depbox.ResizeTween:Play()
+			end
+
+			task.defer(function()
+				Groupbox:Resize()
+			end)
 		end
 
 		Layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-			Depbox:Resize()
+			if Holder.Visible then
+				Depbox:Resize()
+			end
 		end)
 
 		Holder:GetPropertyChangedSignal("Visible"):Connect(function()
@@ -2867,6 +2903,8 @@ do
 
 		return Depbox
 	end
+
+
 
 	BaseGroupbox.__index = Funcs
 	BaseGroupbox.__namecall = function(Table, Key, ...)
