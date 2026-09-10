@@ -32,12 +32,14 @@ local LocalPlayer = Players.LocalPlayer
 local Mouse = LocalPlayer:GetMouse()
 
 local ProtectGui = protectgui or (syn and syn.protect_gui) or function() end
+local GetHui = gethui or (syn and syn.get_hidden_gui) or function() return CoreGui end
 
 local ScreenGui = Instance.new("ScreenGui")
 ProtectGui(ScreenGui)
 
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Global
-ScreenGui.Parent = CoreGui
+ScreenGui.Parent = GetHui()
+ScreenGui.DisplayOrder = 10^6
 
 local Toggles = {}
 local Options = {}
@@ -4038,7 +4040,7 @@ function Library:CreateWindow(...)
 		Fading = false
 	end
 
-	Library:GiveSignal(InputService.InputBegan:Connect(function(Input, Processed)
+	Library:GiveSignal(InputService.InputBegan:Connect(function(Input)
 		if type(Library.ToggleKeybind) == "table" and Library.ToggleKeybind.Type == "KeyPicker" then
 			if
 				Input.UserInputType == Enum.UserInputType.Keyboard
@@ -4047,7 +4049,7 @@ function Library:CreateWindow(...)
 				task.spawn(Library.Toggle)
 			end
 		elseif
-			Input.KeyCode == Enum.KeyCode.RightControl or (Input.KeyCode == Enum.KeyCode.RightShift and not Processed)
+			Input.KeyCode == Enum.KeyCode.RightControl or (Input.KeyCode == Enum.KeyCode.RightShift)
 		then
 			task.spawn(Library.Toggle)
 		end
