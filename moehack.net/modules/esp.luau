@@ -190,7 +190,7 @@ ESP.GetBoundingBox = function(Model: {})
 
     for _, Part in Model do -- if its a table :smile: #i love caching
         if Part.Transparency < 0.99 then -- stupid transparency fix for stupid games
-            for I, Corner in ESP.GetCorners(Part.CFrame, Part.Size) do
+            for _, Corner in ESP.GetCorners(Part.CFrame, Part.Size) do
                 local ScreenPoint, Visible = CurrentCamera:WorldToViewportPoint(Corner)
 
                 if Visible then

@@ -121,7 +121,7 @@ end
 
 Library:Notify("Loading modules...", 2)
 
-local ESP = LoadModule("moehack.net/modules/esp.luau", true)
+LoadModule("moehack.net/modules/esp.luau", true)
 
 --# Connections
 
@@ -134,11 +134,11 @@ Library:GiveSignal(
 
 do -- Notification
     Spawn(function() -- yeah bro
-        Wait(.1)
+        Wait(.2)
         Library:Notify("Loaded sucessfully!", 3)
-        Wait(.1)
+        Wait(.3)
         Library:Notify("Today's wordle's answer is " .. tostring(Game:HttpGet("https://bloxsense.vercel.app/api/WordleTodaysAnswer.js")), 4)
-        Wait(.1)
+        Wait(.4)
         Library:Notify("Welcome to moehack.net, good luck and have fun being a moe" .. " " .. string.lower(LocalPlayer.Name) .. "!", 6)
     end)
 end
