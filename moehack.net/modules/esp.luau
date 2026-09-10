@@ -26,14 +26,14 @@ local LocalPlayer        = Players.LocalPlayer
 --# Helper Funcs (USELESS)
 
 LoadModule = function(Path, Load)
-    local url = "cats-cure-depression.vercel.app/" .. Path
+    local url = "https://cats-cure-depression.vercel.app/" .. Path
     
     return Load == true and loadstring(game:HttpGet(url))() or game:HttpGet(url)
 end
 
 --# Modules
 
-local Fonts = LoadModule("globals/fonts.luau")
+local Fonts = LoadModule("globals/fonts.luau", true)
 
 --# Variables
 
