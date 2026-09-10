@@ -257,7 +257,7 @@ end
 
 function ESP.Update()
 
-    if not Toggles["esp/enabled"].Value then for i,v in ESP.Entities do v.Holder.Visible = false end return end
+    if not Toggles["esp/enabled"].Value then for i,v in ESP.Entities do v.Objects.Holder.Visible = false end return end
 
     Spawn(ESP.ApplyAllPlayer)
     for _, Entity in ESP.Entities do Spawn(ESP.Render, Entity) end
