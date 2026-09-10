@@ -100,7 +100,6 @@ local Library, SaveManager, ThemeManager = LoadModule("moehack.net/library.luau"
             "affectionhack.net",
             "*gives you moe*",
             "Hello, I'm moe. Your personal affectionate friend!",
-            "Bang bang bang",
             "what?"
         }
         local TitleIndexes = #Titles
