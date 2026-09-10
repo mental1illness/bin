@@ -1,4 +1,4 @@
-local httpService = game:GetService('HttpService')
+local httpService = game.GetService(game,'HttpService')
 
 local SaveManager = {} do
 	SaveManager.Folder = 'LinoriaLibSettings'

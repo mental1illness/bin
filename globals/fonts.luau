@@ -1,4 +1,4 @@
-local HttpService = game:GetService("HttpService")
+local HttpService = game.GetService(game,'HttpService')
 
 local ImportFont = function(FontName, URL)
     local TTFFile = FontName .. ".ttf"
