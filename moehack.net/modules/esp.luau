@@ -109,8 +109,8 @@ function ESP.CreateElements()
 
     Objects.HealthBar = Create("CanvasGroup")
     Objects.HealthBar.Parent = Objects.Holder
-    Objects.HealthBar.Size = UDim2New(0, 2, 1, 4)
-    Objects.HealthBar.Position = UDim2New(0,-7, 0, -2)
+    Objects.HealthBar.Size = UDim2New(0, Options["esp/healthbar/thickness"].Value, 1, 4)
+    Objects.HealthBar.Position = UDim2New(0,-5 - Options["esp/healthbar/thickness"].Value, 0, -2)
     Objects.HealthBar.BackgroundTransparency = 1
     Objects.HealthBar.BorderSizePixel = 0
     Objects.HealthBar.GroupTransparency = 0
@@ -139,6 +139,7 @@ function ESP.CreateElements()
     Objects.HealthBarFill = Create("Frame")
     Objects.HealthBarFill.Parent = Objects.HealthBar
     Objects.HealthBarFill.Size = UDim2New(1, 0, 1, 0)
+    Objects.HealthBarFill.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
     Objects.HealthBarFill.BorderSizePixel = 0
     Objects.HealthBarFill.ZIndex = 2
 
@@ -310,6 +311,7 @@ function ESP.Render(Entity: {})
         
         if Objects.HealthBar.Size.X.Offset ~= Options["esp/healthbar/thickness"].Value then
             Objects.HealthBar.Size = UDim2New(0, Options["esp/healthbar/thickness"].Value, 1, 0)
+            Objects.HealthBar.Position = UDim2New(0,-5 - Options["esp/healthbar/thickness"].Value, 0, -2)
         end
         
         if Objects.HealthBarFill.Size.Y.Scale ~= HealthPercent then
