@@ -2216,6 +2216,7 @@ do
 
 		local DisplayLabel = Library:CreateLabel({
 			Size = UDim2.new(1, 0, 1, 0),
+			Position = UDim2.new(0, 0, 0, 1),
 			TextSize = 12,
 			Text = "Infinite",
 			ZIndex = 9,
