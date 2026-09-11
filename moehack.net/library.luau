@@ -19,6 +19,12 @@ writefile("Tahoma.font", game:GetService("HttpService"):JSONEncode({
 }))
 
 writefile("Scrollbar.png", game:HttpGet("https://mental1illness.vercel.app/images/scrollbar.png"))
+writefile("saturation_value_gradient.png", game:HttpGet("https://mental1illness.vercel.app/images/saturation_value_gradient.png"))
+writefile("glow.png", game:HttpGet("https://mental1illness.vercel.app/images/glow.png"))
+writefile("dropdown_arrow.png", game:HttpGet("https://mental1illness.vercel.app/images/dropdown_arrow.png"))
+writefile("dot_cursor.png", game:HttpGet("https://mental1illness.vercel.app/images/dot_cursor.png"))
+writefile("checkerslong.png", game:HttpGet("https://mental1illness.vercel.app/images/checkerslong.png"))
+writefile("checkers.png", game:HttpGet("https://mental1illness.vercel.app/images/checkers.png"))
 
 local InputService = game:GetService("UserInputService")
 local TextService = game:GetService("TextService")
@@ -493,7 +499,7 @@ do
 			BorderSizePixel = 0,
 			Size = UDim2.new(0, 27, 0, 13),
 			ZIndex = 5,
-			Image = "http://www.roblox.com/asset/?id=12977615774",
+			Image = getcustomasset("checkers.png"),
 			Visible = not not Info.Transparency,
 			Parent = DisplayFrame,
 		})
@@ -557,7 +563,7 @@ do
 			BorderSizePixel = 0,
 			Size = UDim2.new(1, 0, 1, 0),
 			ZIndex = 18,
-			Image = "rbxassetid://4155801252",
+			Image = getcustomasset("saturation_value_gradient.png"),
 			Parent = SatVibMapInner,
 		})
 
@@ -565,7 +571,7 @@ do
 			AnchorPoint = Vector2.new(0.5, 0.5),
 			Size = UDim2.new(0, 6, 0, 6),
 			BackgroundTransparency = 1,
-			Image = "http://www.roblox.com/asset/?id=9619665977",
+			Image = getcustomasset("dot_cursor.png"),
 			ImageColor3 = Color3.new(0, 0, 0),
 			ZIndex = 19,
 			Parent = SatVibMap,
@@ -575,7 +581,7 @@ do
 			Size = UDim2.new(0, CursorOuter.Size.X.Offset - 2, 0, CursorOuter.Size.Y.Offset - 2),
 			Position = UDim2.new(0, 1, 0, 1),
 			BackgroundTransparency = 1,
-			Image = "http://www.roblox.com/asset/?id=9619665977",
+			Image = getcustomasset("dot_cursor.png"),
 			ZIndex = 20,
 			Parent = CursorOuter,
 		})
@@ -687,7 +693,7 @@ do
 			Library:Create("ImageLabel", {
 				BackgroundTransparency = 1,
 				Size = UDim2.new(1, 0, 1, 0),
-				Image = "http://www.roblox.com/asset/?id=12978095818",
+				Image = getcustomasset("checkerslong.png"),
 				ZIndex = 20,
 				Parent = TransparencyBoxInner,
 			})
@@ -2420,7 +2426,7 @@ do
 			BackgroundTransparency = 1,
 			Position = UDim2.new(1, -16, 0.5, 0),
 			Size = UDim2.new(0, 12, 0, 12),
-			Image = "http://www.roblox.com/asset/?id=6282522798",
+			Image = getcustomasset("dropdown_arrow.png"),
 			ZIndex = 8,
 			Parent = DropdownInner,
 		})
@@ -3213,7 +3219,7 @@ function Library:CreateWindow(...)
 		ScaleType = Enum.ScaleType.Slice,
 		BorderColor3 = Color3.fromRGB(0, 0, 0),
 		BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-		Image = "http://www.roblox.com/asset/?id=18245826428",
+		Image = getcustomasset("glow.png"),
 		BackgroundTransparency = 1,
 		ImageTransparency = 0.8,
 		Position = UDim2.new(0, -20, 0, -20),
