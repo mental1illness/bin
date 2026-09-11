@@ -2500,8 +2500,9 @@ do
 			ZIndex = 21,
 			Parent = ListInner,
 
-			TopImage = "rbxasset://textures/ui/Scroll/scroll-middle.png",
-			BottomImage = "rbxasset://textures/ui/Scroll/scroll-middle.png",
+			MidImage = getcustomasset("Scrollbar.png"),
+			TopImage = getcustomasset("Scrollbar.png"),
+			BottomImage = getcustomasset("Scrollbar.png"),
 
 			ScrollBarThickness = 3,
 			ScrollBarImageColor3 = Library.AccentColor,
