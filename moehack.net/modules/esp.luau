@@ -310,7 +310,7 @@ function ESP.Render(Entity: {})
 
         
         if Objects.HealthBar.Size.X.Offset ~= Options["esp/healthbar/thickness"].Value then
-            Objects.HealthBar.Size = UDim2New(0, Options["esp/healthbar/thickness"].Value, 1, 0)
+            Objects.HealthBar.Size = UDim2New(0, Options["esp/healthbar/thickness"].Value, 1, 4)
             Objects.HealthBar.Position = UDim2New(0,-5 - Options["esp/healthbar/thickness"].Value, 0, -2)
         end
         
