@@ -2147,7 +2147,7 @@ do
 		local SliderOuter = Library:Create("Frame", {
 			BackgroundColor3 = Color3.new(0, 0, 0),
 			BorderColor3 = Color3.new(0, 0, 0),
-			Size = UDim2.new(1, -4, 0, 13),
+			Size = UDim2.new(1, -4, 0, 15),
 			ZIndex = 5,
 			Parent = Container,
 		})
