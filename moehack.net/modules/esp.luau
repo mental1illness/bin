@@ -4,7 +4,7 @@
 --# Aliases
 
 local FromOffset, FromScale, UDim2New = UDim2.fromOffset, UDim2.fromScale, UDim2.new
-local Atan2, Rad, Pi, Abs, Minimum, Maximum = math.atan2, math.rad, math.pi, math.abs, math.min, math.max
+local Atan2, Rad, Pi, Abs, Minimum, Maximum, Floor = math.atan2, math.rad, math.pi, math.abs, math.min, math.max, math.floor
 local NewVector, NewVector3, NewCFrame = vector.create, Vector3.new, CFrame.new
 local Create, IsA = Instance.new, workspace.IsA
 local Spawn, Wait = task.spawn, task.wait
@@ -68,6 +68,7 @@ local ESP = { Entities = { } }
 
 ScreenGui.ResetOnSpawn = true
 ScreenGui.IgnoreGuiInset = true
+ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
 Library:GiveSignal( Players.PlayerAdded:Connect(function(Player)
     PlayersCache[Player] = Player
@@ -92,10 +93,10 @@ function ESP.CreateElements()
     Objects.BoundingBox.BackgroundTransparency = 1
     Objects.BoundingBox.GroupTransparency = 0
 
-    Objects.BoundingBoxStroke = Create("UIStroke")
-    Objects.BoundingBoxStroke.LineJoinMode = Enum.LineJoinMode.Miter
-    Objects.BoundingBoxStroke.Thickness = 3
-    Objects.BoundingBoxStroke.Parent = Objects.BoundingBox
+    local BoundingBoxStroke = Create("UIStroke")
+    BoundingBoxStroke.LineJoinMode = Enum.LineJoinMode.Miter
+    BoundingBoxStroke.Thickness = 3
+    BoundingBoxStroke.Parent = Objects.BoundingBox
 
     Objects.BoundingBoxInline = Create("UIStroke")
     Objects.BoundingBoxInline.LineJoinMode = Enum.LineJoinMode.Miter
@@ -115,12 +116,12 @@ function ESP.CreateElements()
     Objects.HealthBar.BorderSizePixel = 0
     Objects.HealthBar.GroupTransparency = 0
 
-    Objects.HealthBarOutline = Create("UIStroke")
-    Objects.HealthBarOutline.LineJoinMode = Enum.LineJoinMode.Miter
-    Objects.HealthBarOutline.Thickness = 1
-    Objects.HealthBarOutline.ZIndex = 4
-    Objects.HealthBarOutline.Color = Color3.fromRGB(0, 0, 0)
-    Objects.HealthBarOutline.Parent = Objects.HealthBar
+    local HealthBarOutline = Create("UIStroke")
+    HealthBarOutline.LineJoinMode = Enum.LineJoinMode.Miter
+    HealthBarOutline.Thickness = 1
+    HealthBarOutline.ZIndex = 4
+    HealthBarOutline.Color = Color3.fromRGB(0, 0, 0)
+    HealthBarOutline.Parent = Objects.HealthBar
 
     Objects.HealthBarBackground = Create("Frame")
     Objects.HealthBarBackground.Parent = Objects.HealthBar
@@ -150,6 +151,33 @@ function ESP.CreateElements()
         ColorSequenceKeypoint.new(0, Options["esp/healthbar/colora"].Value),
         ColorSequenceKeypoint.new(1, Options["esp/healthbar/colorb"].Value)
     })
+
+    --# Health Text
+
+    Objects.HealthTextHolder = Create("CanvasGroup")
+    Objects.HealthTextHolder.Parent = Objects.Holder
+    Objects.HealthTextHolder.Size = FromOffset(11, 10)
+    Objects.HealthTextHolder.BackgroundTransparency = 1
+    Objects.HealthTextHolder.GroupTransparency = 1
+    Objects.HealthTextHolder.AnchorPoint = Vector2.new(0, 0.5)
+
+    Objects.HealthText = Create("TextLabel")
+    Objects.HealthText.Parent = Objects.HealthTextHolder
+    Objects.HealthText.Size = FromOffset(9, 9)
+    Objects.HealthText.BackgroundTransparency = 1
+    Objects.HealthText.Position = FromOffset(1, 0)
+    Objects.HealthText.Text = "100"
+    Objects.HealthText.TextXAlignment = Enum.TextXAlignment.Center
+    Objects.HealthText.FontFace = Fonts.SmallestPixel7
+    Objects.HealthText.TextColor3 = Options["esp/healthtext/color"].Value
+    Objects.HealthText.TextSize = 9
+    Objects.HealthText.ZIndex = 5
+
+    local HealthTextStroke = Create("UIStroke")
+    HealthTextStroke.Parent = Objects.HealthText
+    HealthTextStroke.LineJoinMode = Enum.LineJoinMode.Miter
+    HealthTextStroke.Thickness = 1
+    HealthTextStroke.Color = Color3.new(0, 0, 0)
 
     return Objects
 end
@@ -308,14 +336,44 @@ function ESP.Render(Entity: {})
         local HealthPercent = Health / MaxHealth
         local HealthHeight = (HighY - LowY) * HealthPercent
 
-        
         if Objects.HealthBar.Size.X.Offset ~= Options["esp/healthbar/thickness"].Value then
             Objects.HealthBar.Size = UDim2New(0, Options["esp/healthbar/thickness"].Value, 1, 4)
             Objects.HealthBar.Position = UDim2New(0,-5 - Options["esp/healthbar/thickness"].Value, 0, -2)
         end
         
-        if Objects.HealthBarFill.Size.Y.Scale ~= HealthPercent then
-            Objects.HealthBarFill.Size = UDim2New(1, 0, HealthPercent, 0)
+        if Objects.HealthBarCover.Size.Y.Scale ~= (1 - HealthPercent) then
+            Objects.HealthBarCover.Size = UDim2New(1, 0, 1 - HealthPercent, 0)
+        end
+
+        if Toggles["esp/healthtext"].Value  then
+
+            if not Objects.HealthTextHolder.Visible then
+                Objects.HealthTextHolder.Visible = true
+            end
+
+            if Objects.HealthText.TextColor3 ~= Options["esp/healthtext/color"].Value then
+                Objects.HealthText.TextColor3 = Options["esp/healthtext/color"].Value
+            end
+
+            if Objects.HealthText.Text ~= tostring(Floor(Health)) then
+                Objects.HealthText.Text = tostring(Floor(Health))
+            end
+
+            if Health == MaxHealth then
+                Objects.HealthTextHolder.GroupTransparency = 1
+            else
+                local HealthTextY = (HighY - LowY) * (1 - HealthPercent)
+
+                Objects.HealthTextHolder.GroupTransparency = 0
+                Objects.HealthTextHolder.Position = UDim2New(
+                    0, -10 - Options["esp/healthbar/thickness"].Value,
+                    0, HealthTextY
+                )
+            end
+        else
+            if Objects.HealthTextHolder.Visible then
+                Objects.HealthTextHolder.Visible = false
+            end
         end
 
         if Objects.HealthBarGradient.Color.Keypoints[1].Value ~= Options["esp/healthbar/colora"].Value or Objects.HealthBarGradient.Color.Keypoints[2].Value ~= Options["esp/healthbar/colorb"].Value then
@@ -327,6 +385,9 @@ function ESP.Render(Entity: {})
     else
         if Objects.HealthBar.Visible then
             Objects.HealthBar.Visible = false
+        end
+        if Objects.HealthTextHolder.Visible then
+            Objects.HealthTextHolder.Visible = false
         end
     end
     
