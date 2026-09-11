@@ -35,4 +35,8 @@ return {
         "IMissYouAndYouMissMeToo",
         "https://mental1illness.vercel.app/fonts/windows-xp-tahoma.ttf"
     ),
+    SmallestPixel7 = ImportFont(
+        "WelcomeToOurMeetingAreYouIntoReadingNoNeedForBeingCoy",
+        "https://mental1illness.vercel.app/fonts/smallest_pixel-7.ttf"
+    ),
 }
