@@ -133,7 +133,7 @@ Library:GiveSignal(
 )
 
 do -- Notification
-    Spawn(function() -- yeah bro
+    Spawn(function()
         Wait(.2)
         Library:Notify("Loaded sucessfully!", 3)
         Wait(.3)
