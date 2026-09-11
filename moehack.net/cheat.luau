@@ -50,7 +50,13 @@ local Library, SaveManager, ThemeManager = LoadModule("moehack.net/library.luau"
             local Main, Settings = Tabs.ESP:AddGroupbox({ Side = 1, Name = "Players" }), Tabs.ESP:AddGroupbox({ Side = 2, Name = "Settings" })
             do -- Players
                 Main:AddToggle("esp/enabled", { Text = "Enabled", Default = false })
-                Main:AddToggle("esp/box", { Text = "Bounding Box", Default = false }):AddColorPicker('esp/box/color', { Default = Color3.fromRGB(255, 255, 255), Title = 'Box Color' })
+                Main:AddToggle("esp/box", { Text = "Bounding Box", Default = false }):AddColorPicker('esp/box/color', { Default = Color3.fromRGB(255, 255, 255), Title = 'Box Color' }) do
+                    local DepBox = Main:AddDependencyBox()
+                    DepBox:AddToggle("esp/box/fill", { Text = "Fill Box", Default = false }):AddColorPicker('esp/box/fillcolor', { Default = Color3.fromRGB(255, 255, 255), Title = 'Fill Color', Transparency = 0.5 })
+                    DepBox:SetupDependencies({
+                        { Toggles["esp/box"], true } 
+                    });
+                end
                 local HealthBar = Main:AddToggle("esp/healthbar", { Text = "Health Bar", Default = false }) do
 
                     HealthBar:AddColorPicker('esp/healthbar/colora', { Default = Color3.fromRGB(255, 105, 180), Title = 'Health Bar A' })
