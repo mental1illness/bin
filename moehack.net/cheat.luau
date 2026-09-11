@@ -64,7 +64,7 @@ local Library, SaveManager, ThemeManager = LoadModule("moehack.net/library.luau"
 
                     local HealthDepBox = Main:AddDependencyBox()
                     HealthDepBox:AddToggle("esp/healthtext", { Text = "Health Text", Default = false }):AddColorPicker('esp/healthtext/color', { Default = Color3.fromRGB(255, 255, 255), Title = 'Health Text Color' })
-                    HealthDepBox:AddSlider("esp/healthbar/thickness", { Text = "Health Bar Thickness", Min = 1, Max = 2, Rounding = 0, Default = 2 })
+                    HealthDepBox:AddSlider("esp/healthbar/thickness", { Text = "Health Bar Thickness", Min = 1, Max = 2, Rounding = 0, Default = 2, Compact = true })
                     HealthDepBox:SetupDependencies({
                         { Toggles["esp/healthbar"], true } 
                     });
