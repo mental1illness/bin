@@ -3,7 +3,7 @@
 
 --# Aliases
 
-local FromOffset, FromScale = UDim2.fromOffset, UDim2.fromScale
+local FromOffset, FromScale, UDim2New = UDim2.fromOffset, UDim2.fromScale, UDim2.new
 local Atan2, Rad, Pi, Abs, Minimum, Maximum = math.atan2, math.rad, math.pi, math.abs, math.min, math.max
 local NewVector, NewVector3, NewCFrame = vector.create, Vector3.new, CFrame.new
 local Create, IsA = Instance.new, workspace.IsA
@@ -44,8 +44,14 @@ end
 local Flags = {
     ["esp/enabled"] = {Value = true},
     ["esp/settings/renderhz"] = {Value = 60},
-    ["esp/box"] = {Value = false},
-    ["esp/box/color"] = {Value = Color3.fromRGB(255, 255, 255)}
+    ["esp/box"] = {Value = true},
+    ["esp/box/color"] = {Value = Color3.fromRGB(255, 255, 255)},
+    ["esp/healthbar"] = {Value = true},
+    ["esp/healthbar/colora"] = {Value = Color3.fromRGB(255, 105, 180)},
+    ["esp/healthbar/colorb"] = {Value = Color3.fromRGB(255, 20, 147)},
+    ["esp/healthbar/thickness"] = {Value = 2},
+    ["esp/healthtext"] = {Value = true},
+    ["esp/healthtext/color"] = {Value = Color3.fromRGB(255, 255, 255)},
 }
 
 local Library = getgenv().Library or FakeLibrary
@@ -78,6 +84,8 @@ function ESP.CreateElements()
     Objects.Holder.Parent = ScreenGui
     Objects.Holder.BackgroundTransparency = 1
     
+    --# Bounding Box
+
     Objects.BoundingBox = Create("CanvasGroup")
     Objects.BoundingBox.Parent = Objects.Holder
     Objects.BoundingBox.Size = FromScale(1, 1)
@@ -96,6 +104,51 @@ function ESP.CreateElements()
     Objects.BoundingBoxInline.Thickness = 1
     Objects.BoundingBoxInline.ZIndex = 2
     Objects.BoundingBoxInline.Parent = Objects.BoundingBox
+
+    --# Health Bar
+
+    Objects.HealthBar = Create("CanvasGroup")
+    Objects.HealthBar.Parent = Objects.Holder
+    Objects.HealthBar.Size = UDim2New(0, 2, 1, 4)
+    Objects.HealthBar.Position = UDim2New(0,-7, 0, -2)
+    Objects.HealthBar.BackgroundTransparency = 1
+    Objects.HealthBar.BorderSizePixel = 0
+    Objects.HealthBar.GroupTransparency = 0
+
+    Objects.HealthBarOutline = Create("UIStroke")
+    Objects.HealthBarOutline.LineJoinMode = Enum.LineJoinMode.Miter
+    Objects.HealthBarOutline.Thickness = 1
+    Objects.HealthBarOutline.ZIndex = 4
+    Objects.HealthBarOutline.Color = Color3.fromRGB(0, 0, 0)
+    Objects.HealthBarOutline.Parent = Objects.HealthBar
+
+    Objects.HealthBarBackground = Create("Frame")
+    Objects.HealthBarBackground.Parent = Objects.HealthBar
+    Objects.HealthBarBackground.Size = FromScale(1, 1)
+    Objects.HealthBarBackground.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+    Objects.HealthBarBackground.BorderSizePixel = 0
+    Objects.HealthBarBackground.ZIndex = 1
+
+    Objects.HealthBarCover = Create("Frame")
+    Objects.HealthBarCover.Parent = Objects.HealthBar
+    Objects.HealthBarCover.Size = UDim2New(1, 0, 0, 0)
+    Objects.HealthBarCover.BorderSizePixel = 0
+    Objects.HealthBarCover.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+    Objects.HealthBarCover.ZIndex = 3
+
+    Objects.HealthBarFill = Create("Frame")
+    Objects.HealthBarFill.Parent = Objects.HealthBar
+    Objects.HealthBarFill.Size = UDim2New(1, 0, 1, 0)
+    Objects.HealthBarFill.BorderSizePixel = 0
+    Objects.HealthBarFill.ZIndex = 2
+
+    Objects.HealthBarGradient = Create("UIGradient")
+    Objects.HealthBarGradient.Parent = Objects.HealthBarFill
+    Objects.HealthBarGradient.Rotation = 90
+    Objects.HealthBarGradient.Color = ColorSequence.new({
+        ColorSequenceKeypoint.new(0, Options["esp/healthbar/colora"].Value),
+        ColorSequenceKeypoint.new(1, Options["esp/healthbar/colorb"].Value)
+    })
 
     return Objects
 end
@@ -237,17 +290,44 @@ function ESP.Render(Entity: {})
         if not Objects.BoundingBox.Visible then
             Objects.BoundingBox.Visible = true
         end
-
         if Objects.BoundingBoxInline.Color ~= Options["esp/box/color"].Value then
             Objects.BoundingBoxInline.Color = Options["esp/box/color"].Value
         end
-
     else
         if Objects.BoundingBox.Visible then
             Objects.BoundingBox.Visible = false
         end
-        
     end
+
+    if Toggles["esp/healthbar"].Value then
+        if not Objects.HealthBar.Visible then
+            Objects.HealthBar.Visible = true
+        end
+
+        local HealthPercent = Health / MaxHealth
+        local HealthHeight = (HighY - LowY) * HealthPercent
+
+        
+        if Objects.HealthBar.Size.X.Offset ~= Options["esp/healthbar/thickness"].Value then
+            Objects.HealthBar.Size = UDim2New(0, Options["esp/healthbar/thickness"].Value, 1, 0)
+        end
+        
+        if Objects.HealthBarFill.Size.Y.Scale ~= HealthPercent then
+            Objects.HealthBarFill.Size = UDim2New(1, 0, HealthPercent, 0)
+        end
+
+        if Objects.HealthBarGradient.Color.Keypoints[1].Value ~= Options["esp/healthbar/colora"].Value or Objects.HealthBarGradient.Color.Keypoints[2].Value ~= Options["esp/healthbar/colorb"].Value then
+            Objects.HealthBarGradient.Color = ColorSequence.new({
+                ColorSequenceKeypoint.new(0, Options["esp/healthbar/colora"].Value),
+                ColorSequenceKeypoint.new(1, Options["esp/healthbar/colorb"].Value)
+            })
+        end
+    else
+        if Objects.HealthBar.Visible then
+            Objects.HealthBar.Visible = false
+        end
+    end
+    
 
     Objects.Holder.Position = FromOffset(LowX, LowY)
     Objects.Holder.Size = FromOffset(HighX - LowX, HighY - LowY)
