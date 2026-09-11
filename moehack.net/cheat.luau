@@ -68,7 +68,6 @@ local Library, SaveManager, ThemeManager = LoadModule("moehack.net/library.luau"
                     HealthDepBox:SetupDependencies({
                         { Toggles["esp/healthbar"], true } 
                     });
-
                 end
                 Main:AddToggle("esp/name", { Text = "Name", Default = false }):AddColorPicker('esp/name/color', { Default = Color3.fromRGB(255, 255, 255), Title = 'Name Color' })
             end

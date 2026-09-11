@@ -52,13 +52,27 @@ local Flags = {
     ["esp/healthbar/thickness"] = {Value = 2},
     ["esp/healthtext"] = {Value = true},
     ["esp/healthtext/color"] = {Value = Color3.fromRGB(255, 255, 255)},
+    ["esp/name"] = {Value = true},
+    ["esp/name/color"] = {Value = Color3.fromRGB(255, 255, 255)},
+    ["esp/box/fill"] = {Value = true},
+    ["esp/box/fillcolor"] = {Value = Color3.fromRGB(255, 255, 255), Transparency = 0.5}
 }
 
 local Library = getgenv().Library or FakeLibrary
 local Toggles, Options = getgenv().Toggles or Flags, getgenv().Options or Flags
 local ScreenGui = Create("ScreenGui", gethui())
 
-local CornerTlb = table.create(8)
+local Corners = {
+    { 1,  1,  1},
+    {-1,  1,  1},
+    { 1,  1, -1},
+    {-1,  1, -1},
+    { 1, -1,  1},
+    {-1, -1,  1},
+    { 1, -1, -1},
+    {-1, -1, -1},
+}
+local Accumulator = 0
 
 local CurrentCamera = workspace.CurrentCamera
 
@@ -105,6 +119,14 @@ function ESP.CreateElements()
     Objects.BoundingBoxInline.Thickness = 1
     Objects.BoundingBoxInline.ZIndex = 2
     Objects.BoundingBoxInline.Parent = Objects.BoundingBox
+
+    Objects.BoundingBoxFill = Create("Frame")
+    Objects.BoundingBoxFill.Parent = Objects.BoundingBox
+    Objects.BoundingBoxFill.Size = FromScale(1, 1)
+    Objects.BoundingBoxFill.BackgroundColor3 = Options["esp/box/fillcolor"].Value
+    Objects.BoundingBoxFill.BackgroundTransparency = Options["esp/box/fillcolor"].Transparency
+    Objects.BoundingBoxFill.BorderSizePixel = 0
+    Objects.BoundingBoxFill.ZIndex = 1
 
     --# Health Bar
 
@@ -179,6 +201,36 @@ function ESP.CreateElements()
     HealthTextStroke.Thickness = 1
     HealthTextStroke.Color = Color3.new(0, 0, 0)
 
+    --# Name
+
+    Objects.NameHolder = Create("CanvasGroup")
+    Objects.NameHolder.Parent = Objects.Holder
+    Objects.NameHolder.BackgroundTransparency = 1
+    Objects.NameHolder.Size = FromOffset(500, 14)
+    Objects.NameHolder.AnchorPoint = Vector2.new(0.5, 1)
+    Objects.NameHolder.Position = UDim2New(0.5, 0, 0, -3)
+    Objects.NameHolder.GroupTransparency = 0
+    Objects.NameHolder.Visible = false
+    Objects.NameHolder.ZIndex = 6
+
+    Objects.Name = Create("TextLabel")
+    Objects.Name.Parent = Objects.NameHolder
+    Objects.Name.Size = FromScale(1, 1)
+    Objects.Name.BackgroundTransparency = 1
+    Objects.Name.Text = "Player"
+    Objects.Name.TextColor3 = Options["esp/name/color"].Value
+    Objects.Name.TextSize = 12
+    Objects.Name.TextXAlignment = Enum.TextXAlignment.Center
+    Objects.Name.TextYAlignment = Enum.TextYAlignment.Center
+    Objects.Name.FontFace = Fonts.Tahoma
+    Objects.Name.ZIndex = 6
+
+    local NameStroke = Create("UIStroke")
+    NameStroke.Parent = Objects.Name
+    NameStroke.LineJoinMode = Enum.LineJoinMode.Miter
+    NameStroke.Thickness = 1
+    NameStroke.Color = Color3.new(0, 0, 0)
+
     return Objects
 end
 
@@ -251,38 +303,39 @@ function ESP.ApplyAllPlayer()
 	end
 end
 
-ESP.GetCorners = function(Cf: CFrame, Size: Vector3)
-    local HalfSize = Size * 0.5
-    local X, Y, Z = HalfSize.X, HalfSize.Y, HalfSize.Z
-    CornerTlb[1] = Cf * NewVector3(X, Y, Z)
-    CornerTlb[2] = Cf * NewVector3(-X, Y, Z)
-    CornerTlb[3] = Cf * NewVector3(X, Y, -Z)
-    CornerTlb[4] = Cf * NewVector3(-X, Y, -Z)
-    CornerTlb[5] = Cf * NewVector3(X, -Y, Z)
-    CornerTlb[6] = Cf * NewVector3(-X, -Y, Z)
-    CornerTlb[7] = Cf * NewVector3(X, -Y, -Z)
-    CornerTlb[8] = Cf * NewVector3(-X, -Y, -Z)
-    return CornerTlb
-end
-
 ESP.GetBoundingBox = function(Model: {})
     local LowestX, HighestX = 1e6, -1e6
     local LowestY, HighestY = 1e6, -1e6
     local OnScreen = false
 
-    for _, Part in Model do -- if its a table :smile: #i love caching
-        if Part.Transparency < 0.99 then -- stupid transparency fix for stupid games
-            for _, Corner in ESP.GetCorners(Part.CFrame, Part.Size) do
-                local ScreenPoint, Visible = CurrentCamera:WorldToViewportPoint(Corner)
+    local Camera = CurrentCamera
+    local WorldToViewportPoint = Camera.WorldToViewportPoint
+    local Min = Minimum
+    local Max = Maximum
+    local Vector3New = NewVector3
 
-                if Visible then
-                    OnScreen = true
-                end
+    for _, Part in Model do
+        if Part.Transparency < 0.99 then
+            local PartCFrame = Part.CFrame
+            local HalfSize = Part.Size * 0.5
+            local X, Y, Z = HalfSize.X, HalfSize.Y, HalfSize.Z
 
-                LowestX = Minimum(LowestX, ScreenPoint.X)
-                HighestX = Maximum(HighestX, ScreenPoint.X)
-                LowestY = Minimum(LowestY, ScreenPoint.Y)
-                HighestY = Maximum(HighestY, ScreenPoint.Y)
+            for i = 1, 8 do
+                local Signs = Corners[i]
+                local ScreenPoint, Visible = WorldToViewportPoint(
+                    Camera,
+                    PartCFrame * Vector3New(
+                        X * Signs[1],
+                        Y * Signs[2],
+                        Z * Signs[3]
+                    )
+                )
+
+                OnScreen = OnScreen or Visible
+                LowestX = Min(LowestX, ScreenPoint.X)
+                HighestX = Max(HighestX, ScreenPoint.X)
+                LowestY = Min(LowestY, ScreenPoint.Y)
+                HighestY = Max(HighestY, ScreenPoint.Y)
             end
         end
     end
@@ -322,10 +375,46 @@ function ESP.Render(Entity: {})
         if Objects.BoundingBoxInline.Color ~= Options["esp/box/color"].Value then
             Objects.BoundingBoxInline.Color = Options["esp/box/color"].Value
         end
+
+        if Toggles["esp/box/fill"].Value then
+            if not Objects.BoundingBoxFill.Visible then
+                Objects.BoundingBoxFill.Visible = true
+            end
+            if Objects.BoundingBoxFill.BackgroundColor3 ~= Options["esp/box/fillcolor"].Value or Objects.BoundingBoxFill.BackgroundTransparency ~= Options["esp/box/fillcolor"].Transparency then
+                Objects.BoundingBoxFill.BackgroundColor3 = Options["esp/box/fillcolor"].Value
+                Objects.BoundingBoxFill.BackgroundTransparency = Options["esp/box/fillcolor"].Transparency
+            end
+        else
+            if Objects.BoundingBoxFill.Visible then
+                Objects.BoundingBoxFill.Visible = false
+            end
+        end
     else
         if Objects.BoundingBox.Visible then
             Objects.BoundingBox.Visible = false
         end
+    end
+
+    if Toggles["esp/name"].Value then
+        if not Objects.NameHolder.Visible then
+            Objects.NameHolder.Visible = true
+        end
+
+        local Name = Player.DisplayName
+        if Name == "" then
+            Name = Player.Name
+        end
+
+        if Objects.Name.Text ~= Name then
+            Objects.Name.Text = Name
+        end
+
+        local NameColor = Options["esp/name/color"].Value
+        if Objects.Name.TextColor3 ~= NameColor then
+            Objects.Name.TextColor3 = NameColor
+        end
+    elseif Objects.NameHolder.Visible then
+        Objects.NameHolder.Visible = false
     end
 
     if Toggles["esp/healthbar"].Value then
@@ -398,9 +487,10 @@ function ESP.Render(Entity: {})
 
 end
 
-function ESP.Update()
+function ESP.Update(DeltaTime)
 
     if not Toggles["esp/enabled"].Value then
+        Accumulator = 0
         for _, Entity in ESP.Entities do
             if Entity.Objects.Holder.Visible then
                 Entity.Objects.Holder.Visible = false
@@ -409,7 +499,19 @@ function ESP.Update()
         return 
     end
 
-    Spawn(ESP.ApplyAllPlayer)
+    ESP.ApplyAllPlayer()
+
+    do -- dumb perf fix for low end pc
+        local Hertz = math.max(1, Options["esp/settings/renderhz"].Value)
+        local Interval = 1 / Hertz
+
+        Accumulator += DeltaTime
+        if Accumulator < Interval then
+            return
+        end
+        Accumulator -= Interval
+    end
+
     for _, Entity in ESP.Entities do Spawn(ESP.Render, Entity) end
 end 
 
