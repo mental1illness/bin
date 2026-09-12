@@ -2813,17 +2813,19 @@ do
 		return Dropdown
 	end
 
-	function Funcs:AddDependencyBox()
-		local Depbox = {
-			Dependencies = {},
-		}
+		function Funcs:AddDependencyBox()
+			local Depbox = {
+				Dependencies = {},
+				AnimationId = 0,
+			}
 
 		local Groupbox = self
 		local Container = Groupbox.Container
 
-		local Holder = Library:Create("Frame", {
-			BackgroundTransparency = 1,
-			Size = UDim2.new(1, 0, 0, 0),
+			local Holder = Library:Create("Frame", {
+				BackgroundTransparency = 1,
+				Position = UDim2.fromOffset(8, 0),
+				Size = UDim2.new(1, -8, 0, 0),
 			Visible = false,
 			Parent = Container,
 		})
@@ -2841,18 +2843,57 @@ do
 			Parent = Frame,
 		})
 
-		function Depbox:Resize()
-			Holder.Size = UDim2.new(1, 0, 0, Layout.AbsoluteContentSize.Y)
-			Groupbox:Resize()
-		end
+			local function GetSize(Height)
+				return UDim2.new(1, -8, 0, Height)
+			end
+
+			function Depbox:Resize()
+				if not Depbox.IsAnimating then
+					Holder.Size = GetSize(Layout.AbsoluteContentSize.Y)
+				end
+				Groupbox:Resize()
+			end
+
+			function Depbox:Animate(Visible)
+				Depbox.AnimationId = Depbox.AnimationId + 1
+				local AnimationId = Depbox.AnimationId
+				local TargetHeight = Visible and Layout.AbsoluteContentSize.Y or 0
+
+				if Visible then
+					Holder.Visible = true
+				end
+
+				Depbox.IsAnimating = true
+				local Tween = TweenService:Create(
+					Holder,
+					TweenInfo.new(0.18, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+					{ Size = GetSize(TargetHeight) }
+				)
+
+				Tween.Completed:Connect(function()
+					if AnimationId ~= Depbox.AnimationId then
+						return
+					end
+
+					Depbox.IsAnimating = false
+					if Visible then
+						Holder.Size = GetSize(Layout.AbsoluteContentSize.Y)
+					else
+						Holder.Visible = false
+					end
+					Groupbox:Resize()
+				end)
+
+				Tween:Play()
+			end
 
 		Layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
 			Depbox:Resize()
 		end)
 
-		Holder:GetPropertyChangedSignal("Visible"):Connect(function()
-			Depbox:Resize()
-		end)
+			Holder:GetPropertyChangedSignal("Size"):Connect(function()
+				Depbox:Resize()
+			end)
 
 		function Depbox:Update()
 			for _, Dependency in next, Depbox.Dependencies do
@@ -2860,14 +2901,12 @@ do
 				local Value = Dependency[2]
 
 				if Elem.Type == "Toggle" and Elem.Value ~= Value then
-					Holder.Visible = false
-					Depbox:Resize()
+						Depbox:Animate(false)
 					return
 				end
 			end
 
-			Holder.Visible = true
-			Depbox:Resize()
+			Depbox:Animate(true)
 		end
 
 		function Depbox:SetupDependencies(Dependencies)
