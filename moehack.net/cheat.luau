@@ -84,7 +84,7 @@ local Library, SaveManager, ThemeManager = LoadModule("moehack.net/library.luau"
         end
 
         do -- Visuals
-            local World = Tabs.Visuals:AddGroupbox({ Side = 1, Name = "World" })
+            local World, Player = Tabs.Visuals:AddGroupbox({ Side = 1, Name = "World" }), Tabs.Visuals:AddGroupbox({ Side = 2, Name = "Player" }) 
 
             do -- World
                 local Ambient = World:AddToggle("visuals/world/ambient", { Text = "Ambient", Default = false }) do
@@ -222,6 +222,26 @@ local Library, SaveManager, ThemeManager = LoadModule("moehack.net/library.luau"
                 end
             end
 
+            do -- Player
+                Player:AddToggle("visuals/player/chinesehat", { Text = "chinese hat", Default = false }):AddColorPicker('visuals/player/chinesehat/color', { Default = Color3.fromRGB(255, 255, 255), Title = 'Chinese Hat Color' }) do
+                    local DepBox = World:AddDependencyBox()
+
+                    DepBox:AddSlider("visuals/player/chinesehat/glowfac", { Text = "Glow Factor", Min = 0, Max = 10, Rounding = 0, Default = 5 })
+                    DepBox:AddSlider("visuals/player/chinesehat/radius", { Text = "Radius", Min = 0, Max = 2, Rounding = 1 Default = 1.5 })
+                    DepBox:AddSlider("visuals/player/chinesehat/height", { Text = "Height", Min = 0, Max = 2, Rounding = 1 Default = 1 })
+
+                    DepBox:AddToggle("visuals/player/chinesehat/alwaysontop", { Text = "Always On Top", Default = false })
+
+                    DepBox:SetupDependencies({
+                        { Toggles["visuals/player/chinesehat"], true } 
+                    });
+                end
+
+
+            end
+
+            
+
         end
     end
 
@@ -284,7 +304,7 @@ Library:GiveSignal(
 	RunService.RenderStepped:Connect(function(Delta)
 		FrameRate = math.floor(1 / Delta)
 		Ping = math.floor(DataPing:GetValue())
-        Visuals.World.Tick()
+        Visuals.Tick()
 	end)
 )
 

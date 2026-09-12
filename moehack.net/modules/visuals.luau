@@ -82,8 +82,16 @@ local Flags = {
     ["visuals/world/dof/nearintens"] = {Value = 0.7},
     ["visuals/world/dof/focusdist"] = {Value = 20},
     ["visuals/world/dof/focusinradius"] = {Value = 20},
+
+    ["visuals/player/chinesehat"] = {Value=true},
+    ["visuals/player/chinesehat/glowfac"] = {Value = 5},
+    ["visuals/player/chinesehat/radius"] = {Value = 1.5},
+    ["visuals/player/chinesehat/height"] = {Value = 1},
+    ["visuals/player/chinesehat/alwaysontop"] = {Value=true},
+    ['visuals/player/chinesehat/color'] = {Value = Color3.fromRGB(255, 255, 255)}
 }
 
+local HiddenFolder = Create("Folder", gethui and gethui() or GetService(Game, "CoreGui"))
 local Library = getgenv().Library or FakeLibrary
 local Toggles, Options = getgenv().Toggles or Flags, getgenv().Options or Flags
 local Camera = workspace.CurrentCamera
@@ -200,9 +208,6 @@ Visuals.World = {} do
             local FogStart = Options["visuals/world/fog/near"].Value
             local FogEnd = Options["visuals/world/fog/far"].Value
 
---            if FogStart > FogEnd then
---                FogStart, FogEnd = FogEnd, FogStart
---            end
 
             if Lighting.FogColor ~= FogColor then Lighting.FogColor = FogColor end
             if Lighting.FogStart ~= FogStart then Lighting.FogStart = FogStart end
@@ -331,6 +336,81 @@ Visuals.World = {} do
             and Options["visuals/world/atmosphere/haze"].Value
             or DefaultLighting.AtmosphereHaze
     end
+end
+
+function Visuals.GetClientCharacter()
+    return LocalPlayer.Character or nil
+end
+
+Visuals.Players = {} do
+
+    function Visuals.Players.Tick()
+        if Toggles["visuals/player/chinesehat"] then
+            if not Visuals.Players.ChineseHat then
+                Visuals.Players.ChineseHat = Create("ConeHandleAdornment")
+                Visuals.Players.ChineseHat.Shading = Enum.AdornShading.Shaded
+                Visuals.Players.ChineseHat.Radius = 1.5
+                Visuals.Players.ChineseHat.CFrame = NewCFrame(0, 0.25, 0) * CFrame.Angles(Rad(90), 0, 0)
+                Visuals.Players.ChineseHat.Color3 = Color3.fromRGB(255, 255, 255)
+                Visuals.Players.ChineseHat.Hollow = true
+                Visuals.Players.ChineseHat.Height = 1
+                Visuals.Players.ChineseHat.AdornCullingMode = Enum.AdornCullingMode.Never
+                Visuals.Players.ChineseHat.Parent = HiddenFolder
+            end
+
+            if Visuals.Players.ChineseHat.Height ~= Options["visuals/player/chinesehat/height"].Value then
+                Visuals.Players.ChineseHat.Height = Options["visuals/player/chinesehat/height"].Value
+            end
+
+            if Visuals.Players.ChineseHat.Radius ~= Options["visuals/player/chinesehat/radius"].Value then
+                Visuals.Players.ChineseHat.Radius = Options["visuals/player/chinesehat/radius"].Value
+            end
+
+            if Toggles["visuals/player/chinesehat/alwaysontop"] == true and Visuals.Players.ChineseHat.Shading ~= "XRayShaded" then
+                Visuals.Players.ChineseHat.Shading = "XRayShaded"
+            else
+                if Visuals.Players.ChineseHat.Shading ~= "Shaded" then
+                    Visuals.Players.ChineseHat.Shading = "Shaded"
+                end
+            end
+
+            local LastColorThatShouldBeBroImSoScaredMeSOSALYOU= Color3.fromRGB(
+                Options['visuals/player/chinesehat/color'].Value.R * (100 * Options["visuals/player/chinesehat/glowfac"].Value),
+                Options['visuals/player/chinesehat/color'].Value.G * (100 * Options["visuals/player/chinesehat/glowfac"].Value),
+                Options['visuals/player/chinesehat/color'].Value.B * (100 * Options["visuals/player/chinesehat/glowfac"].Value)
+            )
+
+            if Visuals.Players.ChineseHat.Color3 ~= LastColorThatShouldBeBroImSoScaredMeSOSALYOU then
+                Visuals.Players.ChineseHat.Color3 = LastColorThatShouldBeBroImSoScaredMeSOSALYOU
+            end
+
+            local Character = Visuals.GetClientCharacter()
+            if Character and Visuals.Players.ChineseHat.Adornee == nil then -- or diff way idk
+                local Head = FindFirstChild(Character, "Head")
+                if Head then
+                    Visuals.Players.ChineseHat.Adornee = Head
+                    Visuals.Players.ChineseHat.Visible = true
+                else
+                    Visuals.Players.ChineseHat.Adornee = nil
+                    Visuals.Players.ChineseHat.Visible = false
+                end
+            else
+                Visuals.Players.ChineseHat.Adornee = nil
+                Visuals.Players.ChineseHat.Visible = false
+            end
+            
+        else
+            if Visuals.Players.ChineseHat.Visible then
+                Visuals.Players.ChineseHat.Visible = false
+            end
+        end
+    end
+
+end
+
+function Visuals.Tick()
+    Visuals.Players.Tick()
+    Visuals.World.Tick()
 end
 
 return Visuals
