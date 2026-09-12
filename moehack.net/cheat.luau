@@ -223,12 +223,12 @@ local Library, SaveManager, ThemeManager = LoadModule("moehack.net/library.luau"
             end
 
             do -- Player
-                Player:AddToggle("visuals/player/chinesehat", { Text = "chinese hat", Default = false }):AddColorPicker('visuals/player/chinesehat/color', { Default = Color3.fromRGB(255, 255, 255), Title = 'Chinese Hat Color' }) do
-                    local DepBox = World:AddDependencyBox()
+                Player:AddToggle("visuals/player/chinesehat", { Text = "Chinese Hat", Default = false }):AddColorPicker('visuals/player/chinesehat/color', { Default = Color3.fromRGB(255, 255, 255), Title = 'Chinese Hat Color' }) do
+                    local DepBox = Player:AddDependencyBox()
 
-                    DepBox:AddSlider("visuals/player/chinesehat/glowfac", { Text = "Glow Factor", Min = 0, Max = 10, Rounding = 0, Default = 5 })
-                    DepBox:AddSlider("visuals/player/chinesehat/radius", { Text = "Radius", Min = 0, Max = 2, Rounding = 1 Default = 1.5 })
-                    DepBox:AddSlider("visuals/player/chinesehat/height", { Text = "Height", Min = 0, Max = 2, Rounding = 1 Default = 1 })
+                    DepBox:AddSlider("visuals/player/chinesehat/glowfac", { Text = "Glow Factor", Min = 1, Max = 10, Rounding = 0, Default = 5 })
+                    DepBox:AddSlider("visuals/player/chinesehat/radius", { Text = "Radius", Min = 0, Max = 2, Rounding = 1, Default = 1.5 })
+                    DepBox:AddSlider("visuals/player/chinesehat/height", { Text = "Height", Min = 0, Max = 2, Rounding = 1 ,Default = 1 })
 
                     DepBox:AddToggle("visuals/player/chinesehat/alwaysontop", { Text = "Always On Top", Default = false })
 

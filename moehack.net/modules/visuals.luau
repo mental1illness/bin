@@ -366,11 +366,13 @@ Visuals.Players = {} do
                 Visuals.Players.ChineseHat.Radius = Options["visuals/player/chinesehat/radius"].Value
             end
 
-            if Toggles["visuals/player/chinesehat/alwaysontop"] == true and Visuals.Players.ChineseHat.Shading ~= "XRayShaded" then
-                Visuals.Players.ChineseHat.Shading = "XRayShaded"
+            if Toggles["visuals/player/chinesehat/alwaysontop"] == true then
+                if Visuals.Players.ChineseHat.Shading ~= Enum.AdornShading.XRayShaded then
+                    Visuals.Players.ChineseHat.Shading = Enum.AdornShading.XRayShaded
+                end
             else
-                if Visuals.Players.ChineseHat.Shading ~= "Shaded" then
-                    Visuals.Players.ChineseHat.Shading = "Shaded"
+                if Visuals.Players.ChineseHat.Shading ~= Enum.AdornShading.Shaded then
+                    Visuals.Players.ChineseHat.Shading = Enum.AdornShading.Shaded
                 end
             end
 
@@ -385,11 +387,16 @@ Visuals.Players = {} do
             end
 
             local Character = Visuals.GetClientCharacter()
-            if Character and Visuals.Players.ChineseHat.Adornee == nil then -- or diff way idk
+            if Character then
                 local Head = FindFirstChild(Character, "Head")
                 if Head then
-                    Visuals.Players.ChineseHat.Adornee = Head
-                    Visuals.Players.ChineseHat.Visible = true
+                    if Visuals.Players.ChineseHat.Adornee ~= Head then
+                        Visuals.Players.ChineseHat.Adornee = Head
+                    end
+
+                    if not Visuals.Players.ChineseHat.Visible then
+                        Visuals.Players.ChineseHat.Visible = true
+                    end
                 else
                     Visuals.Players.ChineseHat.Adornee = nil
                     Visuals.Players.ChineseHat.Visible = false
@@ -404,6 +411,7 @@ Visuals.Players = {} do
                 Visuals.Players.ChineseHat.Visible = false
             end
         end
+        
     end
 
 end
