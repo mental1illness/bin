@@ -44,8 +44,8 @@ local Flags = {
     ["visuals/world/brightness/exposure"] = {Value = 0.15},
     ["visuals/world/fog"] = {Value = true},
     ["visuals/world/fog/color"] = {Value = Color3.fromRGB(200, 100, 60)},
-	    ["visuals/world/fog/near"] = {Value = 0},
-	    ["visuals/world/fog/far"] = {Value = 100000},
+    ["visuals/world/fog/near"] = {Value = 0},
+    ["visuals/world/fog/far"] = {Value = 100000},
     ["visuals/world/shadow"] = {Value = true},
     ["visuals/world/shadow/color"] = {Value = Color3.fromRGB(200, 100, 60)},
     ["visuals/world/shadow/softness"] = {Value = 0.5},
@@ -108,7 +108,7 @@ local DefaultLighting = {
     Technology = Lighting.Technology,
     SunRaysIntensity = 0.1,
     SunRaysSpread = 0.5,
-    AtmosphereDensity = 0.3,
+    AtmosphereDensity = 0,
     AtmosphereOffset = 0,
     AtmosphereColor = Color3.fromRGB(199, 170, 107),
     AtmosphereDecay = Color3.fromRGB(106, 112, 125),
@@ -167,20 +167,21 @@ Visuals.World = {} do
             if Lighting.OutdoorAmbient ~= DefaultLighting.OutdoorAmbient then Lighting.OutdoorAmbient = DefaultLighting.OutdoorAmbient end
         end
 
-	        if Toggles["visuals/world/brightness"].Value then
-	            local ClockTime = Options["visuals/world/lighting/time"].Value
-	            local Brightness = Options["visuals/world/brightness/level"].Value
-	            local DiffuseScale = Options["visuals/world/brightness/envdiffscale"].Value
-	            local SpecularScale = Options["visuals/world/brightness/envspecscale"].Value
-	            local Exposure = Options["visuals/world/brightness/exposure"].Value
-	            if Lighting.Brightness ~= Brightness then Lighting.Brightness = Brightness end
-	            if Lighting.ClockTime ~= ClockTime then Lighting.ClockTime = ClockTime end
-	            if Lighting.EnvironmentDiffuseScale ~= DiffuseScale then Lighting.EnvironmentDiffuseScale = DiffuseScale end
-	            if Lighting.EnvironmentSpecularScale ~= SpecularScale then Lighting.EnvironmentSpecularScale = SpecularScale end
-	            if Lighting.ExposureCompensation ~= Exposure then Lighting.ExposureCompensation = Exposure end
-	        else
-	            if Lighting.Brightness ~= DefaultLighting.Brightness then Lighting.Brightness = DefaultLighting.Brightness end
-	            if Lighting.ClockTime ~= DefaultLighting.ClockTime then Lighting.ClockTime = DefaultLighting.ClockTime end
+        if Toggles["visuals/world/brightness"].Value then
+            local ClockTime = Options["visuals/world/lighting/time"].Value
+            local Brightness = Options["visuals/world/brightness/level"].Value
+            local DiffuseScale = Options["visuals/world/brightness/envdiffscale"].Value
+            local SpecularScale = Options["visuals/world/brightness/envspecscale"].Value
+            local Exposure = Options["visuals/world/brightness/exposure"].Value
+
+            if Lighting.Brightness ~= Brightness then Lighting.Brightness = Brightness end
+            if Lighting.ClockTime ~= ClockTime then Lighting.ClockTime = ClockTime end
+            if Lighting.EnvironmentDiffuseScale ~= DiffuseScale then Lighting.EnvironmentDiffuseScale = DiffuseScale end
+            if Lighting.EnvironmentSpecularScale ~= SpecularScale then Lighting.EnvironmentSpecularScale = SpecularScale end
+            if Lighting.ExposureCompensation ~= Exposure then Lighting.ExposureCompensation = Exposure end
+        else
+            if Lighting.Brightness ~= DefaultLighting.Brightness then Lighting.Brightness = DefaultLighting.Brightness end
+            if Lighting.ClockTime ~= DefaultLighting.ClockTime then Lighting.ClockTime = DefaultLighting.ClockTime end
             if Lighting.EnvironmentDiffuseScale ~= DefaultLighting.EnvironmentDiffuseScale then Lighting.EnvironmentDiffuseScale = DefaultLighting.EnvironmentDiffuseScale end
             if Lighting.EnvironmentSpecularScale ~= DefaultLighting.EnvironmentSpecularScale then Lighting.EnvironmentSpecularScale = DefaultLighting.EnvironmentSpecularScale end
             if Lighting.ExposureCompensation ~= DefaultLighting.ExposureCompensation then Lighting.ExposureCompensation = DefaultLighting.ExposureCompensation end
@@ -191,6 +192,11 @@ Visuals.World = {} do
             local FogColor = Options["visuals/world/fog/color"].Value
             local FogStart = Options["visuals/world/fog/near"].Value
             local FogEnd = Options["visuals/world/fog/far"].Value
+
+--            if FogStart > FogEnd then
+--                FogStart, FogEnd = FogEnd, FogStart
+--            end
+
             if Lighting.FogColor ~= FogColor then Lighting.FogColor = FogColor end
             if Lighting.FogStart ~= FogStart then Lighting.FogStart = FogStart end
             if Lighting.FogEnd ~= FogEnd then Lighting.FogEnd = FogEnd end
@@ -210,17 +216,18 @@ Visuals.World = {} do
             if Lighting.ShadowSoftness ~= DefaultLighting.ShadowSoftness then Lighting.ShadowSoftness = DefaultLighting.ShadowSoftness end
         end
 
-	        if Toggles["visuals/world/lighting"].Value then
-	            local TimeOfDay = Options["visuals/world/lighting/time"].Value
-	            local Latitude = Options["visuals/world/lighting/latitude"].Value
-	            local Bottom = Options["visuals/world/lighting/colorshiftbottom"].Value
-	            local Top = Options["visuals/world/lighting/colorshifttop"].Value
-	            local Technology = Enum.Technology[Options["visuals/world/lighting/technology"].Value]
-	            if Lighting.TimeOfDay ~= TimeOfDay then Lighting.TimeOfDay = TimeOfDay end
-	            if Lighting.GeographicLatitude ~= Latitude then Lighting.GeographicLatitude = Latitude end
-	            if Lighting.ColorShift_Bottom ~= Bottom then Lighting.ColorShift_Bottom = Bottom end
-	            if Lighting.ColorShift_Top ~= Top then Lighting.ColorShift_Top = Top end
-	            if Technology and Lighting.Technology ~= Technology then Lighting.Technology = Technology end
+        if Toggles["visuals/world/lighting"].Value then
+            local TimeOfDay = Options["visuals/world/lighting/time"].Value
+            local Latitude = Options["visuals/world/lighting/latitude"].Value
+            local Bottom = Options["visuals/world/lighting/colorshiftbottom"].Value
+            local Top = Options["visuals/world/lighting/colorshifttop"].Value
+            local Technology = Enum.Technology[Options["visuals/world/lighting/technology"].Value]
+
+            if Lighting.TimeOfDay ~= TimeOfDay then Lighting.TimeOfDay = TimeOfDay end
+            if Lighting.GeographicLatitude ~= Latitude then Lighting.GeographicLatitude = Latitude end
+            if Lighting.ColorShift_Bottom ~= Bottom then Lighting.ColorShift_Bottom = Bottom end
+            if Lighting.ColorShift_Top ~= Top then Lighting.ColorShift_Top = Top end
+            if Technology and Lighting.Technology ~= Technology then Lighting.Technology = Technology end
         else
             if Lighting.TimeOfDay ~= DefaultLighting.TimeOfDay then Lighting.TimeOfDay = DefaultLighting.TimeOfDay end
             if Lighting.GeographicLatitude ~= DefaultLighting.GeographicLatitude then Lighting.GeographicLatitude = DefaultLighting.GeographicLatitude end
@@ -229,8 +236,14 @@ Visuals.World = {} do
         end
 
         local ColorCorrection = Visuals.World.ColorCorrection
-        local ColorCorrectionEnabled = Toggles["visuals/world/lighting/cc"].Value and Toggles["visuals/world/lighting"].Value
-        if ColorCorrection.Enabled ~= ColorCorrectionEnabled then ColorCorrection.Enabled = ColorCorrectionEnabled end
+        local ColorCorrectionEnabled = Toggles["visuals/world/lighting/cc"].Value
+            and Toggles["visuals/world/lighting"].Value
+
+        ColorCorrection.Parent = Lighting
+        if ColorCorrection.Enabled ~= ColorCorrectionEnabled then
+            ColorCorrection.Enabled = ColorCorrectionEnabled
+        end
+        
         if ColorCorrectionEnabled then
             local Saturation = Options["visuals/world/lighting/cc/saturation"].Value
             local Contrast = Options["visuals/world/lighting/cc/contrast"].Value
