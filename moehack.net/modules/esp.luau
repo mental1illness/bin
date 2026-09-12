@@ -4,7 +4,7 @@
 --# Aliases
 
 local FromOffset, FromScale, UDim2New = UDim2.fromOffset, UDim2.fromScale, UDim2.new
-local Atan2, Rad, Pi, Abs, Minimum, Maximum, Floor = math.atan2, math.rad, math.pi, math.abs, math.min, math.max, math.floor
+local Atan2, Rad, Pi, Abs, Minimum, Maximum, Floor, Clamp = math.atan2, math.rad, math.pi, math.abs, math.min, math.max, math.floor, math.clamp
 local NewVector, NewVector3, NewCFrame = vector.create, Vector3.new, CFrame.new
 local Create, IsA = Instance.new, workspace.IsA
 local Spawn, Wait = task.spawn, task.wait
@@ -45,8 +45,11 @@ end
 local Flags = {
     ["esp/enabled"] = {Value = true},
     ["esp/settings/renderhz"] = {Value = 60},
+
     ["esp/box"] = {Value = true},
     ["esp/box/color"] = {Value = Color3.fromRGB(255, 255, 255)},
+    ["esp/box/type"] = {Value = "Corner"},
+
     ["esp/healthbar"] = {Value = true},
     ["esp/healthbar/colora"] = {Value = Color3.fromRGB(255, 105, 180)},
     ["esp/healthbar/colorb"] = {Value = Color3.fromRGB(255, 20, 147)},
@@ -131,6 +134,195 @@ function ESP.CreateElements()
     Objects.BoundingBoxFill.BackgroundTransparency = Options["esp/box/fillcolor"].Transparency
     Objects.BoundingBoxFill.BorderSizePixel = 0
     Objects.BoundingBoxFill.ZIndex = 1
+
+    --# Corner Box / Thank you claude i only had to jailbreak you twice just for  you to store them in objects table
+
+    Objects.CornerBox = Create("CanvasGroup")
+    Objects.CornerBox.BackgroundTransparency = 1
+    Objects.CornerBox.BorderColor3 = Color3.fromRGB(0, 0, 0)
+    Objects.CornerBox.Size = UDim2New(1, 6, 1, 6)
+    Objects.CornerBox.Position = UDim2New(0, -3, 0, -3)
+    Objects.CornerBox.BorderSizePixel = 0
+    Objects.CornerBox.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    Objects.CornerBox.Parent = Objects.Holder
+
+    -- Bottom Right
+    Objects.BottomRight = Create("Frame")
+    Objects.BottomRight.BorderColor3 = Color3.fromRGB(0, 0, 0)
+    Objects.BottomRight.Rotation = 180
+    Objects.BottomRight.Name = "BottomRight"
+    Objects.BottomRight.BackgroundTransparency = 1
+    Objects.BottomRight.Position = UDim2.new(1, -1, 1, -1)
+    Objects.BottomRight.AnchorPoint = Vector2.new(1, 1)
+    Objects.BottomRight.Size = UDim2.new(0, 10, 0, 10)
+    Objects.BottomRight.BorderSizePixel = 0
+    Objects.BottomRight.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    Objects.BottomRight.Parent = Objects.CornerBox
+
+    Objects.BottomRightInlineHorizontal = Create("Frame")
+    Objects.BottomRightInlineHorizontal.Name = "InlineHorizontal"
+    Objects.BottomRightInlineHorizontal.Size = UDim2.new(1, 0, 0, 1)
+    Objects.BottomRightInlineHorizontal.BorderSizePixel = 0
+    Objects.BottomRightInlineHorizontal.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    Objects.BottomRightInlineHorizontal.ZIndex = 2
+    Objects.BottomRightInlineHorizontal.Parent = Objects.BottomRight
+
+    Objects.BottomRightInlineVertical = Create("Frame")
+    Objects.BottomRightInlineVertical.Name = "InlineVertical"
+    Objects.BottomRightInlineVertical.Size = UDim2.new(0, 1, 1, 0)
+    Objects.BottomRightInlineVertical.BorderSizePixel = 0
+    Objects.BottomRightInlineVertical.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    Objects.BottomRightInlineVertical.ZIndex = 5
+    Objects.BottomRightInlineVertical.Parent = Objects.BottomRight
+
+    Objects.BottomRightOutlineHorizontal = Create("Frame")
+    Objects.BottomRightOutlineHorizontal.Name = "OutlineHorizontal"
+    Objects.BottomRightOutlineHorizontal.Position = UDim2.new(0, 0, 0, -1)
+    Objects.BottomRightOutlineHorizontal.Size = UDim2.new(1, 1, 0, 3)
+    Objects.BottomRightOutlineHorizontal.BorderSizePixel = 0
+    Objects.BottomRightOutlineHorizontal.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    Objects.BottomRightOutlineHorizontal.Parent = Objects.BottomRight
+
+    Objects.BottomRightOutlineVertical = Create("Frame")
+    Objects.BottomRightOutlineVertical.Name = "OutlineVertical"
+    Objects.BottomRightOutlineVertical.Position = UDim2.new(0, -1, 0, -1)
+    Objects.BottomRightOutlineVertical.Size = UDim2.new(0, 3, 1, 2)
+    Objects.BottomRightOutlineVertical.BorderSizePixel = 0
+    Objects.BottomRightOutlineVertical.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    Objects.BottomRightOutlineVertical.Parent = Objects.BottomRight
+
+    -- Top Right
+    Objects.TopRight = Create("Frame")
+    Objects.TopRight.BorderColor3 = Color3.fromRGB(0, 0, 0)
+    Objects.TopRight.Rotation = 90
+    Objects.TopRight.Name = "TopRight"
+    Objects.TopRight.BackgroundTransparency = 1
+    Objects.TopRight.Position = UDim2.new(1, -1, 0, 1)
+    Objects.TopRight.AnchorPoint = Vector2.new(1, 0)
+    Objects.TopRight.Size = UDim2.new(0, 10, 0, 10)
+    Objects.TopRight.BorderSizePixel = 0
+    Objects.TopRight.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    Objects.TopRight.Parent = Objects.CornerBox
+
+    Objects.TopRightInlineHorizontal = Create("Frame")
+    Objects.TopRightInlineHorizontal.Name = "InlineHorizontal"
+    Objects.TopRightInlineHorizontal.Size = UDim2.new(1, 0, 0, 1)
+    Objects.TopRightInlineHorizontal.BorderSizePixel = 0
+    Objects.TopRightInlineHorizontal.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    Objects.TopRightInlineHorizontal.ZIndex = 2
+    Objects.TopRightInlineHorizontal.Parent = Objects.TopRight
+
+    Objects.TopRightInlineVertical = Create("Frame")
+    Objects.TopRightInlineVertical.Name = "InlineVertical"
+    Objects.TopRightInlineVertical.Size = UDim2.new(0, 1, 1, 0)
+    Objects.TopRightInlineVertical.BorderSizePixel = 0
+    Objects.TopRightInlineVertical.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    Objects.TopRightInlineVertical.ZIndex = 5
+    Objects.TopRightInlineVertical.Parent = Objects.TopRight
+
+    Objects.TopRightOutlineHorizontal = Create("Frame")
+    Objects.TopRightOutlineHorizontal.Name = "OutlineHorizontal"
+    Objects.TopRightOutlineHorizontal.Position = UDim2.new(0, 0, 0, -1)
+    Objects.TopRightOutlineHorizontal.Size = UDim2.new(1, 1, 0, 3)
+    Objects.TopRightOutlineHorizontal.BorderSizePixel = 0
+    Objects.TopRightOutlineHorizontal.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    Objects.TopRightOutlineHorizontal.Parent = Objects.TopRight
+
+    Objects.TopRightOutlineVertical = Create("Frame")
+    Objects.TopRightOutlineVertical.Name = "OutlineVertical"
+    Objects.TopRightOutlineVertical.Position = UDim2.new(0, -1, 0, -1)
+    Objects.TopRightOutlineVertical.Size = UDim2.new(0, 3, 1, 2)
+    Objects.TopRightOutlineVertical.BorderSizePixel = 0
+    Objects.TopRightOutlineVertical.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    Objects.TopRightOutlineVertical.Parent = Objects.TopRight
+
+    -- Top Left
+    Objects.TopLeft = Create("Frame")
+    Objects.TopLeft.Name = "TopLeft"
+    Objects.TopLeft.BackgroundTransparency = 1
+    Objects.TopLeft.Position = UDim2.new(0, 1, 0, 1)
+    Objects.TopLeft.BorderColor3 = Color3.fromRGB(0, 0, 0)
+    Objects.TopLeft.Size = UDim2.new(0, 10, 0, 10)
+    Objects.TopLeft.BorderSizePixel = 0
+    Objects.TopLeft.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    Objects.TopLeft.Parent = Objects.CornerBox
+
+    Objects.TopLeftInlineHorizontal = Create("Frame")
+    Objects.TopLeftInlineHorizontal.Name = "InlineHorizontal"
+    Objects.TopLeftInlineHorizontal.Size = UDim2.new(1, 0, 0, 1)
+    Objects.TopLeftInlineHorizontal.BorderSizePixel = 0
+    Objects.TopLeftInlineHorizontal.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    Objects.TopLeftInlineHorizontal.ZIndex = 2
+    Objects.TopLeftInlineHorizontal.Parent = Objects.TopLeft
+
+    Objects.TopLeftInlineVertical = Create("Frame")
+    Objects.TopLeftInlineVertical.Name = "InlineVertical"
+    Objects.TopLeftInlineVertical.Size = UDim2.new(0, 1, 1, 0)
+    Objects.TopLeftInlineVertical.BorderSizePixel = 0
+    Objects.TopLeftInlineVertical.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    Objects.TopLeftInlineVertical.ZIndex = 5
+    Objects.TopLeftInlineVertical.Parent = Objects.TopLeft
+
+    Objects.TopLeftOutlineHorizontal = Create("Frame")
+    Objects.TopLeftOutlineHorizontal.Name = "OutlineHorizontal"
+    Objects.TopLeftOutlineHorizontal.Position = UDim2.new(0, 0, 0, -1)
+    Objects.TopLeftOutlineHorizontal.Size = UDim2.new(1, 1, 0, 3)
+    Objects.TopLeftOutlineHorizontal.BorderSizePixel = 0
+    Objects.TopLeftOutlineHorizontal.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    Objects.TopLeftOutlineHorizontal.Parent = Objects.TopLeft
+
+    Objects.TopLeftOutlineVertical = Create("Frame")
+    Objects.TopLeftOutlineVertical.Name = "OutlineVertical"
+    Objects.TopLeftOutlineVertical.Position = UDim2.new(0, -1, 0, -1)
+    Objects.TopLeftOutlineVertical.Size = UDim2.new(0, 3, 1, 2)
+    Objects.TopLeftOutlineVertical.BorderSizePixel = 0
+    Objects.TopLeftOutlineVertical.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    Objects.TopLeftOutlineVertical.Parent = Objects.TopLeft
+
+    -- Bottom Left
+    Objects.BottomLeft = Create("Frame")
+    Objects.BottomLeft.BorderColor3 = Color3.fromRGB(0, 0, 0)
+    Objects.BottomLeft.Rotation = -90
+    Objects.BottomLeft.Name = "BottomLeft"
+    Objects.BottomLeft.BackgroundTransparency = 1
+    Objects.BottomLeft.Position = UDim2.new(0, 1, 1, -1)
+    Objects.BottomLeft.AnchorPoint = Vector2.new(0, 1)
+    Objects.BottomLeft.Size = UDim2.new(0, 10, 0, 10)
+    Objects.BottomLeft.BorderSizePixel = 0
+    Objects.BottomLeft.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    Objects.BottomLeft.Parent = Objects.CornerBox
+
+    Objects.BottomLeftInlineHorizontal = Create("Frame")
+    Objects.BottomLeftInlineHorizontal.Name = "InlineHorizontal"
+    Objects.BottomLeftInlineHorizontal.Size = UDim2.new(1, 0, 0, 1)
+    Objects.BottomLeftInlineHorizontal.BorderSizePixel = 0
+    Objects.BottomLeftInlineHorizontal.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    Objects.BottomLeftInlineHorizontal.ZIndex = 2
+    Objects.BottomLeftInlineHorizontal.Parent = Objects.BottomLeft
+
+    Objects.BottomLeftInlineVertical = Create("Frame")
+    Objects.BottomLeftInlineVertical.Name = "InlineVertical"
+    Objects.BottomLeftInlineVertical.Size = UDim2.new(0, 1, 1, 0)
+    Objects.BottomLeftInlineVertical.BorderSizePixel = 0
+    Objects.BottomLeftInlineVertical.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    Objects.BottomLeftInlineVertical.ZIndex = 5
+    Objects.BottomLeftInlineVertical.Parent = Objects.BottomLeft
+
+    Objects.BottomLeftOutlineHorizontal = Create("Frame")
+    Objects.BottomLeftOutlineHorizontal.Name = "OutlineHorizontal"
+    Objects.BottomLeftOutlineHorizontal.Position = UDim2.new(0, 0, 0, -1)
+    Objects.BottomLeftOutlineHorizontal.Size = UDim2.new(1, 1, 0, 3)
+    Objects.BottomLeftOutlineHorizontal.BorderSizePixel = 0
+    Objects.BottomLeftOutlineHorizontal.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    Objects.BottomLeftOutlineHorizontal.Parent = Objects.BottomLeft
+
+    Objects.BottomLeftOutlineVertical = Create("Frame")
+    Objects.BottomLeftOutlineVertical.Name = "OutlineVertical"
+    Objects.BottomLeftOutlineVertical.Position = UDim2.new(0, -1, 0, -1)
+    Objects.BottomLeftOutlineVertical.Size = UDim2.new(0, 3, 1, 2)
+    Objects.BottomLeftOutlineVertical.BorderSizePixel = 0
+    Objects.BottomLeftOutlineVertical.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    Objects.BottomLeftOutlineVertical.Parent = Objects.BottomLeft
 
     --# Health Bar
 
@@ -245,11 +437,11 @@ function ESP.CreateElements()
     Objects.Bottom.AnchorPoint = Vector2.new(0.5, 0)
     Objects.Bottom.Position = UDim2New(0.5, 0, 1, 0)
 
-    local Padding = Instance.new("UIPadding")
+    local Padding = Create("UIPadding")
     Padding.PaddingTop = UDim.new(0, 2)
     Padding.Parent = Objects.Bottom
 
-    local Layout = Instance.new("UIListLayout")
+    local Layout = Create("UIListLayout")
     Layout.SortOrder = Enum.SortOrder.LayoutOrder
     Layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
     Layout.Padding = UDim.new(0, -1)
@@ -379,6 +571,8 @@ function ESP.Render(Entity: {})
     local ClientCharacter = LocalPlayer.Character
     local ClientRoot = ClientCharacter and ClientCharacter:FindFirstChild("HumanoidRootPart")
 
+    local Distance = 0
+
 	if not Character then
 		Objects.Holder.Visible = false
 		return
@@ -398,12 +592,52 @@ function ESP.Render(Entity: {})
         return
     end
 
+    local TargetRoot = Character.PrimaryPart
+    if TargetRoot then
+        Distance = (CurrentCamera.CFrame.Position - TargetRoot.Position).Magnitude
+    end
+
     if Toggles["esp/box"].Value then
-        if not Objects.BoundingBox.Visible then
+        if not Objects.BoundingBox.Visible and Options["esp/box/type"].Value ~= "Corner" then
+            if Objects.CornerBox.Visible then
+                Objects.CornerBox.Visible = false
+            end
             Objects.BoundingBox.Visible = true
         end
+
+        if Options["esp/box/type"].Value == "Corner" then
+            if Objects.BoundingBox.Visible then
+                Objects.BoundingBox.Visible = false
+            end
+
+            if not Objects.CornerBox.Visible then
+                Objects.CornerBox.Visible = true
+            end
+
+            local CornerSize = Clamp(160 / Maximum(Distance, 1), 3.25, 10)
+            local CornerUDim = UDim2New(0, CornerSize, 0, CornerSize)
+
+            Objects.BottomRight.Size = CornerUDim
+            Objects.TopRight.Size = CornerUDim
+            Objects.TopLeft.Size = CornerUDim
+            Objects.BottomLeft.Size = CornerUDim
+
+        end
+
         if Objects.BoundingBoxInline.Color ~= Options["esp/box/color"].Value then
             Objects.BoundingBoxInline.Color = Options["esp/box/color"].Value
+
+            Objects.BottomRightInlineHorizontal.BackgroundColor3 = Options["esp/box/color"].Value
+            Objects.BottomRightInlineVertical.BackgroundColor3 = Options["esp/box/color"].Value
+
+            Objects.TopRightInlineHorizontal.BackgroundColor3 = Options["esp/box/color"].Value
+            Objects.TopRightInlineVertical.BackgroundColor3 = Options["esp/box/color"].Value
+
+            Objects.TopLeftInlineHorizontal.BackgroundColor3 = Options["esp/box/color"].Value
+            Objects.TopLeftInlineVertical.BackgroundColor3 = Options["esp/box/color"].Value
+
+            Objects.BottomLeftInlineHorizontal.BackgroundColor3 = Options["esp/box/color"].Value
+            Objects.BottomLeftInlineVertical.BackgroundColor3 = Options["esp/box/color"].Value
         end
 
         if Toggles["esp/box/fill"].Value then
@@ -422,6 +656,10 @@ function ESP.Render(Entity: {})
     else
         if Objects.BoundingBox.Visible then
             Objects.BoundingBox.Visible = false
+        end
+
+        if Objects.CornerBox.Visible then
+            Objects.CornerBox.Visible = false
         end
     end
 
@@ -515,7 +753,6 @@ function ESP.Render(Entity: {})
         local TargetRoot = Character:FindFirstChild("HumanoidRootPart")
 
         if ClientRoot and TargetRoot then
-            local Distance = (ClientRoot.Position - TargetRoot.Position).Magnitude
             local DistanceText = tostring(Floor(Distance)) .. "st"
 
             if Objects.Distance.Text ~= DistanceText then

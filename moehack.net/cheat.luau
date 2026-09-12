@@ -59,6 +59,7 @@ local Library, SaveManager, ThemeManager = LoadModule("moehack.net/library.luau"
                 Main:AddToggle("esp/box", { Text = "Bounding Box", Default = false }):AddColorPicker('esp/box/color', { Default = Color3.fromRGB(255, 255, 255), Title = 'Box Color' }) do
                     local DepBox = Main:AddDependencyBox()
                     DepBox:AddToggle("esp/box/fill", { Text = "Fill Box", Default = false }):AddColorPicker('esp/box/fillcolor', { Default = Color3.fromRGB(255, 255, 255), Title = 'Fill Color', Transparency = 0.5 })
+                    DepBox:AddDropdown("esp/box/type", { Text = "Box Type", Default = 1, Values = {"Full", "Corner"} })
                     DepBox:SetupDependencies({
                         { Toggles["esp/box"], true } 
                     });
@@ -237,8 +238,7 @@ local Library, SaveManager, ThemeManager = LoadModule("moehack.net/library.luau"
                         { Toggles["visuals/player/chinesehat"], true } 
                     });
                 end
-
-
+                
             end
 
             
