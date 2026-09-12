@@ -56,7 +56,10 @@ local Flags = {
     ["esp/name"] = {Value = true},
     ["esp/name/color"] = {Value = Color3.fromRGB(255, 255, 255)},
     ["esp/box/fill"] = {Value = true},
-    ["esp/box/fillcolor"] = {Value = Color3.fromRGB(255, 255, 255), Transparency = 0.5}
+    ["esp/box/fillcolor"] = {Value = Color3.fromRGB(255, 255, 255), Transparency = 0.5},
+
+    ["esp/distance"] = {Value = true},
+    ["esp/distance/color"] = {Value = Color3.fromRGB(255, 255, 255)},
 }
 
 local Library = getgenv().Library or FakeLibrary
@@ -232,6 +235,46 @@ function ESP.CreateElements()
     NameStroke.Thickness = 1
     NameStroke.Color = Color3.new(0, 0, 0)
 
+    --# Sides Elements
+
+    Objects.Bottom = Create("CanvasGroup")
+    Objects.Bottom.Size = UDim2New(0, 500, 0, 500)
+    Objects.Bottom.BackgroundTransparency = 1
+    Objects.Bottom.GroupTransparency = 0
+    Objects.Bottom.Parent = Objects.Holder
+    Objects.Bottom.AnchorPoint = Vector2.new(0.5, 0)
+    Objects.Bottom.Position = UDim2New(0.5, 0, 1, 0)
+
+    local Padding = Instance.new("UIPadding")
+    Padding.PaddingTop = UDim.new(0, 2)
+    Padding.Parent = Objects.Bottom
+
+    local Layout = Instance.new("UIListLayout")
+    Layout.SortOrder = Enum.SortOrder.LayoutOrder
+    Layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+    Layout.Padding = UDim.new(0, -1)
+    Layout.Parent = Objects.Bottom
+
+    --# Distance
+
+    Objects.Distance = Create("TextLabel")
+    Objects.Distance.Parent = Objects.Bottom
+    Objects.Distance.Size = FromOffset(9, 9)
+    Objects.Distance.BackgroundTransparency = 1
+    Objects.Distance.Position = FromOffset(1, 0)
+    Objects.Distance.Text = "100st"
+    Objects.Distance.TextXAlignment = Enum.TextXAlignment.Center
+    Objects.Distance.FontFace = Fonts.SmallestPixel7
+    Objects.Distance.TextColor3 = Options["esp/distance/color"].Value
+    Objects.Distance.TextSize = 9
+    Objects.Distance.ZIndex = 5
+
+    local DistStroke = Create("UIStroke")
+    DistStroke.Parent = Objects.Distance
+    DistStroke.LineJoinMode = Enum.LineJoinMode.Miter
+    DistStroke.Thickness = 1
+    DistStroke.Color = Color3.new(0, 0, 0)
+
     return Objects
 end
 
@@ -332,6 +375,9 @@ function ESP.Render(Entity: {})
 	local Objects = Entity.Objects
 
 	local Character = Player.Character
+
+    local ClientCharacter = LocalPlayer.Character
+    local ClientRoot = ClientCharacter and ClientCharacter:FindFirstChild("HumanoidRootPart")
 
 	if not Character then
 		Objects.Holder.Visible = false
@@ -458,6 +504,32 @@ function ESP.Render(Entity: {})
         end
         if Objects.HealthTextHolder.Visible then
             Objects.HealthTextHolder.Visible = false
+        end
+    end
+
+    if Toggles["esp/distance"].Value then
+        if not Objects.Distance.Visible then
+            Objects.Distance.Visible = true
+        end
+
+        local TargetRoot = Character:FindFirstChild("HumanoidRootPart")
+
+        if ClientRoot and TargetRoot then
+            local Distance = (ClientRoot.Position - TargetRoot.Position).Magnitude
+            local DistanceText = tostring(Floor(Distance)) .. "st"
+
+            if Objects.Distance.Text ~= DistanceText then
+                Objects.Distance.Text = DistanceText
+            end
+
+            local DistanceColor = Options["esp/distance/color"].Value
+            if Objects.Distance.TextColor3 ~= DistanceColor then
+                Objects.Distance.TextColor3 = DistanceColor
+            end
+        end
+    else
+        if Objects.Distance.Visible then
+            Objects.Distance.Visible = false
         end
     end
     

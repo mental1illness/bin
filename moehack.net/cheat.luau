@@ -76,6 +76,7 @@ local Library, SaveManager, ThemeManager = LoadModule("moehack.net/library.luau"
                     });
                 end
                 Main:AddToggle("esp/name", { Text = "Name", Default = false }):AddColorPicker('esp/name/color', { Default = Color3.fromRGB(255, 255, 255), Title = 'Name Color' })
+                Main:AddToggle("esp/distance", { Text = "Distance", Default = false }):AddColorPicker('esp/distance/color', { Default = Color3.fromRGB(255, 255, 255), Title = 'Distance Color' })
             end
 
             do -- Settings
