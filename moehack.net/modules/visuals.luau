@@ -366,7 +366,7 @@ Visuals.Players = {} do
                 Visuals.Players.ChineseHat.Radius = Options["visuals/player/chinesehat/radius"].Value
             end
 
-            if Toggles["visuals/player/chinesehat/alwaysontop"] == true then
+            if Toggles["visuals/player/chinesehat/alwaysontop"].Value == true then
                 if Visuals.Players.ChineseHat.Shading ~= Enum.AdornShading.XRayShaded then
                     Visuals.Players.ChineseHat.Shading = Enum.AdornShading.XRayShaded
                 end
