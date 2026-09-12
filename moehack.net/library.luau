@@ -171,10 +171,6 @@ function Library:Create(Class, Properties)
 			_Instance[Property] = Value
 		end
 
-		-- UIListLayout uses LayoutOrder rather than the order in which
-		-- instances were parented. Give new GUI children a stable creation
-		-- order so dependency boxes stay directly below the control that
-		-- created them, even when later controls are added to the same box.
 		if Properties.LayoutOrder == nil and _Instance:IsA("GuiObject") and _Instance.Parent then
 			local ParentLayout = _Instance.Parent:FindFirstChildOfClass("UIListLayout")
 			if ParentLayout then
@@ -2824,6 +2820,7 @@ do
 
 			local Holder = Library:Create("Frame", {
 				BackgroundTransparency = 1,
+				ClipsDescendants = true,
 				Position = UDim2.fromOffset(8, 0),
 				Size = UDim2.new(1, -8, 0, 0),
 			Visible = false,
