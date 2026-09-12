@@ -125,7 +125,7 @@ local Library, SaveManager, ThemeManager = LoadModule("moehack.net/library.luau"
                     });
                 end
                 
-                local Lighting = World:AddToggle("visuals/world/lighting", { Text = "Lighting", Default = false }) do
+	            local Lighting = World:AddToggle("visuals/world/lighting", { Text = "Lighting", Default = false }) do
                     local DepBox = World:AddDependencyBox()
                     DepBox:AddSlider("visuals/world/lighting/time", { Text = "Clock Time", Min = 0, Max = 23, Rounding = 2, Default = 1 })
                     DepBox:AddSlider("visuals/world/lighting/latitude", { Text = "Geographic Latitude", Min = -90, Max = 90, Rounding = 1, Default = 0 })
@@ -133,44 +133,68 @@ local Library, SaveManager, ThemeManager = LoadModule("moehack.net/library.luau"
                     DepBox:AddLabel("ColorShift Top"):AddColorPicker('visuals/world/lighting/colorshifttop', { Default = Color3.fromRGB(255, 255, 255), Title = 'ColorShift Top' })
                     
                     DepBox:AddToggle("visuals/world/lighting/colorgrading", { Text = "Color Grading", Default = false }) do
-                        local DepBox2 = World:AddDependencyBox()
-                        local TonemapOptions = {}
-                        for _, EnumItem in Enum.TonemapperPreset:GetEnumItems() do 
-                            Insert(TonemapOptions, EnumItem.Name)
-                        end -- timothy
+                        local DepBox2 = DepBox:AddDependencyBox()
+                    local TonemapOptions = {}
+                    for _, EnumItem in Enum.TonemapperPreset:GetEnumItems() do 
+                        Insert(TonemapOptions, EnumItem.Name)
+                    end -- timothy
 
-                        DepBox2:AddDropdown("visuals/world/lighting/colorgrading/tonemap", { Text = "Tone Map Preset", Default = 1, Values = TonemapOptions })
+                    DepBox2:AddDropdown("visuals/world/lighting/colorgrading/tonemap", { Text = "Tone Map Preset", Default = 1, Values = TonemapOptions })
 
-                        DepBox2:SetupDependencies({
-                            { Toggles["visuals/world/lighting/colorgrading"], true }
-                        });
-                    end
+                    DepBox2:SetupDependencies({
+                        { Toggles["visuals/world/lighting/colorgrading"], true }
+                    });
+                end
 
                     
 
-                    local CC = DepBox:AddToggle("visuals/world/lighting/cc", { Text = "Color Correction", Default = false }) do
-                        local DepBox2 = World:AddDependencyBox()
-                        DepBox2:AddSlider("visuals/world/lighting/cc/saturation", { Text = "Saturation", Min = 0, Max = 1, Rounding = 2, Default = 0.5 })
-                        DepBox2:AddSlider("visuals/world/lighting/cc/contrast", { Text = "Contrast", Min = 0, Max = 1, Rounding = 2, Default = 0.5 })
-                        DepBox2:AddSlider("visuals/world/lighting/cc/brightness", { Text = "Brightness", Min = -1, Max = 1, Rounding = 2, Default = 0 })
-                        
-                        CC:AddColorPicker('visuals/world/lighting/cc/tint', { Default = Color3.fromRGB(255, 255, 255), Title = 'Tint Color' })
+                local CC = DepBox:AddToggle("visuals/world/lighting/cc", { Text = "Color Correction", Default = false }) do
+                    local DepBox2 = DepBox:AddDependencyBox()
+                    DepBox2:AddSlider("visuals/world/lighting/cc/saturation", { Text = "Saturation", Min = 0, Max = 1, Rounding = 2, Default = 0.5 })
+                    DepBox2:AddSlider("visuals/world/lighting/cc/contrast", { Text = "Contrast", Min = 0, Max = 1, Rounding = 2, Default = 0.5 })
+                    DepBox2:AddSlider("visuals/world/lighting/cc/brightness", { Text = "Brightness", Min = -1, Max = 1, Rounding = 2, Default = 0 })
+                    
+                    CC:AddColorPicker('visuals/world/lighting/cc/tint', { Default = Color3.fromRGB(255, 255, 255), Title = 'Tint Color' })
 
-                        DepBox2:SetupDependencies({
-                            { Toggles["visuals/world/lighting/cc"], true }
-                        });
-                    end
+                    DepBox2:SetupDependencies({
+                        { Toggles["visuals/world/lighting/cc"], true }
+                    });
+                end
 
-                    local Bloom = DepBox:AddToggle("visuals/world/lighting/bloom", { Text = "Bloom", Default = false }) do
-                        local DepBox2 = World:AddDependencyBox()
-                        DepBox2:AddSlider("visuals/world/lighting/bloom/intensity", { Text = "Intensity", Min = 0, Max = 1, Rounding = 2, Default = 0.5 })
-                        DepBox2:AddSlider("visuals/world/lighting/bloom/size", { Text = "Size", Min = 0, Max = 56, Rounding = 2, Default = 0.5 })
-                        DepBox2:AddSlider("visuals/world/lighting/bloom/threshold", { Text = "Threshold", Min = 0, Max = 1, Rounding = 2, Default = 0.5 })
+                local Bloom = DepBox:AddToggle("visuals/world/lighting/bloom", { Text = "Bloom", Default = false }) do
+                    local DepBox2 = DepBox:AddDependencyBox()
+                    DepBox2:AddSlider("visuals/world/lighting/bloom/intensity", { Text = "Intensity", Min = 0, Max = 1, Rounding = 2, Default = 0.5 })
+                    DepBox2:AddSlider("visuals/world/lighting/bloom/size", { Text = "Size", Min = 0, Max = 56, Rounding = 2, Default = 0.5 })
+                    DepBox2:AddSlider("visuals/world/lighting/bloom/threshold", { Text = "Threshold", Min = 0, Max = 1, Rounding = 2, Default = 0.5 })
 
-                        DepBox2:SetupDependencies({
-                            { Toggles["visuals/world/lighting/bloom"], true }
-                        });
-                    end
+                DepBox2:SetupDependencies({
+                    { Toggles["visuals/world/lighting/bloom"], true }
+                    });
+                end
+
+                local SunRays = DepBox:AddToggle("visuals/world/sunrays", { Text = "Sun Rays", Default = false }) do
+                    local DepBox2 = DepBox:AddDependencyBox()
+                    DepBox2:AddSlider("visuals/world/sunrays/intensity", { Text = "Intensity", Min = 0, Max = 1, Rounding = 2, Default = 0.1 })
+                    DepBox2:AddSlider("visuals/world/sunrays/spread", { Text = "Spread", Min = 0, Max = 1, Rounding = 2, Default = 0.5 })
+
+                    DepBox2:SetupDependencies({
+                        { Toggles["visuals/world/sunrays"], true }
+                    });
+                end
+
+                local Atmosphere = DepBox:AddToggle("visuals/world/atmosphere", { Text = "Atmosphere", Default = false }) do
+                    local DepBox2 = DepBox:AddDependencyBox()
+                    DepBox2:AddSlider("visuals/world/atmosphere/density", { Text = "Density", Min = 0, Max = 1, Rounding = 2, Default = 0.3 })
+                    DepBox2:AddSlider("visuals/world/atmosphere/offset", { Text = "Offset", Min = -1, Max = 1, Rounding = 2, Default = 0 })
+                    DepBox2:AddLabel("Color"):AddColorPicker("visuals/world/atmosphere/color", { Default = Color3.fromRGB(199, 170, 107), Title = "Atmosphere Color" })
+                    DepBox2:AddLabel("Decay"):AddColorPicker("visuals/world/atmosphere/decay", { Default = Color3.fromRGB(106, 112, 125), Title = "Atmosphere Decay" })
+                    DepBox2:AddSlider("visuals/world/atmosphere/glare", { Text = "Glare", Min = 0, Max = 1, Rounding = 2, Default = 0 })
+                    DepBox2:AddSlider("visuals/world/atmosphere/haze", { Text = "Haze", Min = 0, Max = 1, Rounding = 2, Default = 0 })
+
+                    DepBox2:SetupDependencies({
+                        { Toggles["visuals/world/atmosphere"], true }
+                    }); 
+                end
 
 
                     local TechOptions = {}
@@ -183,6 +207,7 @@ local Library, SaveManager, ThemeManager = LoadModule("moehack.net/library.luau"
                         { Toggles["visuals/world/lighting"], true }
                     });
                 end
+
 
                 local DepthOfField = World:AddToggle("visuals/world/dof", { Text = "Depth of Field", Default = false }) do
                     local DepBox = World:AddDependencyBox()
