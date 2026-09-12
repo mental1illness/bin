@@ -173,7 +173,7 @@ Visuals.World = {} do
         end
 
         if Toggles["visuals/world/shadow"].Value then
-            local GlobalShadows = Options["visuals/world/shadow/globalshadows"].Value
+            local GlobalShadows = Toggles["visuals/world/shadow/globalshadows"].Value
             local ShadowSoftness = Options["visuals/world/shadow/softness"].Value
             if Lighting.GlobalShadows ~= GlobalShadows then Lighting.GlobalShadows = GlobalShadows end
             if Lighting.ShadowSoftness ~= ShadowSoftness then Lighting.ShadowSoftness = ShadowSoftness end
