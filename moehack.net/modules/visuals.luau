@@ -1,0 +1,253 @@
+--!native
+--!optimize 2
+
+--# Aliases
+
+local FromOffset, FromScale, UDim2New = UDim2.fromOffset, UDim2.fromScale, UDim2.new
+local Atan2, Rad, Pi, Abs, Minimum, Maximum, Floor = math.atan2, math.rad, math.pi, math.abs, math.min, math.max, math.floor
+local NewVector, NewVector3, NewCFrame = vector.create, Vector3.new, CFrame.new
+local Create, IsA = Instance.new, workspace.IsA
+local Spawn, Wait = task.spawn, task.wait
+local ForEach, Insert, RemoveTable = table.foreach, table.insert, table.remove
+local FindFirstChild, WaitForChild = workspace.FindFirstChild, workspace.WaitForChild
+local WorldToViewportPoint = workspace.CurrentCamera.WorldToViewportPoint
+local GetService = Game.GetService
+
+--# Services
+local MarketplaceService = GetService(Game, "MarketplaceService")
+local ReplicatedStorage  = GetService(Game, "ReplicatedStorage")
+local RunService         = GetService(Game, "RunService")
+local Stats              = GetService(Game, "Stats")
+local Players            = GetService(Game, "Players")
+local Lighting           = GetService(Game, "Lighting")
+local LocalPlayer        = Players.LocalPlayer
+
+--# Helper Funcs (USELESS)
+LoadModule = function(Path, Load)
+    local url = "https://cats-cure-depression.vercel.app/" .. Path
+    return Load == true and loadstring(game:HttpGet(url))() or game:HttpGet(url)
+end
+
+--# Variables
+local FakeLibrary = {} do
+    function FakeLibrary:GiveSignal() end
+end
+
+local Flags = {
+    ["visuals/world/ambient"] = {Value = true},
+    ["visuals/world/ambient/outdoorcolor"] = {Value = Color3.fromRGB(200, 100, 60)},
+    ["visuals/world/ambient/color"] = {Value = Color3.fromRGB(200, 100, 60)},
+    ["visuals/world/brightness"] = {Value = true},
+    ["visuals/world/brightness/level"] = {Value = 1.6},
+    ["visuals/world/brightness/envdiffscale"] = {Value = 1},
+    ["visuals/world/brightness/envspecscale"] = {Value = 0.9},
+    ["visuals/world/brightness/exposure"] = {Value = 0.15},
+    ["visuals/world/fog"] = {Value = true},
+    ["visuals/world/fog/color"] = {Value = Color3.fromRGB(200, 100, 60)},
+    ["visuals/world/fog/near"] = {Value = 100000},
+    ["visuals/world/fog/far"] = {Value = 0},
+    ["visuals/world/shadow"] = {Value = true},
+    ["visuals/world/shadow/color"] = {Value = Color3.fromRGB(200, 100, 60)},
+    ["visuals/world/shadow/softness"] = {Value = 0.5},
+    ["visuals/world/shadow/globalshadows"] = {Value = true},
+    ["visuals/world/lighting"] = {Value = true},
+    ["visuals/world/lighting/time"] = {Value = 14},
+    ["visuals/world/lighting/latitude"] = {Value = 0},
+    ["visuals/world/lighting/colorshiftbottom"] = {Value = Color3.fromRGB(200, 100, 60)},
+    ["visuals/world/lighting/colorshifttop"] = {Value = Color3.fromRGB(200, 100, 60)},
+    ["visuals/world/lighting/colorgrading"] = {Value = true},
+    ["visuals/world/lighting/colorgrading/tonemap"] = {Value = "Retro"},
+    ["visuals/world/lighting/cc"] = {Value = false},
+    ["visuals/world/lighting/cc/saturation"] = {Value = 0.5},
+    ["visuals/world/lighting/cc/contrast"] = {Value = 0.5},
+    ["visuals/world/lighting/cc/brightness"] = {Value = 0},
+    ["visuals/world/lighting/cc/tint"] = {Value = Color3.fromRGB(255, 255, 255)},
+    ["visuals/world/lighting/bloom"] = {Value = true},
+    ["visuals/world/lighting/bloom/intensity"] = {Value = 1},
+    ["visuals/world/lighting/bloom/size"] = {Value = 56},
+    ["visuals/world/lighting/bloom/threshold"] = {Value = 0.5},
+    ["visuals/world/lighting/technology"] = {Value = "Future"},
+    ["visuals/world/dof"] = {Value = true},
+    ["visuals/world/dof/farintens"] = {Value = 0},
+    ["visuals/world/dof/nearintens"] = {Value = 0.7},
+    ["visuals/world/dof/focusdist"] = {Value = 20},
+    ["visuals/world/dof/focusinradius"] = {Value = 20},
+}
+
+local Library = getgenv().Library or FakeLibrary
+local Toggles, Options = getgenv().Toggles or Flags, getgenv().Options or Flags
+local Camera = workspace.CurrentCamera
+
+local DefaultLighting = {
+    Ambient = Lighting.Ambient,
+    OutdoorAmbient = Lighting.OutdoorAmbient,
+    Brightness = Lighting.Brightness,
+    EnvironmentDiffuseScale = Lighting.EnvironmentDiffuseScale,
+    EnvironmentSpecularScale = Lighting.EnvironmentSpecularScale,
+    ExposureCompensation = Lighting.ExposureCompensation,
+    ClockTime = Lighting.ClockTime,
+    FogColor = Lighting.FogColor,
+    FogStart = Lighting.FogStart,
+    FogEnd = Lighting.FogEnd,
+    GlobalShadows = Lighting.GlobalShadows,
+    ShadowSoftness = Lighting.ShadowSoftness,
+    TimeOfDay = Lighting.TimeOfDay,
+    GeographicLatitude = Lighting.GeographicLatitude,
+    ColorShift_Bottom = Lighting.ColorShift_Bottom,
+    ColorShift_Top = Lighting.ColorShift_Top,
+    Technology = Lighting.Technology,
+}
+
+--# Main
+local Visuals = {}
+
+Visuals.World = {} do
+    function Visuals.World.GetDefaultLighting()
+        return DefaultLighting
+    end
+
+    function Visuals.World.Tick()
+        local DefaultLighting = Visuals.World.GetDefaultLighting()
+
+        if not Visuals.World.ColorCorrection then
+            Visuals.World.ColorCorrection = Create("ColorCorrectionEffect")
+            Visuals.World.ColorCorrection.Enabled = false
+            Visuals.World.ColorCorrection.Parent = Lighting
+        end
+        if not Visuals.World.Bloom then
+            Visuals.World.Bloom = Create("BloomEffect")
+            Visuals.World.Bloom.Enabled = false
+            Visuals.World.Bloom.Parent = Lighting
+        end
+        if not Visuals.World.DepthOfField then
+            Visuals.World.DepthOfField = Create("DepthOfFieldEffect")
+            Visuals.World.DepthOfField.Enabled = false
+            Visuals.World.DepthOfField.Parent = Lighting
+        end
+        if not Visuals.World.ColorGrading then
+            Visuals.World.ColorGrading = Create("ColorGradingEffect")
+            Visuals.World.ColorGrading.Enabled = false
+            Visuals.World.ColorGrading.Parent = Lighting
+        end
+
+        local Ambient = Options["visuals/world/ambient/color"].Value
+        local OutdoorAmbient = Options["visuals/world/ambient/outdoorcolor"].Value
+        if Toggles["visuals/world/ambient"].Value then
+            if Lighting.Ambient ~= Ambient then Lighting.Ambient = Ambient end
+            if Lighting.OutdoorAmbient ~= OutdoorAmbient then Lighting.OutdoorAmbient = OutdoorAmbient end
+        else
+            if Lighting.Ambient ~= DefaultLighting.Ambient then Lighting.Ambient = DefaultLighting.Ambient end
+            if Lighting.OutdoorAmbient ~= DefaultLighting.OutdoorAmbient then Lighting.OutdoorAmbient = DefaultLighting.OutdoorAmbient end
+        end
+
+        if Toggles["visuals/world/brightness"].Value then
+            local ClockTime = Options["visuals/world/lighting/time"].Value
+            local DiffuseScale = Options["visuals/world/brightness/envdiffscale"].Value
+            local SpecularScale = Options["visuals/world/brightness/envspecscale"].Value
+            local Exposure = Options["visuals/world/brightness/exposure"].Value
+            local Technology = Enum.Technology[Options["visuals/world/lighting/technology"].Value]
+            if Lighting.ClockTime ~= ClockTime then Lighting.ClockTime = ClockTime end
+            if Lighting.EnvironmentDiffuseScale ~= DiffuseScale then Lighting.EnvironmentDiffuseScale = DiffuseScale end
+            if Lighting.EnvironmentSpecularScale ~= SpecularScale then Lighting.EnvironmentSpecularScale = SpecularScale end
+            if Lighting.ExposureCompensation ~= Exposure then Lighting.ExposureCompensation = Exposure end
+            if Technology and Lighting.Technology ~= Technology then Lighting.Technology = Technology end
+        else
+            if Lighting.ClockTime ~= DefaultLighting.ClockTime then Lighting.ClockTime = DefaultLighting.ClockTime end
+            if Lighting.EnvironmentDiffuseScale ~= DefaultLighting.EnvironmentDiffuseScale then Lighting.EnvironmentDiffuseScale = DefaultLighting.EnvironmentDiffuseScale end
+            if Lighting.EnvironmentSpecularScale ~= DefaultLighting.EnvironmentSpecularScale then Lighting.EnvironmentSpecularScale = DefaultLighting.EnvironmentSpecularScale end
+            if Lighting.ExposureCompensation ~= DefaultLighting.ExposureCompensation then Lighting.ExposureCompensation = DefaultLighting.ExposureCompensation end
+            if Lighting.Technology ~= DefaultLighting.Technology then Lighting.Technology = DefaultLighting.Technology end
+        end
+
+        if Toggles["visuals/world/fog"].Value then
+            local FogColor = Options["visuals/world/fog/color"].Value
+            local FogStart = Options["visuals/world/fog/near"].Value
+            local FogEnd = Options["visuals/world/fog/far"].Value
+            if Lighting.FogColor ~= FogColor then Lighting.FogColor = FogColor end
+            if Lighting.FogStart ~= FogStart then Lighting.FogStart = FogStart end
+            if Lighting.FogEnd ~= FogEnd then Lighting.FogEnd = FogEnd end
+        else
+            if Lighting.FogColor ~= DefaultLighting.FogColor then Lighting.FogColor = DefaultLighting.FogColor end
+            if Lighting.FogStart ~= DefaultLighting.FogStart then Lighting.FogStart = DefaultLighting.FogStart end
+            if Lighting.FogEnd ~= DefaultLighting.FogEnd then Lighting.FogEnd = DefaultLighting.FogEnd end
+        end
+
+        if Toggles["visuals/world/shadow"].Value then
+            local GlobalShadows = Options["visuals/world/shadow/globalshadows"].Value
+            local ShadowSoftness = Options["visuals/world/shadow/softness"].Value
+            if Lighting.GlobalShadows ~= GlobalShadows then Lighting.GlobalShadows = GlobalShadows end
+            if Lighting.ShadowSoftness ~= ShadowSoftness then Lighting.ShadowSoftness = ShadowSoftness end
+        else
+            if Lighting.GlobalShadows ~= DefaultLighting.GlobalShadows then Lighting.GlobalShadows = DefaultLighting.GlobalShadows end
+            if Lighting.ShadowSoftness ~= DefaultLighting.ShadowSoftness then Lighting.ShadowSoftness = DefaultLighting.ShadowSoftness end
+        end
+
+        if Toggles["visuals/world/lighting"].Value then
+            local TimeOfDay = Options["visuals/world/lighting/time"].Value
+            local Latitude = Options["visuals/world/lighting/latitude"].Value
+            local Bottom = Options["visuals/world/lighting/colorshiftbottom"].Value
+            local Top = Options["visuals/world/lighting/colorshifttop"].Value
+            if Lighting.TimeOfDay ~= TimeOfDay then Lighting.TimeOfDay = TimeOfDay end
+            if Lighting.GeographicLatitude ~= Latitude then Lighting.GeographicLatitude = Latitude end
+            if Lighting.ColorShift_Bottom ~= Bottom then Lighting.ColorShift_Bottom = Bottom end
+            if Lighting.ColorShift_Top ~= Top then Lighting.ColorShift_Top = Top end
+        else
+            if Lighting.TimeOfDay ~= DefaultLighting.TimeOfDay then Lighting.TimeOfDay = DefaultLighting.TimeOfDay end
+            if Lighting.GeographicLatitude ~= DefaultLighting.GeographicLatitude then Lighting.GeographicLatitude = DefaultLighting.GeographicLatitude end
+            if Lighting.ColorShift_Bottom ~= DefaultLighting.ColorShift_Bottom then Lighting.ColorShift_Bottom = DefaultLighting.ColorShift_Bottom end
+            if Lighting.ColorShift_Top ~= DefaultLighting.ColorShift_Top then Lighting.ColorShift_Top = DefaultLighting.ColorShift_Top end
+        end
+
+        local ColorCorrection = Visuals.World.ColorCorrection
+        local ColorCorrectionEnabled = Toggles["visuals/world/lighting/cc"].Value and Toggles["visuals/world/lighting"].Value
+        if ColorCorrection.Enabled ~= ColorCorrectionEnabled then ColorCorrection.Enabled = ColorCorrectionEnabled end
+        if ColorCorrectionEnabled then
+            local Saturation = Options["visuals/world/lighting/cc/saturation"].Value
+            local Contrast = Options["visuals/world/lighting/cc/contrast"].Value
+            local Brightness = Options["visuals/world/lighting/cc/brightness"].Value
+            local TintColor = Options["visuals/world/lighting/cc/tint"].Value
+            if ColorCorrection.Saturation ~= Saturation then ColorCorrection.Saturation = Saturation end
+            if ColorCorrection.Contrast ~= Contrast then ColorCorrection.Contrast = Contrast end
+            if ColorCorrection.Brightness ~= Brightness then ColorCorrection.Brightness = Brightness end
+            if ColorCorrection.TintColor ~= TintColor then ColorCorrection.TintColor = TintColor end
+        end
+
+        local Bloom = Visuals.World.Bloom
+        local BloomEnabled = Toggles["visuals/world/lighting/bloom"].Value and Toggles["visuals/world/lighting"].Value
+        if Bloom.Enabled ~= BloomEnabled then Bloom.Enabled = BloomEnabled end
+        if BloomEnabled then
+            local Intensity = Options["visuals/world/lighting/bloom/intensity"].Value
+            local Size = Options["visuals/world/lighting/bloom/size"].Value
+            local Threshold = Options["visuals/world/lighting/bloom/threshold"].Value
+            if Bloom.Intensity ~= Intensity then Bloom.Intensity = Intensity end
+            if Bloom.Size ~= Size then Bloom.Size = Size end
+            if Bloom.Threshold ~= Threshold then Bloom.Threshold = Threshold end
+        end
+
+        local DepthOfField = Visuals.World.DepthOfField
+        local DepthOfFieldEnabled = Toggles["visuals/world/dof"].Value
+        if DepthOfField.Enabled ~= DepthOfFieldEnabled then DepthOfField.Enabled = DepthOfFieldEnabled end
+        if DepthOfFieldEnabled then
+            local FarIntensity = Options["visuals/world/dof/farintens"].Value
+            local NearIntensity = Options["visuals/world/dof/nearintens"].Value
+            local FocusDistance = Options["visuals/world/dof/focusdist"].Value
+            local InFocusRadius = Options["visuals/world/dof/focusinradius"].Value
+            if DepthOfField.FarIntensity ~= FarIntensity then DepthOfField.FarIntensity = FarIntensity end
+            if DepthOfField.NearIntensity ~= NearIntensity then DepthOfField.NearIntensity = NearIntensity end
+            if DepthOfField.FocusDistance ~= FocusDistance then DepthOfField.FocusDistance = FocusDistance end
+            if DepthOfField.InFocusRadius ~= InFocusRadius then DepthOfField.InFocusRadius = InFocusRadius end
+        end
+
+        local ColorGrading = Visuals.World.ColorGrading
+        local ColorGradingEnabled = Toggles["visuals/world/lighting/colorgrading"].Value and Toggles["visuals/world/lighting"].Value
+        if ColorGrading.Enabled ~= ColorGradingEnabled then ColorGrading.Enabled = ColorGradingEnabled end
+        if ColorGradingEnabled then
+            local TonemapperPreset = Enum.TonemapperPreset[Options["visuals/world/lighting/colorgrading/tonemap"].Value]
+            if TonemapperPreset and ColorGrading.TonemapperPreset ~= TonemapperPreset then
+                ColorGrading.TonemapperPreset = TonemapperPreset
+            end
+        end
+    end
+end
+
+return Visuals
