@@ -409,6 +409,7 @@ Visuals.Players = {} do
         else
             if Visuals.Players.ChineseHat.Visible then
                 Visuals.Players.ChineseHat.Visible = false
+                Visuals.Players.ChineseHat.Adornee = nil
             end
         end
         
