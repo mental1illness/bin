@@ -167,23 +167,23 @@ function Library:Create(Class, Properties)
 		_Instance = Instance.new(Class)
 	end
 
-	for Property, Value in next, Properties do
-		_Instance[Property] = Value
-	end
-
-	-- UIListLayout uses LayoutOrder rather than the order in which
-	-- instances were parented. Give new GUI children a stable creation
-	-- order so dependency boxes stay directly below the control that
-	-- created them, even when later controls are added to the same box.
-	if Properties.LayoutOrder == nil and _Instance:IsA("GuiObject") and _Instance.Parent then
-		local ParentLayout = _Instance.Parent:FindFirstChildOfClass("UIListLayout")
-		if ParentLayout then
-			_Instance.LayoutOrder = #_Instance.Parent:GetChildren()
+		for Property, Value in next, Properties do
+			_Instance[Property] = Value
 		end
-	end
 
-	return _Instance
-end
+		-- UIListLayout uses LayoutOrder rather than the order in which
+		-- instances were parented. Give new GUI children a stable creation
+		-- order so dependency boxes stay directly below the control that
+		-- created them, even when later controls are added to the same box.
+		if Properties.LayoutOrder == nil and _Instance:IsA("GuiObject") and _Instance.Parent then
+			local ParentLayout = _Instance.Parent:FindFirstChildOfClass("UIListLayout")
+			if ParentLayout then
+				_Instance.LayoutOrder = #_Instance.Parent:GetChildren()
+			end
+		end
+
+		return _Instance
+	end
 
 function Library:ApplyTextStroke(Inst)
 	Inst.TextStrokeTransparency = 1
@@ -2816,7 +2816,6 @@ do
 	function Funcs:AddDependencyBox()
 		local Depbox = {
 			Dependencies = {},
-			AnimationId = 0,
 		}
 
 		local Groupbox = self
@@ -2824,8 +2823,6 @@ do
 
 		local Holder = Library:Create("Frame", {
 			BackgroundTransparency = 1,
-			ClipsDescendants = true,
-			Position = UDim2.fromOffset(0, 0),
 			Size = UDim2.new(1, 0, 0, 0),
 			Visible = false,
 			Parent = Container,
@@ -2844,55 +2841,16 @@ do
 			Parent = Frame,
 		})
 
-		local function GetSize(Height)
-			return UDim2.new(1, 0, 0, Height)
-		end
-
 		function Depbox:Resize()
-			if not Depbox.IsAnimating then
-				Holder.Size = GetSize(Layout.AbsoluteContentSize.Y)
-			end
+			Holder.Size = UDim2.new(1, 0, 0, Layout.AbsoluteContentSize.Y)
 			Groupbox:Resize()
-		end
-
-		function Depbox:Animate(Visible)
-			Depbox.AnimationId = Depbox.AnimationId + 1
-			local AnimationId = Depbox.AnimationId
-			local TargetHeight = Visible and Layout.AbsoluteContentSize.Y or 0
-
-			if Visible then
-				Holder.Visible = true
-			end
-
-			Depbox.IsAnimating = true
-			local Tween = TweenService:Create(
-				Holder,
-				TweenInfo.new(0.18, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
-				{ Size = GetSize(TargetHeight) }
-			)
-
-			Tween.Completed:Connect(function()
-				if AnimationId ~= Depbox.AnimationId then
-					return
-				end
-
-				Depbox.IsAnimating = false
-				if Visible then
-					Holder.Size = GetSize(Layout.AbsoluteContentSize.Y)
-				else
-					Holder.Visible = false
-				end
-				Groupbox:Resize()
-			end)
-
-			Tween:Play()
 		end
 
 		Layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
 			Depbox:Resize()
 		end)
 
-		Holder:GetPropertyChangedSignal("Size"):Connect(function()
+		Holder:GetPropertyChangedSignal("Visible"):Connect(function()
 			Depbox:Resize()
 		end)
 
@@ -2902,12 +2860,14 @@ do
 				local Value = Dependency[2]
 
 				if Elem.Type == "Toggle" and Elem.Value ~= Value then
-					Depbox:Animate(false)
+					Holder.Visible = false
+					Depbox:Resize()
 					return
 				end
 			end
 
-			Depbox:Animate(true)
+			Holder.Visible = true
+			Depbox:Resize()
 		end
 
 		function Depbox:SetupDependencies(Dependencies)
