@@ -130,30 +130,37 @@ Visuals.World = {} do
         if not Visuals.World.ColorCorrection then
             Visuals.World.ColorCorrection = Create("ColorCorrectionEffect")
             Visuals.World.ColorCorrection.Enabled = false
+            Visuals.World.ColorCorrection.Name = "\0"
             Visuals.World.ColorCorrection.Parent = Lighting
         end
         if not Visuals.World.Bloom then
             Visuals.World.Bloom = Create("BloomEffect")
             Visuals.World.Bloom.Enabled = false
+            Visuals.World.Bloom.Name = "\0"
             Visuals.World.Bloom.Parent = Lighting
         end
         if not Visuals.World.DepthOfField then
             Visuals.World.DepthOfField = Create("DepthOfFieldEffect")
             Visuals.World.DepthOfField.Enabled = false
+            Visuals.World.DepthOfField.Name = "\0"
             Visuals.World.DepthOfField.Parent = Lighting
         end
         if not Visuals.World.ColorGrading then
             Visuals.World.ColorGrading = Create("ColorGradingEffect")
             Visuals.World.ColorGrading.Enabled = false
+            Visuals.World.ColorGrading.Name = "\0"
             Visuals.World.ColorGrading.Parent = Lighting
         end
         if not Visuals.World.SunRays then
             Visuals.World.SunRays = Create("SunRaysEffect")
             Visuals.World.SunRays.Enabled = false
+            Visuals.World.SunRays.Name = "\0"
             Visuals.World.SunRays.Parent = Lighting
         end
+        
         if not Visuals.World.Atmosphere then
             Visuals.World.Atmosphere = Lighting:FindFirstChildOfClass("Atmosphere") or Create("Atmosphere")
+            Visuals.World.Atmosphere.Name = "\0"
             Visuals.World.Atmosphere.Parent = Lighting
         end
 
