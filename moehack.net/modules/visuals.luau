@@ -345,7 +345,7 @@ end
 Visuals.Players = {} do
 
     function Visuals.Players.Tick()
-        if Toggles["visuals/player/chinesehat"] then
+        if Toggles["visuals/player/chinesehat"].Value then
             if not Visuals.Players.ChineseHat then
                 Visuals.Players.ChineseHat = Create("ConeHandleAdornment")
                 Visuals.Players.ChineseHat.Shading = Enum.AdornShading.Shaded
