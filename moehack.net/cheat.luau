@@ -85,6 +85,7 @@ local Library, SaveManager, ThemeManager = LoadModule("moehack.net/library.luau"
 
         do -- Visuals
             local World = Tabs.Visuals:AddGroupbox({ Side = 1, Name = "World" })
+
             do -- World
                 local Ambient = World:AddToggle("visuals/world/ambient", { Text = "Ambient", Default = false }) do
                     Ambient:AddColorPicker('visuals/world/ambient/outdoorcolor', { Default = Color3.fromRGB(200, 100, 60), Title = 'Outdoor Color' })
@@ -264,7 +265,7 @@ local Library, SaveManager, ThemeManager = LoadModule("moehack.net/library.luau"
 
     Spawn(function() -- Watermark
         while Wait(1) do
-            Library:SetWatermark("moehack.net" .. " » " .. FrameRate .. "fps" .. " » " .. Ping .. "ms" .. " » " .. string.lower(LocalPlayer.Name) .. " » "  .. "private (kawaii user)")
+            Library:SetWatermark("moehack.net" .. " » " .. FrameRate .. "fps" .. " » " .. Ping .. "ms" .. " » " .. string.lower(LocalPlayer.Name) .. " » "  .. "definetly dev build")
         end
     end)
 end
