@@ -167,12 +167,23 @@ function Library:Create(Class, Properties)
 		_Instance = Instance.new(Class)
 	end
 
-	for Property, Value in next, Properties do
-		_Instance[Property] = Value
-	end
+		for Property, Value in next, Properties do
+			_Instance[Property] = Value
+		end
 
-	return _Instance
-end
+		-- UIListLayout uses LayoutOrder rather than the order in which
+		-- instances were parented. Give new GUI children a stable creation
+		-- order so dependency boxes stay directly below the control that
+		-- created them, even when later controls are added to the same box.
+		if Properties.LayoutOrder == nil and _Instance:IsA("GuiObject") and _Instance.Parent then
+			local ParentLayout = _Instance.Parent:FindFirstChildOfClass("UIListLayout")
+			if ParentLayout then
+				_Instance.LayoutOrder = #_Instance.Parent:GetChildren()
+			end
+		end
+
+		return _Instance
+	end
 
 function Library:ApplyTextStroke(Inst)
 	Inst.TextStrokeTransparency = 1

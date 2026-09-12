@@ -146,6 +146,8 @@ local Library, SaveManager, ThemeManager = LoadModule("moehack.net/library.luau"
                         });
                     end
 
+                    
+
                     local CC = DepBox:AddToggle("visuals/world/lighting/cc", { Text = "Color Correction", Default = false }) do
                         local DepBox2 = World:AddDependencyBox()
                         DepBox2:AddSlider("visuals/world/lighting/cc/saturation", { Text = "Saturation", Min = 0, Max = 1, Rounding = 2, Default = 0.5 })
