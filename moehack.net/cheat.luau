@@ -142,9 +142,9 @@ do -- Notification
     Spawn(function()
         Wait(.2)
         Library:Notify("Loaded sucessfully!", 3)
-        Wait(.3)
+        Wait(.2)
         Library:Notify("Today's wordle's answer is " .. tostring(Game:HttpGet("https://bloxsense.vercel.app/api/WordleTodaysAnswer.js")), 4)
-        Wait(.4)
+        Wait(.2)
         Library:Notify("Welcome to moehack.net, good luck and have fun being a moe" .. " " .. string.lower(LocalPlayer.Name) .. "!", 6)
     end)
 end

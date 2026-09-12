@@ -10,6 +10,7 @@ local Create, IsA = Instance.new, workspace.IsA
 local Spawn, Wait = task.spawn, task.wait
 local ForEach, Insert, RemoveTable = table.foreach, table.insert, table.remove
 local FindFirstChild, WaitForChild = workspace.FindFirstChild, workspace.WaitForChild
+local WorldToViewportPoint = workspace.CurrentCamera.WorldToViewportPoint
 local GetService = Game.GetService
 
 --# Services
@@ -72,7 +73,7 @@ local Corners = {
     { 1, -1, -1},
     {-1, -1, -1},
 }
-local Accumulator = 0
+local LastHz = 0
 
 local CurrentCamera = workspace.CurrentCamera
 
@@ -148,7 +149,7 @@ function ESP.CreateElements()
     Objects.HealthBarBackground = Create("Frame")
     Objects.HealthBarBackground.Parent = Objects.HealthBar
     Objects.HealthBarBackground.Size = FromScale(1, 1)
-    Objects.HealthBarBackground.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+    Objects.HealthBarBackground.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
     Objects.HealthBarBackground.BorderSizePixel = 0
     Objects.HealthBarBackground.ZIndex = 1
 
@@ -156,7 +157,7 @@ function ESP.CreateElements()
     Objects.HealthBarCover.Parent = Objects.HealthBar
     Objects.HealthBarCover.Size = UDim2New(1, 0, 0, 0)
     Objects.HealthBarCover.BorderSizePixel = 0
-    Objects.HealthBarCover.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+    Objects.HealthBarCover.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
     Objects.HealthBarCover.ZIndex = 3
 
     Objects.HealthBarFill = Create("Frame")
@@ -245,24 +246,20 @@ function ESP.GetHealth(Player, Character)
     return MaxHealth, Health
 end
 
-local function IWannaCacheThisBroSoHereItIs(Character, Entity)
+local function _ESPConnectCharacter(Character, Entity)
     Entity.BodyParts = {}
-
     for _, Object in Character:GetDescendants() do
         if IsA(Object, "BasePart") then
             Insert(Entity.BodyParts, Object)
         end
     end
-
     Library:GiveSignal(
         Character.DescendantAdded:Connect(function(Object)
             if IsA(Object, "BasePart") then
                 Insert(Entity.BodyParts, Object)
             end
         end)
-    )
-
-    Library:GiveSignal(
+    ); Library:GiveSignal(
         Character.DescendantRemoving:Connect(function(Object)
             for i, Part in Entity.BodyParts do
                 if Part == Object then
@@ -292,12 +289,12 @@ function ESP.ApplyAllPlayer()
 
 		local Character = Player.Character
 		if Character then
-			IWannaCacheThisBroSoHereItIs(Character, Entity)
+			_ESPConnectCharacter(Character, Entity)
 		end
 
 		Library:GiveSignal(
 			Player.CharacterAdded:Connect(function(Character)
-				IWannaCacheThisBroSoHereItIs(Character, Entity)
+				_ESPConnectCharacter(Character, Entity)
 			end)
 		)
 	end
@@ -308,12 +305,6 @@ ESP.GetBoundingBox = function(Model: {})
     local LowestY, HighestY = 1e6, -1e6
     local OnScreen = false
 
-    local Camera = CurrentCamera
-    local WorldToViewportPoint = Camera.WorldToViewportPoint
-    local Min = Minimum
-    local Max = Maximum
-    local Vector3New = NewVector3
-
     for _, Part in Model do
         if Part.Transparency < 0.99 then
             local PartCFrame = Part.CFrame
@@ -322,20 +313,13 @@ ESP.GetBoundingBox = function(Model: {})
 
             for i = 1, 8 do
                 local Signs = Corners[i]
-                local ScreenPoint, Visible = WorldToViewportPoint(
-                    Camera,
-                    PartCFrame * Vector3New(
-                        X * Signs[1],
-                        Y * Signs[2],
-                        Z * Signs[3]
-                    )
-                )
+                local ScreenPoint, Visible = WorldToViewportPoint(CurrentCamera, PartCFrame * NewVector3(X * Signs[1], Y * Signs[2], Z * Signs[3]))
 
                 OnScreen = OnScreen or Visible
-                LowestX = Min(LowestX, ScreenPoint.X)
-                HighestX = Max(HighestX, ScreenPoint.X)
-                LowestY = Min(LowestY, ScreenPoint.Y)
-                HighestY = Max(HighestY, ScreenPoint.Y)
+                LowestX = Minimum(LowestX, ScreenPoint.X)
+                HighestX = Maximum(HighestX, ScreenPoint.X)
+                LowestY = Minimum(LowestY, ScreenPoint.Y)
+                HighestY = Maximum(HighestY, ScreenPoint.Y)
             end
         end
     end
@@ -454,10 +438,7 @@ function ESP.Render(Entity: {})
                 local HealthTextY = (HighY - LowY) * (1 - HealthPercent)
 
                 Objects.HealthTextHolder.GroupTransparency = 0
-                Objects.HealthTextHolder.Position = UDim2New(
-                    0, -10 - Options["esp/healthbar/thickness"].Value,
-                    0, HealthTextY
-                )
+                Objects.HealthTextHolder.Position = UDim2New(0, -10 - Options["esp/healthbar/thickness"].Value, 0, HealthTextY)
             end
         else
             if Objects.HealthTextHolder.Visible then
@@ -490,7 +471,7 @@ end
 function ESP.Update(DeltaTime)
 
     if not Toggles["esp/enabled"].Value then
-        Accumulator = 0
+        LastHz = 0
         for _, Entity in ESP.Entities do
             if Entity.Objects.Holder.Visible then
                 Entity.Objects.Holder.Visible = false
@@ -501,15 +482,15 @@ function ESP.Update(DeltaTime)
 
     ESP.ApplyAllPlayer()
 
-    do -- dumb perf fix for low end pc
-        local Hertz = math.max(1, Options["esp/settings/renderhz"].Value)
+    do
+        local Hertz = Maximum(1, Options["esp/settings/renderhz"].Value)
         local Interval = 1 / Hertz
 
-        Accumulator += DeltaTime
-        if Accumulator < Interval then
+        LastHz += DeltaTime
+        if LastHz < Interval then
             return
         end
-        Accumulator -= Interval
+        LastHz -= Interval
     end
 
     for _, Entity in ESP.Entities do Spawn(ESP.Render, Entity) end
