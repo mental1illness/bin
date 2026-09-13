@@ -521,6 +521,7 @@ end
 local function _ESPConnectCharacter(Player, Entity)
     Entity.BodyParts = {}
     local Character = ESP.GetCharacter(Player)
+    if not Character then return end
     for _, Object in Character:GetDescendants() do
         if IsA(Object, "BasePart") then
             Insert(Entity.BodyParts, Object)
