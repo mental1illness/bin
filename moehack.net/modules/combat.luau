@@ -272,7 +272,7 @@ function Combat.Tick(Delta)
         local ReactionTime = Options["combat/triggerbot/reactiontime"].Value / 1000
         local IgnoreBehindWalls = Toggles["combat/triggerbot/ignorebehindwalls"].Value
 
-        local Target, Hitbox = Combat.GetTarget(FOV, false)
+        local Target, Hitbox = Combat.GetTarget(FOV, true)
 
         if Target and Hitbox then
             local Visible = true
@@ -318,7 +318,7 @@ function Combat.Tick(Delta)
                 end
 
                 if os.clock() - Combat.TriggerBotTime >= ReactionTime then
-                    print("TriggerBot: Shoot", Target.Name, Hitbox.Name)
+                    mouse1click()
                 end
             else
                 Combat.TriggerBotTarget = nil
