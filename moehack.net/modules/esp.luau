@@ -620,7 +620,7 @@ function ESP.GetTool(Player, Character)
         end
         if not Player.Character then return nil end
         local Data = StateObject.get("Character", Player.Character)
-        return Data.values.equipped and Data.values.equipped.value and Data.values.equipped.value.Name or "NONE"
+        return Data.values.equipped and Data.values.equipped.Name or "NONE"
     end
 
     local Tool = FindFirstChildOfClass(Character, "Tool")
