@@ -60,7 +60,7 @@ local Library, SaveManager, ThemeManager = LoadModule("moehack.net/interface/lib
             local AimAssist = Tabs.Combat:AddGroupbox({ Side = 1, Name = "Aim Assistance" })
 
             do -- Aim Assist
-                AimAssist:AddToggle("combat/aimassist", { Text = "Enabled", Default = false })
+                AimAssist:AddToggle("combat/aimassist", { Text = "Enabled", Default = false }):AddKeyPicker("combat/aimassist/key", { Text = "Le Aim Assist Key", SyncToggleState = false, Mode = "Hold", Default = "MB2" })
                 AimAssist:AddSlider("combat/aimassist/fov", { Text = "Field Of View", Min = 1, Max = 360, Rounding = 0, Default = 120 })
                 AimAssist:AddDropdown("combat/aimassist/easingstyle", { Text = "Easing Style", Default = 1, Values = {
                     "Sine",
@@ -79,7 +79,7 @@ local Library, SaveManager, ThemeManager = LoadModule("moehack.net/interface/lib
                     "Mouse",
                 } })
                 AimAssist:AddToggle("combat/aimassist/instasnap", { Text = "Instant Snap", Default = false })
-                AimAssist:AddSlider("combat/aimassist/speed", {Text = "Speed", Min = 1, Max = 30, Rounding = 1, Default = 12})
+                AimAssist:AddSlider("combat/aimassist/speed", {Text = "Speed", Min = 1, Max = 100, Rounding = 1, Default = 12})
             end
         end
 
