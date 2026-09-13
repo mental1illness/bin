@@ -136,20 +136,14 @@ function Combat.Tick(Delta)
                     local BestDistance = FOV
                     local ViewportSize = Camera.ViewportSize
 
-                    local Center = NewVector(
-                        ViewportSize.X * 0.5,
-                        ViewportSize.Y * 0.5
-                    )
+                    local Center = NewVector( ViewportSize.X * 0.5, ViewportSize.Y * 0.5 )
 
                     for _, Part in Character:GetChildren() do
                         if Part:IsA("BasePart") then
-                            local Position, OnScreen =
-                                WorldToViewportPoint(Camera, Part.Position)
+                            local Position, OnScreen = WorldToViewportPoint(Camera, Part.Position)
 
                             if OnScreen and Position.Z > 0 then
-                                local Distance = (
-                                    NewVector(Position.X, Position.Y) - Center
-                                ).Magnitude
+                                local Distance = (NewVector(Position.X, Position.Y) - Center).Magnitude
 
                                 if Distance <= BestDistance then
                                     BestDistance = Distance
@@ -180,8 +174,7 @@ function Combat.Tick(Delta)
         end
 
         if Target and Hitbox then
-            local Position, OnScreen =
-                WorldToViewportPoint(Camera, Hitbox.Position)
+            local Position, OnScreen = WorldToViewportPoint(Camera, Hitbox.Position)
 
             if OnScreen and Position.Z > 0 then
                 local ViewportSize = Camera.ViewportSize
@@ -200,10 +193,12 @@ function Combat.Tick(Delta)
                 if Distance <= FOV then
                     local Alpha
 
+                    local Alpha
+
                     if InstantSnap then
                         Alpha = 1
                     else
-                        Alpha = 1 - math.exp(-Speed * Delta)
+                        Alpha = Clamp(Speed * Delta, 0, 1)
 
                         local Easing = EasingStyle[EasingName]
 
@@ -213,25 +208,16 @@ function Combat.Tick(Delta)
                     end
 
                     if Method == "Camera" then
-                        local Alpha = InstantSnap and 1 or (1 - math.exp(-12 * Delta))
-
-                        if not InstantSnap then
-                            local Easing = EasingStyle[EasingName]
-
-                            if Easing then
-                                Alpha = Easing(Alpha)
-                            end
-                        end
-
                         local BroCFrame = CFrame.lookAt(
                             Camera.CFrame.Position,
                             Hitbox.Position
                         )
 
-                        Camera.CFrame = NewCFrame(
+                        Camera.CFrame = Camera.CFrame:Lerp(
                             BroCFrame,
                             Alpha
                         )
+
                     elseif Method == "Mouse" then
                         local MoveX = OffsetX * Alpha
                         local MoveY = OffsetY * Alpha
