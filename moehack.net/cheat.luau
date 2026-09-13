@@ -44,7 +44,7 @@ end
 local FrameRate, Ping = 0, 0
 
 --# UI Library
-local Library, SaveManager, ThemeManager = LoadModule("moehack.net/library.luau", true), LoadModule("moehack.net/SaveManager.lua", true), LoadModule("moehack.net/ThemeManager.lua", true) do
+local Library, SaveManager, ThemeManager = LoadModule("moehack.net/interface/library.luau", true), LoadModule("moehack.net/interface/addons/SaveManager.lua", true), LoadModule("moehack.net/interface/addons/ThemeManager.lua", true) do
     local Window = Library:CreateWindow({ Title = 'moehack.net', Center = true, AutoShow = true, TabPadding = 1, MenuFadeTime = 0.2 })
     
     local Tabs = {
@@ -298,9 +298,11 @@ end
 
 Library:Notify("Loading modules...", 2)
 
-LoadModule("moehack.net/modules/esp.luau", true)
-
+local ESP = LoadModule("moehack.net/modules/esp.luau", true)
 local Visuals = LoadModule("moehack.net/modules/visuals.luau", true)
+local Combat = LoadModule("moehack.net/modules/combat.luau", true)
+
+--# Hooks
 
 --# Connections
 
@@ -308,8 +310,10 @@ Library:GiveSignal(
 	RunService.RenderStepped:Connect(function(Delta)
 		FrameRate = Floor(1000 / RenderAverage:GetValue())
 		Ping = Floor(DataPing:GetValue())
-        Visuals.Tick()
-	end)
+
+        Visuals.Tick(Delta)
+        ESP.Update(Delta)
+    end)
 )
 
 do -- Notification

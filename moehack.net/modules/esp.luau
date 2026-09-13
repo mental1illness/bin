@@ -810,6 +810,4 @@ function ESP.Update(DeltaTime)
     for _, Entity in ESP.Entities do Spawn(ESP.Render, Entity) end
 end 
 
-RunService.RenderStepped:Connect(ESP.Update)
-
 return ESP
