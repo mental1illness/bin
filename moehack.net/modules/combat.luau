@@ -99,6 +99,18 @@ function Combat.IsBehindWalls(Target, Hitbox)
     return true
 end
 
+function ESP.GetCharacter(Player)
+    if PlaceId == 72920620366355 then
+        if not StateObject then
+            StateObject = require(ReplicatedStorage.Modules.StateObject)
+        end
+        if not Player.Character then return nil end
+        local Data = StateObject.get("Character", Player.Character)
+        return Data.values.viewmodels
+    end
+    return Player.Character
+end
+
 function Combat.GetTarget(FOV: number, BestHitbox: boolean)
     local ViewportSize = Camera.ViewportSize
     local Center = NewVector(ViewportSize.X * 0.5, ViewportSize.Y * 0.5)
@@ -108,11 +120,12 @@ function Combat.GetTarget(FOV: number, BestHitbox: boolean)
 
     for _, Player in Players:GetPlayers() do
         if Player ~= LocalPlayer then
-            local Character = Player.Character
+            local Character = ESP.GetCharacter(Player)
+            local RealCharacter = Player.Character
 
             if Character then
                 local Humanoid = FindFirstChild(Character, "Humanoid")
-                local RootPart = Character.PrimaryPart
+                local RootPart = RealCharacter.PrimaryPart
 
                 if Humanoid and RootPart and Humanoid.Health > 0 then
                     if BestHitbox then
@@ -140,7 +153,7 @@ function Combat.GetTarget(FOV: number, BestHitbox: boolean)
                             if Distance <= BestDistance then
                                 BestDistance = Distance
                                 BestTarget = Player
-                                BestHitboxPart = RootPart
+                                BestHitboxPart = PlaceId == 72920620366355 and FindFirstChild(Character, "head") or FindFirstChild(Character, "Head")
                             end
                         end
                     end
