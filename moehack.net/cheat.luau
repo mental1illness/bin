@@ -228,11 +228,24 @@ local Library, SaveManager, ThemeManager = LoadModule("moehack.net/interface/lib
 
                 local Weather = World:AddToggle("visuals/world/weather", { Text = "Weather", Default = false }) do
                     local DepBox = World:AddDependencyBox()
-                    DepBox:AddDropdown("visuals/world/weather/type", { Text = "Type", Default = 1, Values = {"Rain"} })
+                    DepBox:AddDropdown("visuals/world/weather/type", { Text = "Type", Default = 1, Values = {"Rain", "Snow"} })
+
+                    do --# Snow
+                        local DepBoxSnow = World:AddDependencyBox()
+                        DepBoxSnow:AddSlider("visuals/world/snow/rate", { Text = "Snow Rate", Min = 1, Max = 2000, Rounding = 0, Default = 1000 })
+
+                        DepBoxSnow:SetupDependencies({  
+                            { Toggles["visuals/world/weather/type"], "Snow" }
+                        });
+                    end
+
                     DepBox:SetupDependencies({  
                         { Toggles["visuals/world/weather"], true }
                     });
                 end
+                World:AddToggle("visuals/world/its,driving,me,crazy,i,just,need,your,affection", { Text = "Use 2022 Materials", Default = gethiddenproperty(GetService(Game, "MaterialService"), "Use2022Materials"),  Callback = function(Var)
+                    sethiddenproperty(GetService(Game, "MaterialService"), "Use2022Materials", Var)
+                end})
             end
 
             do -- Player

@@ -84,7 +84,8 @@ local Flags = {
     ["visuals/world/dof/focusinradius"] = {Value = 20},
 
     ["visuals/world/weather"] = {Value=true},
-    ["visuals/world/weather/type"] = {Value = "Rain"},
+    ["visuals/world/weather/type"] = {Value = "Snow"},
+    ["visuals/world/snow/rate"] = {Value = 1000},
 
     ["visuals/player/chinesehat"] = {Value=true},
     ["visuals/player/chinesehat/glowfac"] = {Value = 5},
@@ -138,6 +139,8 @@ Rain:SetLightInfluence(0.85)
 Rain:SetVolume(0.35)
 Rain:SetDirection(Vector3.new(0.15, -1, 0.05))
 
+const SNOW_OFFSET  = NewCFrame(0, 10, 0) -- why do ppl think this is ai
+
 --# Main
 local Visuals = {}
 
@@ -151,6 +154,50 @@ Visuals.World = {} do
 
         if Toggles["visuals/world/weather"].Value then
             local WeatherType = Options["visuals/world/weather/type"].Value
+
+            if WeatherType == "Snow" then
+                if not Visuals.World.Snow then
+                    Visuals.World.Snow = Instance.new("Part")
+                    Visuals.World.Snow.Transparency = 1
+                    Visuals.World.Snow.Name = "Snow_Particles"
+                    Visuals.World.Snow.CanCollide = false
+                    Visuals.World.Snow.Size = Vector3.new(127, 1, 144)
+                    Visuals.World.Snow.Anchored = true
+                    Visuals.World.Snow.Parent = nil
+
+                    Visuals.World.SnowParticles = Instance.new("ParticleEmitter")
+                    Visuals.World.SnowParticles.Rate = 1000
+                    Visuals.World.SnowParticles.Transparency = NumberSequence.new{
+                        NumberSequenceKeypoint.new(0, 0),
+                        NumberSequenceKeypoint.new(0.984, 0.043749988079071045),
+                        NumberSequenceKeypoint.new(1, 1)
+                    }
+
+                    Visuals.World.SnowParticles.Texture = "http://www.roblox.com/asset/?id=99851851"
+                    Visuals.World.SnowParticles.LightEmission = 0.5
+                    Visuals.World.SnowParticles.SpreadAngle = Vector2.new(50, 50)
+                    Visuals.World.SnowParticles.Speed = NumberRange.new(30, 30)
+                    Visuals.World.SnowParticles.EmissionDirection = Enum.NormalId.Bottom
+                    Visuals.World.SnowParticles.Size = NumberSequence.new{
+                        NumberSequenceKeypoint.new(0, 0.33096909523010254),
+                        NumberSequenceKeypoint.new(0.551, 0.40189146995544434),
+                        NumberSequenceKeypoint.new(1, 0.33096909523010254)
+                    }
+                    Visuals.World.SnowParticles.Parent = Snow
+                end
+            
+                if Visuals.World.Snow.Parent == nil then
+                    Visuals.World.Snow.Parent = Visuals.World.Snow
+                end
+                Visuals.World.Snow.CFrame = Camera.CFrame  * SNOW_OFFSET
+
+                if SnowParticles.Rate ~= Options["visuals/world/snow/rate"].Value then Visuals.World.SnowParticles.Rate = Options["visuals/world/snow/rate"].Value end
+            else
+                if Visuals.World.Snow.Parent ~= nil then
+                    Visuals.World.Snow.Parent = nil
+                end
+            end
+
             if WeatherType == "Rain" then
                 if not IsRainEnabled then
                     IsRainEnabled = true
@@ -162,10 +209,14 @@ Visuals.World = {} do
                     IsRainEnabled = false
                 end
             end
+
         else
             if IsRainEnabled then
                 Rain:Disable(TweenInfo.new(2, Enum.EasingStyle.Sine, Enum.EasingDirection.Out))
                 IsRainEnabled = false
+            end
+            if Visuals.World.Snow.Parent ~= nil then
+                Visuals.World.Snow.Parent = nil
             end
         end
 
