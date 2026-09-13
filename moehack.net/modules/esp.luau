@@ -515,6 +515,7 @@ function ESP.GetCharacter(Player)
         end
         if not Player.Character then return nil end
         local Data = StateObject.get("Character", Player.Character)
+        if not Data.values or not Data.values.viewmodels then return end
         return Data.values.viewmodels
     end
     return Player.Character
@@ -877,7 +878,7 @@ function ESP.Update(DeltaTime)
         LastHz -= Interval
     end
 
-    for _, Entity in ESP.Entities do Spawn(ESP.Render, Entity) end
+    for _, Entity in ESP.Entities do ESP.Render, Entity end
 end 
 
 return ESP
