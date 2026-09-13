@@ -159,7 +159,7 @@ Visuals.World = {} do
                 if not Visuals.World.Snow then
                     Visuals.World.Snow = Create("Part")
                     Visuals.World.Snow.Transparency = 1
-                    Visuals.World.Snow.Name = "/0"
+                    Visuals.World.Snow.Name = "\0"
                     Visuals.World.Snow.CanCollide = false
                     Visuals.World.Snow.Size = Vector3.new(127, 1, 144)
                     Visuals.World.Snow.Anchored = true
@@ -184,6 +184,8 @@ Visuals.World = {} do
                         NumberSequenceKeypoint.new(1, 0.33096909523010254)
                     }
                     Visuals.World.SnowParticles.Parent = Snow
+
+                    return
                 end
             
                 if Visuals.World.Snow.Parent == nil then
@@ -191,7 +193,7 @@ Visuals.World = {} do
                 end
                 Visuals.World.Snow.CFrame = Camera.CFrame  * SNOW_OFFSET
 
-                if SnowParticles.Rate ~= Options["visuals/world/snow/rate"].Value then Visuals.World.SnowParticles.Rate = Options["visuals/world/snow/rate"].Value end
+                if Visuals.World.SnowParticles.Rate ~= Options["visuals/world/snow/rate"].Value then Visuals.World.SnowParticles.Rate = Options["visuals/world/snow/rate"].Value end
             else
                 if Visuals.World.Snow.Parent ~= nil then
                     Visuals.World.Snow.Parent = nil
