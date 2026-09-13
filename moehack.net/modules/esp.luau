@@ -9,7 +9,7 @@ local NewVector, NewVector3, NewCFrame = vector.create, Vector3.new, CFrame.new
 local Create, IsA = Instance.new, workspace.IsA
 local Spawn, Wait = task.spawn, task.wait
 local ForEach, Insert, RemoveTable = table.foreach, table.insert, table.remove
-local FindFirstChild, WaitForChild = workspace.FindFirstChild, workspace.WaitForChild
+local FindFirstChild, WaitForChild, FindFirstChildOfClass = workspace.FindFirstChild, workspace.WaitForChild, workspace.FindFirstChildOfClass
 local WorldToViewportPoint = workspace.CurrentCamera.WorldToViewportPoint
 local GetService = Game.GetService
 
@@ -63,6 +63,9 @@ local Flags = {
 
     ["esp/distance"] = {Value = true},
     ["esp/distance/color"] = {Value = Color3.fromRGB(255, 255, 255)},
+
+    ["esp/tool"] = {Value = true},
+    ["esp/tool/color"] = {Value = Color3.fromRGB(255, 255, 255)},
 }
 
 local Library = getgenv().Library or FakeLibrary
@@ -480,7 +483,7 @@ function ESP.CreateElements()
     Objects.Tool.ZIndex = 5
 
     local ToolStroke = Create("UIStroke")
-    ToolStroke.Parent = Objects.Distance
+    ToolStroke.Parent = Objects.Tool
     ToolStroke.LineJoinMode = Enum.LineJoinMode.Miter
     ToolStroke.Thickness = 1
     ToolStroke.Color = Color3.new(0, 0, 0)
@@ -578,6 +581,12 @@ ESP.GetBoundingBox = function(Model: {})
     end
 
     return LowestX, HighestX, LowestY, HighestY, OnScreen
+end
+
+function ESP.GetTool(Player, Character)
+    local Tool = FindFirstChildOfClass(Character, "Tool")
+    if Tool then return Tool.Name end
+    return "none"
 end
 
 function ESP.Render(Entity: {})
@@ -701,6 +710,21 @@ function ESP.Render(Entity: {})
         end
     elseif Objects.NameHolder.Visible then
         Objects.NameHolder.Visible = false
+    end
+
+    if Toggles["esp/tool"].Value then
+        if not Objects.Tool.Visible then
+            Objects.Tool.Visible = true
+        end
+        local ToolName = ESP.GetTool(Player, Character)
+
+        if Objects.Tool.Text ~= ToolName then Objects.Tool.Text = ToolName end
+        local ToolColor = Options["esp/tool/color"].Value
+        if Objects.Tool.TextColor3 ~= ToolColor then
+            Objects.Tool.TextColor3 = ToolColor
+        end
+    else
+        if Objects.Tool.Visible then Objects.Tool.Visible = false end
     end
 
     if Toggles["esp/healthbar"].Value then

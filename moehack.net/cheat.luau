@@ -81,7 +81,10 @@ local Library, SaveManager, ThemeManager = LoadModule("moehack.net/interface/lib
                 end
                 Main:AddToggle("esp/name", { Text = "Name", Default = false }):AddColorPicker('esp/name/color', { Default = Color3.fromRGB(255, 255, 255), Title = 'Name Color' })
                 Main:AddToggle("esp/distance", { Text = "Distance", Default = false }):AddColorPicker('esp/distance/color', { Default = Color3.fromRGB(255, 255, 255), Title = 'Distance Color' })
+                Main:AddToggle("esp/tool", { Text = "Tool", Default = false }):AddColorPicker('esp/tool/color', { Default = Color3.fromRGB(255, 255, 255), Title = 'Tool Color' })
+                
             end
+
 
             do -- Settings
                 Settings:AddSlider("esp/settings/renderhz", { Text = "Render Hertz", Min = 10, Max = 240, Rounding = 1, Default = 60 })
