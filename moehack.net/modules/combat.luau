@@ -196,9 +196,9 @@ function Combat.Tick(Delta)
                         }
 
                         for _ = 1, 10 do
-                            AimRaycastParams.FilterDescendantsInstances = IgnoreList
+                            RaycastParams.FilterDescendantsInstances = IgnoreList
 
-                            local Result = workspace:Raycast(Origin, Direction, AimRaycastParams)
+                            local Result = Raycast(workspace, Origin, Direction, RaycastParams)
 
                             if not Result then
                                 break
@@ -211,7 +211,7 @@ function Combat.Tick(Delta)
                             end
 
                             if Part.Transparency >= 1 or not Part.CanCollide then
-                                table.insert(IgnoreList, Part)
+                                Insert(IgnoreList, Part)
 
                                 Origin = Result.Position + Direction.Unit * 0.01
                                 Direction = Hitbox.Position - Origin
@@ -280,14 +280,14 @@ function Combat.Tick(Delta)
             if not IgnoreBehindWalls then
                 local Origin = Camera.CFrame.Position
                 local Direction = Hitbox.Position - Origin
-
-                for _ = 1, 5 do
-                    RaycastParams.FilterDescendantsInstances = {
+                local IgnoreList = {
                         LocalPlayer.Character
                     }
+                for _ = 1, 5 do
+                    RaycastParams.FilterDescendantsInstances = IgnoreList
 
 
-                    local Result = workspace:Raycast(Origin, Direction, RaycastParams)
+                    local Result = Raycast(workspace, Origin, Direction, RaycastParams)
 
                     if not Result then
                         break
@@ -300,7 +300,7 @@ function Combat.Tick(Delta)
                     end
 
                     if Part.Transparency >= 1 or not Part.CanCollide then
-                        table.insert(IgnoreList, Part)
+                        Insert(IgnoreList, Part)
 
                         Origin = Result.Position + Direction.Unit * 0.01
                         Direction = Hitbox.Position - Origin
