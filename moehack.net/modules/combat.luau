@@ -228,7 +228,7 @@ function Combat.Tick(Delta)
                             Hitbox.Position
                         )
 
-                        Camera.CFrame = Camera.CFrame:Lerp(
+                        Camera.CFrame = NewCFrame(
                             BroCFrame,
                             Alpha
                         )
