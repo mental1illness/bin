@@ -38,6 +38,7 @@ local Fonts = LoadModule("globals/fonts.luau", true)
 
 --# Variables
 
+local PlaceId = Game.PlaceId
 local FakeLibrary = {  } do 
     function FakeLibrary:GiveSignal() end
 end
@@ -67,6 +68,8 @@ local Flags = {
     ["esp/tool"] = {Value = true},
     ["esp/tool/color"] = {Value = Color3.fromRGB(255, 255, 255)},
 }
+
+local ShouldIgnoreTransparent = PlaceId == 72920620366355
 
 local Library = getgenv().Library or FakeLibrary
 local Toggles, Options = getgenv().Toggles or Flags, getgenv().Options or Flags
@@ -562,7 +565,7 @@ ESP.GetBoundingBox = function(Model: {})
     local OnScreen = false
 
     for _, Part in Model do
-        if Part.Transparency < 0.99 then
+        if ShouldIgnoreTransparent or (Part.Transparency < 0.99) then
             local PartCFrame = Part.CFrame
             local HalfSize = Part.Size * 0.5
             local X, Y, Z = HalfSize.X, HalfSize.Y, HalfSize.Z
