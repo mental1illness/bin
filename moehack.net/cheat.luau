@@ -307,13 +307,13 @@ local Library, SaveManager, ThemeManager = LoadModule("moehack.net/interface/lib
             local Movement = Tabs.Misc:AddGroupbox({ Side = 1, Name = "Movement" })
 
             do -- Movement
-                Main:AddToggle("misc/movement/speed", { Text = "Speed Hack", Default = false })
-                Main:AddSlider("misc/movement/speed/value", {Text = "Speed Hack Value", Min = 1, Max = 500, Rounding = 0, Default = 12})
+                Movement:AddToggle("misc/movement/speed", { Text = "Speed Hack", Default = false })
+                Movement:AddSlider("misc/movement/speed/value", {Text = "Speed Hack Value", Min = 1, Max = 500, Rounding = 0, Default = 12})
 
-                Main:AddToggle("misc/movement/autojump", { Text = "Auto Jump", Default = false })
-                Main:AddDropdown("misc/movement/autojump/method", { Text = "Auto Jump Method", Default = 1, Values = {"Humanoid", "Velocity"} })
+                Movement:AddToggle("misc/movement/autojump", { Text = "Auto Jump", Default = false })
+                Movement:AddDropdown("misc/movement/autojump/method", { Text = "Auto Jump Method", Default = 1, Values = {"Humanoid", "Velocity"} })
 
-                Main:AddToggle("misc/movement/pixelsurf", { Text = "Pixel Surf", Default = false }):AddKeyPicker("misc/movement/pixelsurf/key", { SyncToggleState = false, Mode = "Hold", Default = "MB2" })
+                Movement:AddToggle("misc/movement/pixelsurf", { Text = "Pixel Surf", Default = false }):AddKeyPicker("misc/movement/pixelsurf/key", { SyncToggleState = false, Mode = "Hold", Default = "MB2" })
 
             end
         end
