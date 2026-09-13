@@ -287,7 +287,7 @@ function Combat.Tick(Delta)
         Combat.AimAssistTarget = nil
     end
 
-    if Toggles["combat/triggerbot"].Value then
+    if Toggles["combat/triggerbot"].Value and Options["combat/triggerbot/key"]:GetState() then
         local FOV = Options["combat/triggerbot/fov"].Value
         local ReactionTime = Options["combat/triggerbot/reactiontime"].Value / 1000
         local IgnoreBehindWalls = Toggles["combat/triggerbot/ignorebehindwalls"].Value

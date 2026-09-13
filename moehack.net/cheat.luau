@@ -51,6 +51,7 @@ local Library, SaveManager, ThemeManager = LoadModule("moehack.net/interface/lib
         Combat = Window:AddTab("Combat"),
         ESP = Window:AddTab("ESP"),
         Visuals = Window:AddTab("Visuals"),
+        Misc = Window:AddTab("Visuals"),,
         Settings = Window:AddTab("Settings")
     }
 
@@ -85,7 +86,7 @@ local Library, SaveManager, ThemeManager = LoadModule("moehack.net/interface/lib
             end
 
             do -- Trigger Bot
-                TriggerBot:AddToggle("combat/triggerbot", { Text = "Enabled", Default = false })
+                TriggerBot:AddToggle("combat/triggerbot", { Text = "Enabled", Default = false }):AddKeyPicker("combat/triggerbot/key", { SyncToggleState = false, Mode = "Hold", Default = "MB2" })
                 TriggerBot:AddSlider("combat/triggerbot/fov", { Text = "Field Of View", Min = 1, Max = 360, Rounding = 0, Default = 120 })
                 TriggerBot:AddSlider("combat/triggerbot/reactiontime", { Text = "Reaction Time", Min = 1, Max = 360, Rounding = 0, Default = 12 })
                 TriggerBot:AddToggle("combat/triggerbot/ignorebehindwalls", { Text = "Ignore Behind Walls", Default = false })
@@ -213,8 +214,8 @@ local Library, SaveManager, ThemeManager = LoadModule("moehack.net/interface/lib
                     DepBox2:AddSlider("visuals/world/lighting/bloom/size", { Text = "Size", Min = 0, Max = 56, Rounding = 2, Default = 0.5 })
                     DepBox2:AddSlider("visuals/world/lighting/bloom/threshold", { Text = "Threshold", Min = 0, Max = 1, Rounding = 2, Default = 0.5 })
 
-                DepBox2:SetupDependencies({
-                    { Toggles["visuals/world/lighting/bloom"], true }
+                    DepBox2:SetupDependencies({
+                        { Toggles["visuals/world/lighting/bloom"], true }
                     });
                 end
 
@@ -300,6 +301,21 @@ local Library, SaveManager, ThemeManager = LoadModule("moehack.net/interface/lib
 
             
 
+        end
+
+        do -- Misc
+            local Movement = Tabs.Misc:AddGroupbox({ Side = 1, Name = "Movement" })
+
+            do -- Movement
+                Main:AddToggle("misc/movement/speed", { Text = "Speed Hack", Default = false })
+                Main:AddSlider("misc/movement/speed/value", {Text = "Speed Hack Value", Min = 1, Max = 500, Rounding = 0, Default = 12})
+
+                Main:AddToggle("misc/movement/autojump", { Text = "Auto Jump", Default = false })
+                Main:AddDropdown("misc/movement/autojump/method", { Text = "Auto Jump Method", Default = 1, Values = {"Humanoid", "Velocity"} })
+
+                Main:AddToggle("misc/movement/pixelsurf", { Text = "Pixel Surf", Default = false }):AddKeyPicker("misc/movement/pixelsurf/key", { SyncToggleState = false, Mode = "Hold", Default = "MB2" })
+
+            end
         end
     end
 
