@@ -567,7 +567,18 @@ function ESP.ApplyAllPlayer()
 
 		Library:GiveSignal(
 			Player.CharacterAdded:Connect(function(Character)
+                
+                if PlaceId == 72920620366355 then
+                    local count = 0
+                    repeat Wait(); count += 1 until ESP.GetCharacter(Player) ~= nil or count == 20
+                end
 				_ESPConnectCharacter(Player, Entity)
+			end)
+		)
+
+		Library:GiveSignal(
+			Player.CharacterRemoving:Connect(function(Character)
+                Entity.BodyParts = {}
 			end)
 		)
 	end
@@ -632,8 +643,6 @@ function ESP.Render(Entity: {})
 		Objects.Holder.Visible = false
 		return
 	end
-
-    setthreadidentity(8)
 
 	local MaxHealth, Health = ESP.GetHealth(Player, RealCharacter)
 
