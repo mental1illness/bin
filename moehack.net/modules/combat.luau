@@ -20,6 +20,7 @@ local ReplicatedStorage = GetService(Game, "ReplicatedStorage")
 local RunService = GetService(Game, "RunService")
 local Stats = GetService(Game, "Stats")
 local DataPing = Stats.Network.ServerStatsItem["Data Ping"]
+local VirtualInputManager = Create("VirtualInputManager")
 local Players = GetService(Game, "Players")
 
 local LocalPlayer = Players.LocalPlayer
@@ -318,7 +319,9 @@ function Combat.Tick(Delta)
                 end
 
                 if os.clock() - Combat.TriggerBotTime >= ReactionTime then
-                    mouse1click()
+                    local Middle = Camera.ViewportSize / 2
+                    VirtualInputManager:SendMouseButtonEvent(Middle.X, Middle.Y, 0, true, Game, 0)
+                    VirtualInputManager:SendMouseButtonEvent(Middle.X, Middle.Y, 0, false, Game, 0)
                 end
             else
                 Combat.TriggerBotTarget = nil
