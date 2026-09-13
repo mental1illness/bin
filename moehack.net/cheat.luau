@@ -55,6 +55,33 @@ local Library, SaveManager, ThemeManager = LoadModule("moehack.net/interface/lib
     }
 
     do
+
+        do -- Combat
+            local AimAssist = Tabs.Combat:AddGroupbox({ Side = 1, Name = "Aim Assistance" })
+
+            do -- Aim Assist
+                AimAssist:AddToggle("combat/aimassist", { Text = "Enabled", Default = false })
+                AimAssist:AddSlider("combat/aimassist/fov", { Text = "Field Of View", Min = 1, Max = 360, Rounding = 0, Default = 120 })
+                AimAssist:AddDropdown("combat/aimassist/easingstyle", { Text = "Easing Style", Default = 1, Values = {
+                    "Sine",
+                    "Quad",
+                    "Cubic",
+                    "Quart",
+                    "Quint",
+                    "Exponential",
+                    "Circular",
+                    "Linear",
+                } })
+                AimAssist:AddToggle("combat/aimassist/usenearhitbox", { Text = "Use Nearest Hitbox", Default = false })
+                AimAssist:AddToggle("combat/aimassist/stickyaim", { Text = "Sticky Aim", Default = false })
+                AimAssist:AddDropdown("combat/aimassist/method", { Text = "Method", Default = 1, Values = {
+                    "Camera",
+                    "Mouse",
+                } })
+                AimAssist:AddToggle("combat/aimassist/instasnap", { Text = "Instant Snap", Default = false })
+            end
+        end
+
         do -- ESP
             local Main, Settings = Tabs.ESP:AddGroupbox({ Side = 1, Name = "Players" }), Tabs.ESP:AddGroupbox({ Side = 2, Name = "Settings" })
             do -- Players
@@ -82,7 +109,7 @@ local Library, SaveManager, ThemeManager = LoadModule("moehack.net/interface/lib
                 Main:AddToggle("esp/name", { Text = "Name", Default = false }):AddColorPicker('esp/name/color', { Default = Color3.fromRGB(255, 255, 255), Title = 'Name Color' })
                 Main:AddToggle("esp/distance", { Text = "Distance", Default = false }):AddColorPicker('esp/distance/color', { Default = Color3.fromRGB(255, 255, 255), Title = 'Distance Color' })
                 Main:AddToggle("esp/tool", { Text = "Tool", Default = false }):AddColorPicker('esp/tool/color', { Default = Color3.fromRGB(255, 255, 255), Title = 'Tool Color' })
-                
+
             end
 
 
@@ -329,6 +356,7 @@ Library:GiveSignal(
 		Ping = Floor(DataPing:GetValue())
 
         Visuals.Tick(Delta)
+        Combat.Tick(Delta)
         ESP.Update(Delta)
     end)
 )
