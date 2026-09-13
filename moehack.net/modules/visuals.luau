@@ -129,7 +129,7 @@ local DefaultLighting = {
 
 local Rain, IsRainEnabled = LoadModule("moehack.net/rain.luau"), false
 
-ain:SetColor(Color3.fromRGB(220, 225, 235))
+Rain:SetColor(Color3.fromRGB(220, 225, 235))
 Rain:SetTransparency(0.05)
 Rain:SetSpeedRatio(0.85)
 Rain:SetIntensityRatio(0.55)
