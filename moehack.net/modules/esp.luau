@@ -106,8 +106,6 @@ Library:GiveSignal( Players.PlayerRemoving:Connect(function(Player)
     PlayersCache[Player] = nil
 end) )
 
-setthreadidentity(8)
-
 function ESP.CreateElements()
     local Objects = {}
 
@@ -634,6 +632,8 @@ function ESP.Render(Entity: {})
 		Objects.Holder.Visible = false
 		return
 	end
+
+    setthreadidentity(8)
 
 	local MaxHealth, Health = ESP.GetHealth(Player, RealCharacter)
 
