@@ -9,7 +9,7 @@ local NewVector, NewVector3, NewCFrame = vector.create, Vector3.new, CFrame.new
 local Create, IsA = Instance.new, workspace.IsA
 local Spawn, Wait = task.spawn, task.wait
 local ForEach, Insert, RemoveTable = table.foreach, table.insert, table.remove
-local FindFirstChild, WaitForChild = workspace.FindFirstChild, workspace.WaitForChild
+local FindFirstChild, WaitForChild, Raycast = workspace.FindFirstChild, workspace.WaitForChild, workspace.Raycast
 local WorldToViewportPoint = workspace.CurrentCamera.WorldToViewportPoint
 local GetService = Game.GetService
 
@@ -37,13 +37,18 @@ local Utility = LoadModule("moehack.net/modules/utility.luau", true)
 local EasingStyle = Utility.EasingStyle
 
 local Toggles, Options = getgenv().Toggles, getgenv().Options
-
 local Camera = workspace.CurrentCamera
+
+local RaycastParams = RaycastParams.new()
 
 --# Main
 
+RaycastParams.FilterType = Enum.RaycastFilterType.Exclude
+
 local Combat = {
-    AimAssistTarget = nil
+    AimAssistTarget = nil,
+    TriggerBotTarget = nil,
+    TriggerBotTime = nil
 }
 
 function Combat.GetTarget(FOV: number, BestHitbox: boolean)
@@ -111,14 +116,11 @@ function Combat.GetTarget(FOV: number, BestHitbox: boolean)
 end
 
 function Combat.Tick(Delta)
-
-    --# Aim Assist
-
     if Toggles["combat/aimassist"].Value and Options["combat/aimassist/key"]:GetState() then
-        
         local FOV = Options["combat/aimassist/fov"].Value
         local UseNearestHitbox = Toggles["combat/aimassist/usenearhitbox"].Value
         local StickyAim = Toggles["combat/aimassist/stickyaim"].Value
+        local IgnoreBehindWalls = Toggles["combat/aimassist/ignorebehindwalls"].Value
         local Method = Options["combat/aimassist/method"].Value
         local InstantSnap = Toggles["combat/aimassist/instasnap"].Value
         local EasingName = Options["combat/aimassist/easingstyle"].Value
@@ -136,7 +138,7 @@ function Combat.Tick(Delta)
                     local BestDistance = FOV
                     local ViewportSize = Camera.ViewportSize
 
-                    local Center = NewVector( ViewportSize.X * 0.5, ViewportSize.Y * 0.5 )
+                    local Center = NewVector(ViewportSize.X * 0.5, ViewportSize.Y * 0.5)
 
                     for _, Part in Character:GetChildren() do
                         if Part:IsA("BasePart") then
@@ -163,10 +165,7 @@ function Combat.Tick(Delta)
         end
 
         if not Target then
-            Target, Hitbox = Combat.GetTarget(
-                FOV,
-                UseNearestHitbox
-            )
+            Target, Hitbox = Combat.GetTarget(FOV, UseNearestHitbox)
 
             if Target then
                 Combat.AimAssistTarget = Target
@@ -178,59 +177,84 @@ function Combat.Tick(Delta)
 
             if OnScreen and Position.Z > 0 then
                 local ViewportSize = Camera.ViewportSize
-
                 local CenterX = ViewportSize.X * 0.5
                 local CenterY = ViewportSize.Y * 0.5
 
                 local OffsetX = Position.X - CenterX
                 local OffsetY = Position.Y - CenterY
 
-                local Distance = Sqrt(
-                    OffsetX * OffsetX +
-                    OffsetY * OffsetY
-                )
+                local Distance = Sqrt(OffsetX * OffsetX + OffsetY * OffsetY)
 
                 if Distance <= FOV then
-                    local Alpha
+                    local Visible = true
 
-                    local Alpha
+                    if not IgnoreBehindWalls then
+                        local Origin = Camera.CFrame.Position
+                        local Direction = Hitbox.Position - Origin
+                        local IgnoreList = {
+                            LocalPlayer.Character
+                        }
 
-                    if InstantSnap then
-                        Alpha = 1
-                    else
-                        Alpha = Clamp(Speed * Delta, 0, 1)
+                        for _ = 1, 10 do
+                            AimRaycastParams.FilterDescendantsInstances = IgnoreList
 
-                        local Easing = EasingStyle[EasingName]
+                            local Result = workspace:Raycast(Origin, Direction, AimRaycastParams)
 
-                        if Easing then
-                            Alpha = Easing(Alpha)
+                            if not Result then
+                                break
+                            end
+
+                            local Part = Result.Instance
+
+                            if Part.Parent == Target.Character then
+                                break
+                            end
+
+                            if Part.Transparency >= 1 or not Part.CanCollide then
+                                table.insert(IgnoreList, Part)
+
+                                Origin = Result.Position + Direction.Unit * 0.01
+                                Direction = Hitbox.Position - Origin
+                            else
+                                Visible = false
+                                break
+                            end
                         end
                     end
 
-                    if Method == "Camera" then
-                        local BroCFrame = CFrame.lookAt(
-                            Camera.CFrame.Position,
-                            Hitbox.Position
-                        )
+                    if Visible then
+                        local Alpha
 
-                        Camera.CFrame = Camera.CFrame:Lerp(
-                            BroCFrame,
-                            Alpha
-                        )
+                        if InstantSnap then
+                            Alpha = 1
+                        else
+                            Alpha = Clamp(Speed * Delta, 0, 1)
 
-                    elseif Method == "Mouse" then
-                        local MoveX = OffsetX * Alpha
-                        local MoveY = OffsetY * Alpha
+                            local Easing = EasingStyle[EasingName]
 
-                        if Abs(MoveX) < 1 and Abs(OffsetX) > 0.5 then
-                            MoveX = OffsetX > 0 and 1 or -1
+                            if Easing then
+                                Alpha = Easing(Alpha)
+                            end
                         end
 
-                        if Abs(MoveY) < 1 and Abs(OffsetY) > 0.5 then
-                            MoveY = OffsetY > 0 and 1 or -1
-                        end
+                        if Method == "Camera" then
+                            local AimCFrame = CFrame.lookAt(Camera.CFrame.Position, Hitbox.Position)
 
-                        mousemoverel(MoveX, MoveY)
+                            Camera.CFrame = Camera.CFrame:Lerp(AimCFrame, Alpha)
+                        elseif Method == "Mouse" then
+                            local MoveX = OffsetX * Alpha
+                            local MoveY = OffsetY * Alpha
+
+                            if Abs(MoveX) < 1 and Abs(OffsetX) > 0.5 then
+                                MoveX = OffsetX > 0 and 1 or -1
+                            end
+
+                            if Abs(MoveY) < 1 and Abs(OffsetY) > 0.5 then
+                                MoveY = OffsetY > 0 and 1 or -1
+                            end
+
+                            mousemoverel(MoveX, MoveY)
+                        end
                     end
                 elseif not StickyAim then
                     Combat.AimAssistTarget = nil
@@ -239,8 +263,72 @@ function Combat.Tick(Delta)
                 Combat.AimAssistTarget = nil
             end
         end
+    else
+        Combat.AimAssistTarget = nil
     end
 
+    if Toggles["combat/triggerbot"].Value then
+        local FOV = Options["combat/triggerbot/fov"].Value
+        local ReactionTime = Options["combat/triggerbot/reactiontime"].Value / 1000
+        local IgnoreBehindWalls = Toggles["combat/triggerbot/ignorebehindwalls"].Value
+
+        local Target, Hitbox = Combat.GetTarget(FOV, false)
+
+        if Target and Hitbox then
+            local Visible = true
+
+            if not IgnoreBehindWalls then
+                local Origin = Camera.CFrame.Position
+                local Direction = Hitbox.Position - Origin
+
+                for _ = 1, 5 do
+                    RaycastParams.FilterDescendantsInstances = {
+                        LocalPlayer.Character
+                    }
+
+
+                    local Result = workspace:Raycast(Origin, Direction, RaycastParams)
+
+                    if not Result then
+                        break
+                    end
+
+                    local Part = Result.Instance
+
+                    if Part.Parent == Target.Character then
+                        break
+                    end
+
+                    if Part.Transparency >= 1 or not Part.CanCollide then
+                        table.insert(IgnoreList, Part)
+
+                        Origin = Result.Position + Direction.Unit * 0.01
+                        Direction = Hitbox.Position - Origin
+                    else
+                        Visible = false
+                        break
+                    end
+                end
+            end
+
+            if Visible then
+                if Combat.TriggerBotTarget ~= Target then
+                    Combat.TriggerBotTarget = Target
+                    Combat.TriggerBotTime = os.clock()
+                end
+
+                if os.clock() - Combat.TriggerBotTime >= ReactionTime then
+                    print("TriggerBot: Shoot", Target.Name, Hitbox.Name)
+                end
+            else
+                Combat.TriggerBotTarget = nil
+                Combat.TriggerBotTime = nil
+            end
+        else
+            Combat.TriggerBotTarget = nil
+            Combat.TriggerBotTime = nil
+        end
+    end
 end
 
 return Combat

@@ -57,8 +57,8 @@ local Library, SaveManager, ThemeManager = LoadModule("moehack.net/interface/lib
     do
 
         do -- Combat
-            local AimAssist = Tabs.Combat:AddGroupbox({ Side = 1, Name = "Aim Assistance" })
-
+            local AimAssist, TriggerBot = Tabs.Combat:AddGroupbox({ Side = 1, Name = "Aim Assistance" }), Tabs.Combat:AddGroupbox({ Side = 1, Name = "Trigger Bot" })
+           
             do -- Aim Assist
                 AimAssist:AddToggle("combat/aimassist", { Text = "Enabled", Default = false }):AddKeyPicker("combat/aimassist/key", { Text = "Le Aim Assist Key", SyncToggleState = false, Mode = "Hold", Default = "MB2" })
                 AimAssist:AddSlider("combat/aimassist/fov", { Text = "Field Of View", Min = 1, Max = 360, Rounding = 0, Default = 120 })
@@ -79,7 +79,16 @@ local Library, SaveManager, ThemeManager = LoadModule("moehack.net/interface/lib
                     "Mouse",
                 } })
                 AimAssist:AddToggle("combat/aimassist/instasnap", { Text = "Instant Snap", Default = false })
-                AimAssist:AddSlider("combat/aimassist/speed", {Text = "Speed", Min = 1, Max = 100, Rounding = 1, Default = 12})
+                AimAssist:AddSlider("combat/aimassist/speed", {Text = "Speed", Min = 1, Max = 32, Rounding = 1, Default = 12})
+
+                AimAssist:AddToggle("combat/aimassist/ignorebehindwalls", { Text = "Ignore Behind Walls", Default = false })
+            end
+
+            do -- Trigger Bot
+                TriggerBot:AddToggle("combat/triggerbot", { Text = "Enabled", Default = false })
+                TriggerBot:AddSlider("combat/triggerbot/fov", { Text = "Field Of View", Min = 1, Max = 360, Rounding = 0, Default = 120 })
+                TriggerBot:AddSlider("combat/triggerbot/reactiontime", { Text = "Reaction Time", Min = 1, Max = 360, Rounding = 0, Default = 12 })
+                TriggerBot:AddToggle("combat/triggerbot/ignorebehindwalls", { Text = "Ignore Behind Walls", Default = false })
             end
         end
 
