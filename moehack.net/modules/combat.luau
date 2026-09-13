@@ -99,7 +99,7 @@ function Combat.IsBehindWalls(Target, Hitbox)
     return true
 end
 
-function ESP.GetCharacter(Player)
+function Combat.GetCharacter(Player)
     if PlaceId == 72920620366355 then
         if not StateObject then
             StateObject = require(ReplicatedStorage.Modules.StateObject)
@@ -120,7 +120,7 @@ function Combat.GetTarget(FOV: number, BestHitbox: boolean)
 
     for _, Player in Players:GetPlayers() do
         if Player ~= LocalPlayer then
-            local Character = ESP.GetCharacter(Player)
+            local Character = Combat.GetCharacter(Player)
             local RealCharacter = Player.Character
 
             if Character then
