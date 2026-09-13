@@ -183,7 +183,7 @@ Visuals.World = {} do
                         NumberSequenceKeypoint.new(0.551, 0.40189146995544434),
                         NumberSequenceKeypoint.new(1, 0.33096909523010254)
                     }
-                    Visuals.World.SnowParticles.Parent = Snow
+                    Visuals.World.SnowParticles.Parent = Visuals.World.SnowParticles
 
                     return
                 end
@@ -195,7 +195,7 @@ Visuals.World = {} do
 
                 if Visuals.World.Snow and Visuals.World.SnowParticles.Rate ~= Options["visuals/world/snow/rate"].Value then Visuals.World.SnowParticles.Rate = Options["visuals/world/snow/rate"].Value end
             else
-                if Visuals.World.Snow.Parent ~= nil then
+                if Visuals.World.Snow and Visuals.World.Snow.Parent ~= nil then
                     Visuals.World.Snow.Parent = nil
                 end
             end
