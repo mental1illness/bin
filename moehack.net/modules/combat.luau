@@ -6,7 +6,7 @@
 local FromOffset, FromScale, UDim2New = UDim2.fromOffset, UDim2.fromScale, UDim2.new
 local Atan2, Rad, Pi, Abs, Minimum, Maximum, Floor, Clamp, Sqrt = math.atan2, math.rad, math.pi, math.abs, math.min, math.max, math.floor, math.clamp, math.sqrt
 local NewVector, NewVector3, NewCFrame = vector.create, Vector3.new, CFrame.new
-local Create, IsA = Instance.new, workspace.IsA
+local Create, IsA, IsDescendantOf, GetChildren = Instance.new, workspace.IsA, workspace.IsDescendantOf, workspace.GetChildren
 local Spawn, Wait = task.spawn, task.wait
 local ForEach, Insert, RemoveTable = table.foreach, table.insert, table.remove
 local FindFirstChild, WaitForChild, Raycast = workspace.FindFirstChild, workspace.WaitForChild, workspace.Raycast
@@ -52,14 +52,56 @@ local Combat = {
     TriggerBotTime = nil
 }
 
+function Combat.IsBehindWalls(Target, Hitbox)
+    local Character = Target and Target.Character
+
+    if not Character or not Hitbox or not Hitbox:IsDescendantOf(Character) then
+        return true
+    end
+
+    local Origin = Camera.CFrame.Position
+    local Direction = Hitbox.Position - Origin
+
+    local IgnoreList = {
+        LocalPlayer.Character
+    }
+
+    for _ = 1, 20 do
+        RaycastParams.FilterDescendantsInstances = IgnoreList
+
+        local Result = Raycast(
+            workspace,
+            Origin,
+            Direction,
+            RaycastParams
+        )
+
+        if not Result then
+            return false
+        end
+
+        local Part = Result.Instance
+
+        if IsDescendantOf(Part, Character) then
+            return false
+        end
+
+        if Part.Transparency >= 1 or not Part.CanCollide then
+            Insert(IgnoreList, Part)
+
+            Origin = Result.Position + Direction.Unit * 0.01
+            Direction = Hitbox.Position - Origin
+        else
+            return true
+        end
+    end
+
+    return true
+end
+
 function Combat.GetTarget(FOV: number, BestHitbox: boolean)
     local ViewportSize = Camera.ViewportSize
-
-    local Center = NewVector(
-        ViewportSize.X * 0.5,
-        ViewportSize.Y * 0.5
-    )
-
+    local Center = NewVector(ViewportSize.X * 0.5, ViewportSize.Y * 0.5)
     local BestTarget = nil
     local BestHitboxPart = nil
     local BestDistance = FOV
@@ -74,15 +116,12 @@ function Combat.GetTarget(FOV: number, BestHitbox: boolean)
 
                 if Humanoid and RootPart and Humanoid.Health > 0 then
                     if BestHitbox then
-                        for _, Hitbox in Character:GetChildren() do
+                        for _, Hitbox in GetChildren(Character) do
                             if Hitbox:IsA("BasePart") then
-                                local Position, OnScreen =
-                                    WorldToViewportPoint(Camera, Hitbox.Position)
+                                local Position, OnScreen = WorldToViewportPoint(Camera, Hitbox.Position)
 
                                 if OnScreen and Position.Z > 0 then
-                                    local Distance = (
-                                        NewVector(Position.X, Position.Y) - Center
-                                    ).Magnitude
+                                    local Distance = (NewVector(Position.X, Position.Y) - Center).Magnitude
 
                                     if Distance <= BestDistance then
                                         BestDistance = Distance
@@ -93,13 +132,10 @@ function Combat.GetTarget(FOV: number, BestHitbox: boolean)
                             end
                         end
                     else
-                        local Position, OnScreen =
-                            WorldToViewportPoint(Camera, RootPart.Position)
+                        local Position, OnScreen = WorldToViewportPoint(Camera, RootPart.Position)
 
                         if OnScreen and Position.Z > 0 then
-                            local Distance = (
-                                NewVector(Position.X, Position.Y) - Center
-                            ).Magnitude
+                            local Distance = (NewVector(Position.X, Position.Y) - Center).Magnitude
 
                             if Distance <= BestDistance then
                                 BestDistance = Distance
@@ -118,6 +154,7 @@ end
 
 function Combat.Tick(Delta)
     if Toggles["combat/aimassist"].Value and Options["combat/aimassist/key"]:GetState() then
+        
         local FOV = Options["combat/aimassist/fov"].Value
         local UseNearestHitbox = Toggles["combat/aimassist/usenearhitbox"].Value
         local StickyAim = Toggles["combat/aimassist/stickyaim"].Value
@@ -138,7 +175,6 @@ function Combat.Tick(Delta)
                 if UseNearestHitbox then
                     local BestDistance = FOV
                     local ViewportSize = Camera.ViewportSize
-
                     local Center = NewVector(ViewportSize.X * 0.5, ViewportSize.Y * 0.5)
 
                     for _, Part in Character:GetChildren() do
@@ -189,38 +225,8 @@ function Combat.Tick(Delta)
                 if Distance <= FOV then
                     local Visible = true
 
-                    if not IgnoreBehindWalls then
-                        local Origin = Camera.CFrame.Position
-                        local Direction = Hitbox.Position - Origin
-                        local IgnoreList = {
-                            LocalPlayer.Character
-                        }
-
-                        for _ = 1, 10 do
-                            RaycastParams.FilterDescendantsInstances = IgnoreList
-
-                            local Result = Raycast(workspace, Origin, Direction, RaycastParams)
-
-                            if not Result then
-                                break
-                            end
-
-                            local Part = Result.Instance
-
-                            if Part.Parent == Target.Character then
-                                break
-                            end
-
-                            if Part.Transparency >= 1 or not Part.CanCollide then
-                                Insert(IgnoreList, Part)
-
-                                Origin = Result.Position + Direction.Unit * 0.01
-                                Direction = Hitbox.Position - Origin
-                            else
-                                Visible = false
-                                break
-                            end
-                        end
+                    if IgnoreBehindWalls then
+                        Visible = not Combat.IsBehindWalls(Target, Hitbox)
                     end
 
                     if Visible then
@@ -278,38 +284,8 @@ function Combat.Tick(Delta)
         if Target and Hitbox then
             local Visible = true
 
-            if not IgnoreBehindWalls then
-                local Origin = Camera.CFrame.Position
-                local Direction = Hitbox.Position - Origin
-                local IgnoreList = {
-                        LocalPlayer.Character
-                    }
-                for _ = 1, 5 do
-                    RaycastParams.FilterDescendantsInstances = IgnoreList
-
-
-                    local Result = Raycast(workspace, Origin, Direction, RaycastParams)
-
-                    if not Result then
-                        break
-                    end
-
-                    local Part = Result.Instance
-
-                    if Part.Parent == Target.Character then
-                        break
-                    end
-
-                    if Part.Transparency >= 1 or not Part.CanCollide then
-                        Insert(IgnoreList, Part)
-
-                        Origin = Result.Position + Direction.Unit * 0.01
-                        Direction = Hitbox.Position - Origin
-                    else
-                        Visible = false
-                        break
-                    end
-                end
+            if IgnoreBehindWalls then
+                Visible = not Combat.IsBehindWalls(Target, Hitbox)
             end
 
             if Visible then
@@ -318,8 +294,9 @@ function Combat.Tick(Delta)
                     Combat.TriggerBotTime = os.clock()
                 end
 
-                if os.clock() - Combat.TriggerBotTime >= ReactionTime then
+                if Combat.TriggerBotTime and os.clock() - Combat.TriggerBotTime >= ReactionTime then
                     local Middle = Camera.ViewportSize / 2
+
                     VirtualInputManager:SendMouseButtonEvent(Middle.X, Middle.Y, 0, true, Game, 0)
                     VirtualInputManager:SendMouseButtonEvent(Middle.X, Middle.Y, 0, false, Game, 0)
                 end
@@ -331,6 +308,9 @@ function Combat.Tick(Delta)
             Combat.TriggerBotTarget = nil
             Combat.TriggerBotTime = nil
         end
+    else
+        Combat.TriggerBotTarget = nil
+        Combat.TriggerBotTime = nil
     end
 end
 
