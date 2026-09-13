@@ -183,7 +183,7 @@ Visuals.World = {} do
                         NumberSequenceKeypoint.new(0.551, 0.40189146995544434),
                         NumberSequenceKeypoint.new(1, 0.33096909523010254)
                     }
-                    Visuals.World.SnowParticles.Parent = Visuals.World.SnowParticles
+                    Visuals.World.SnowParticles.Parent = Visuals.World.Snow
 
                     return
                 end
