@@ -718,11 +718,15 @@ function ESP.Render(Entity: {})
             end
 
             if Health == MaxHealth then
-                Objects.HealthTextHolder.GroupTransparency = 1
+                if Objects.HealthTextHolder.Visible then
+                    Objects.HealthTextHolder.Visible = false
+                end
             else
                 local HealthTextY = (HighY - LowY) * (1 - HealthPercent)
 
-                Objects.HealthTextHolder.GroupTransparency = 0
+                if not Objects.HealthTextHolder.Visible then
+                    Objects.HealthTextHolder.Visible = true
+                end
                 Objects.HealthTextHolder.Position = UDim2New(0, -10 - Options["esp/healthbar/thickness"].Value, 0, HealthTextY)
             end
         else
