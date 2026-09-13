@@ -69,8 +69,6 @@ local Flags = {
     ["esp/tool/color"] = {Value = Color3.fromRGB(255, 255, 255)},
 }
 
-local ShouldIgnoreTransparent = PlaceId == 72920620366355
-
 local Library = getgenv().Library or FakeLibrary
 local Toggles, Options = getgenv().Toggles or Flags, getgenv().Options or Flags
 local ScreenGui = Create("ScreenGui", gethui())
@@ -88,8 +86,11 @@ local Corners = {
 local LastHz = 0
 
 local CurrentCamera = workspace.CurrentCamera
-
 local PlayersCache = Players:GetPlayers()
+
+if PlaceId == 72920620366355 then
+    StateObject = require(ReplicatedStorage.Modules.StateObject)
+end
 
 local ESP = { Entities = { } }
 
@@ -505,8 +506,21 @@ function ESP.GetHealth(Player, Character)
     return MaxHealth, Health
 end
 
-local function _ESPConnectCharacter(Character, Entity)
+function ESP.GetCharacter(Player)
+    if PlaceId == 72920620366355 then
+        if not StateObject then
+            StateObject = require(ReplicatedStorage.Modules.StateObject)
+        end
+        if not Player.Character then return nil end
+        local Data = StateObject.get("Character", Player.Character)
+        return Data.values.viewmodels
+    end
+    return Player.Character
+end
+
+local function _ESPConnectCharacter(Player, Entity)
     Entity.BodyParts = {}
+    local Character = ESP.GetCharacter(Player)
     for _, Object in Character:GetDescendants() do
         if IsA(Object, "BasePart") then
             Insert(Entity.BodyParts, Object)
@@ -544,28 +558,26 @@ function ESP.ApplyAllPlayer()
 
 		ESP.Entities[Player] = Entity
 
-
-
 		local Character = Player.Character
 		if Character then
-			_ESPConnectCharacter(Character, Entity)
+			_ESPConnectCharacter(Player, Entity)
 		end
 
 		Library:GiveSignal(
 			Player.CharacterAdded:Connect(function(Character)
-				_ESPConnectCharacter(Character, Entity)
+				_ESPConnectCharacter(Player, Entity)
 			end)
 		)
 	end
 end
 
-ESP.GetBoundingBox = function(Model: {})
+function ESP.GetBoundingBox(Model: {})
     local LowestX, HighestX = 1e6, -1e6
     local LowestY, HighestY = 1e6, -1e6
     local OnScreen = false
 
     for _, Part in Model do
-        if ShouldIgnoreTransparent or (Part.Transparency < 0.99) then
+        if Part.Transparency < 0.99 then
             local PartCFrame = Part.CFrame
             local HalfSize = Part.Size * 0.5
             local X, Y, Z = HalfSize.X, HalfSize.Y, HalfSize.Z
@@ -587,6 +599,16 @@ ESP.GetBoundingBox = function(Model: {})
 end
 
 function ESP.GetTool(Player, Character)
+
+    if PlaceId == 72920620366355 then
+        if not StateObject then
+            StateObject = require(ReplicatedStorage.Modules.StateObject)
+        end
+        if not Player.Character then return nil end
+        local Data = StateObject.get("Character", Player.Character)
+        return Data.values.equipped and Data.values.equipped.value and Data.values.equipped.value.Name or "NONE"
+    end
+
     local Tool = FindFirstChildOfClass(Character, "Tool")
     if Tool then return Tool.Name end
     return "none"
@@ -596,7 +618,7 @@ function ESP.Render(Entity: {})
 	local Player = Entity.Player
 	local Objects = Entity.Objects
 
-	local Character = Player.Character
+	local Character = ESP.GetCharacter(Player)
 
     local ClientCharacter = LocalPlayer.Character
     local ClientRoot = ClientCharacter and ClientCharacter:FindFirstChild("HumanoidRootPart")
