@@ -571,7 +571,7 @@ function ESP.ApplyAllPlayer()
                 
                 if PlaceId == 72920620366355 then
                     local count = 0
-                    repeat Wait(); count += 1 until ESP.GetCharacter(Player) ~= nil or count == 20
+                    repeat Wait(); count += 1 until ESP.GetCharacter(Player) ~= nil or count == 100
                 end
 				_ESPConnectCharacter(Player, Entity)
 			end)
