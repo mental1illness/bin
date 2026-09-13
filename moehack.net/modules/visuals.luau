@@ -83,6 +83,9 @@ local Flags = {
     ["visuals/world/dof/focusdist"] = {Value = 20},
     ["visuals/world/dof/focusinradius"] = {Value = 20},
 
+    ["visuals/world/weather"] = {Value=true},
+    ["visuals/world/weather/type"] = {Value = "Rain"},
+
     ["visuals/player/chinesehat"] = {Value=true},
     ["visuals/player/chinesehat/glowfac"] = {Value = 5},
     ["visuals/player/chinesehat/radius"] = {Value = 1.5},
@@ -124,6 +127,17 @@ local DefaultLighting = {
     AtmosphereHaze = 0,
 }
 
+local Rain, IsRainEnabled = LoadModule("moehack.net/rain.luau"), false
+
+ain:SetColor(Color3.fromRGB(220, 225, 235))
+Rain:SetTransparency(0.05)
+Rain:SetSpeedRatio(0.85)
+Rain:SetIntensityRatio(0.55)
+Rain:SetLightEmission(0.05)
+Rain:SetLightInfluence(0.85)
+Rain:SetVolume(0.35)
+Rain:SetDirection(Vector3.new(0.15, -1, 0.05))
+
 --# Main
 local Visuals = {}
 
@@ -134,6 +148,26 @@ Visuals.World = {} do
 
     function Visuals.World.Tick()
         local DefaultLighting = Visuals.World.GetDefaultLighting()
+
+        if Toggles["visuals/world/weather"].Value then
+            local WeatherType = Options["visuals/world/weather/type"].Value
+            if WeatherType == "Rain" then
+                if not IsRainEnabled then
+                    IsRainEnabled = true
+                    Rain:Enable(TweenInfo.new(2.5, Enum.EasingStyle.Sine, Enum.EasingDirection.Out))
+                end
+            else
+                if IsRainEnabled then
+                    Rain:Disable(TweenInfo.new(2, Enum.EasingStyle.Sine, Enum.EasingDirection.Out))
+                    IsRainEnabled = false
+                end
+            end
+        else
+            if IsRainEnabled then
+                Rain:Disable(TweenInfo.new(2, Enum.EasingStyle.Sine, Enum.EasingDirection.Out))
+                IsRainEnabled = false
+            end
+        end
 
         if not Visuals.World.ColorCorrection then
             Visuals.World.ColorCorrection = Create("ColorCorrectionEffect")

@@ -225,6 +225,14 @@ local Library, SaveManager, ThemeManager = LoadModule("moehack.net/interface/lib
                         { Toggles["visuals/world/dof"], true }
                     });
                 end
+
+                local Weather = World:AddToggle("visuals/world/weather", { Text = "Weather", Default = false }) do
+                    local DepBox = World:AddDependencyBox()
+                    DepBox:AddDropdown("visuals/world/weather/type", { Text = "Type", Default = 1, Values = {"Rain"} })
+                    DepBox:SetupDependencies({  
+                        { Toggles["visuals/world/weather"], true }
+                    });
+                end
             end
 
             do -- Player
