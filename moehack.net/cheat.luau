@@ -79,7 +79,7 @@ local Library, SaveManager, ThemeManager = LoadModule("moehack.net/interface/lib
                     "Mouse",
                 } })
                 AimAssist:AddToggle("combat/aimassist/instasnap", { Text = "Instant Snap", Default = false })
-                AimAssist:AddSlider("combat/aimassist/speed", {Text = "Speed", Min = 1, Max = 32, Rounding = 1, Default = 12})
+                AimAssist:AddSlider("combat/aimassist/speed", {Text = "Speed", Min = 1, Max = 40, Rounding = 1, Default = 12})
 
                 AimAssist:AddToggle("combat/aimassist/ignorebehindwalls", { Text = "Ignore Behind Walls", Default = false })
             end
