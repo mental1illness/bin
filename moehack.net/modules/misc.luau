@@ -8,10 +8,9 @@ local NewVector, NewVector3, NewCFrame = vector.create, Vector3.new, CFrame.new
 local Create, IsA = Instance.new, workspace.IsA
 local Spawn, Wait = task.spawn, task.wait
 local ForEach, Insert, RemoveTable = table.foreach, table.insert, table.remove
-local FindFirstChild, WaitForChild, FindFirstChildOfClass = workspace.FindFirstChild, workspace.WaitForChild, workspace.FindFirstChildOfClass
+local FindFirstChild, WaitForChild, FindFirstChildOfClass, Raycast  = workspace.FindFirstChild, workspace.WaitForChild, workspace.FindFirstChildOfClass, workspace.Raycast
 local WorldToViewportPoint = workspace.CurrentCamera.WorldToViewportPoint
 local GetService, IsKeyDown = Game.GetService, cloneref(Game:GetService("UserInputService")).IsKeyDown
-
 --# Services
 
 local MarketplaceService = GetService(Game, "MarketplaceService")
