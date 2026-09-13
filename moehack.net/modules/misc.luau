@@ -134,9 +134,8 @@ Misc.Movement = {} do
                     local HorizontalVelocity = NewVector3(Velocity.X, 0, Velocity.Z)
 
                     local SurfVelocity = HorizontalVelocity - FlatNormal * HorizontalVelocity:Dot(FlatNormal)
-                    local VerticalVelocity = Maximum(Velocity.Y, 0)
 
-                    RootPart.AssemblyLinearVelocity = NewVector3(SurfVelocity.X, VerticalVelocity, SurfVelocity.Z)
+                    RootPart.AssemblyLinearVelocity = NewVector3(SurfVelocity.X, 0, SurfVelocity.Z)
                 end
             end
         end
