@@ -157,15 +157,15 @@ Visuals.World = {} do
 
             if WeatherType == "Snow" then
                 if not Visuals.World.Snow then
-                    Visuals.World.Snow = Instance.new("Part")
+                    Visuals.World.Snow = Create("Part")
                     Visuals.World.Snow.Transparency = 1
-                    Visuals.World.Snow.Name = "Snow_Particles"
+                    Visuals.World.Snow.Name = "/0"
                     Visuals.World.Snow.CanCollide = false
                     Visuals.World.Snow.Size = Vector3.new(127, 1, 144)
                     Visuals.World.Snow.Anchored = true
                     Visuals.World.Snow.Parent = nil
 
-                    Visuals.World.SnowParticles = Instance.new("ParticleEmitter")
+                    Visuals.World.SnowParticles = Create("ParticleEmitter")
                     Visuals.World.SnowParticles.Rate = 1000
                     Visuals.World.SnowParticles.Transparency = NumberSequence.new{
                         NumberSequenceKeypoint.new(0, 0),
@@ -187,7 +187,7 @@ Visuals.World = {} do
                 end
             
                 if Visuals.World.Snow.Parent == nil then
-                    Visuals.World.Snow.Parent = Visuals.World.Snow
+                    Visuals.World.Snow.Parent = Camera
                 end
                 Visuals.World.Snow.CFrame = Camera.CFrame  * SNOW_OFFSET
 

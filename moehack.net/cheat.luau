@@ -230,14 +230,7 @@ local Library, SaveManager, ThemeManager = LoadModule("moehack.net/interface/lib
                     local DepBox = World:AddDependencyBox()
                     DepBox:AddDropdown("visuals/world/weather/type", { Text = "Type", Default = 1, Values = {"Rain", "Snow"} })
 
-                    do --# Snow
-                        local DepBoxSnow = World:AddDependencyBox()
-                        DepBoxSnow:AddSlider("visuals/world/snow/rate", { Text = "Snow Rate", Min = 1, Max = 2000, Rounding = 0, Default = 1000 })
-
-                        DepBoxSnow:SetupDependencies({  
-                            { Toggles["visuals/world/weather/type"], "Snow" }
-                        });
-                    end
+                    DepBox:AddSlider("visuals/world/snow/rate", { Text = "Snow Rate", Min = 1, Max = 2000, Rounding = 0, Default = 1000 })
 
                     DepBox:SetupDependencies({  
                         { Toggles["visuals/world/weather"], true }
