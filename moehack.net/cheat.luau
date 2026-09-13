@@ -4,7 +4,7 @@
 --# Aliases
 
 local FromOffset, FromScale, UDim2New = UDim2.fromOffset, UDim2.fromScale, UDim2.new
-local Atan2, Rad, Pi, Abs, Minimum, Maximum, Floor = math.atan2, math.rad, math.pi, math.abs, math.min, math.max, math.floor
+local Atan2, Rad, Pi, Abs, Minimum, Maximum, Floor, Clamp = math.atan2, math.rad, math.pi, math.abs, math.min, math.max, math.floor, math.clamp
 local NewVector, NewVector3, NewCFrame = vector.create, Vector3.new, CFrame.new
 local Create, IsA = Instance.new, workspace.IsA
 local Spawn, Wait = task.spawn, task.wait
@@ -20,6 +20,8 @@ local ReplicatedStorage  = GetService(Game, "ReplicatedStorage")
 local RunService         = GetService(Game, "RunService")
 local Stats              = GetService(Game, "Stats")
 local DataPing           = Stats.Network.ServerStatsItem["Data Ping"]
+local FrameRateManager   = Stats:FindFirstChild("FrameRateManager")
+local RenderAverage      = FrameRateManager:FindFirstChild("RenderAverage")
 local Players            = GetService(Game, "Players")
 
 local LocalPlayer        = Players.LocalPlayer
@@ -46,6 +48,7 @@ local Library, SaveManager, ThemeManager = LoadModule("moehack.net/library.luau"
     local Window = Library:CreateWindow({ Title = 'moehack.net', Center = true, AutoShow = true, TabPadding = 1, MenuFadeTime = 0.2 })
     
     local Tabs = {
+        Combat = Window:AddTab("Combat"),
         ESP = Window:AddTab("ESP"),
         Visuals = Window:AddTab("Visuals"),
         Settings = Window:AddTab("Settings")
@@ -228,7 +231,7 @@ local Library, SaveManager, ThemeManager = LoadModule("moehack.net/library.luau"
                 Player:AddToggle("visuals/player/chinesehat", { Text = "Chinese Hat", Default = false }):AddColorPicker('visuals/player/chinesehat/color', { Default = Color3.fromRGB(255, 255, 255), Title = 'Chinese Hat Color' }) do
                     local DepBox = Player:AddDependencyBox()
 
-                    DepBox:AddSlider("visuals/player/chinesehat/glowfac", { Text = "Glow Factor", Min = 1, Max = 10, Rounding = 0, Default = 5 })
+                    DepBox:AddSlider("visuals/player/chinesehat/glowfac", { Text = "Glow Factor", Min = 5, Max = 20, Rounding = 0, Default = 5 })
                     DepBox:AddSlider("visuals/player/chinesehat/radius", { Text = "Radius", Min = 0, Max = 2, Rounding = 1, Default = 1.5 })
                     DepBox:AddSlider("visuals/player/chinesehat/height", { Text = "Height", Min = 0, Max = 2, Rounding = 1 ,Default = 1 })
 
@@ -255,7 +258,7 @@ local Library, SaveManager, ThemeManager = LoadModule("moehack.net/library.luau"
     SaveManager:SetIgnoreIndexes({ 'MenuKeybind' })
 
     ThemeManager:SetFolder('moehack')
-    SaveManager:SetFolder('moehack/' .. makeKebabPls(MarketplaceService:GetProductInfo(game.PlaceId).Name))
+    SaveManager:SetFolder('moehack/' .. makeKebabPls(MarketplaceService:GetProductInfo(Game.PlaceId).Name))
 
     SaveManager:BuildConfigSection(Tabs.Settings)
     ThemeManager:ApplyToTab(Tabs.Settings)
@@ -303,8 +306,8 @@ local Visuals = LoadModule("moehack.net/modules/visuals.luau", true)
 
 Library:GiveSignal(
 	RunService.RenderStepped:Connect(function(Delta)
-		FrameRate = math.floor(1 / Delta)
-		Ping = math.floor(DataPing:GetValue())
+		FrameRate = Floor(1000 / RenderAverage:GetValue())
+		Ping = Floor(DataPing:GetValue())
         Visuals.Tick()
 	end)
 )
