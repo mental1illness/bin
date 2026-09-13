@@ -36,8 +36,7 @@ end
 local Utility = LoadModule("moehack.net/modules/utility.luau", true)
 local EasingStyle = Utility.EasingStyle
 
-local Toggles = getgenv().Toggles
-local Options = getgenv().Options
+local Toggles, Options = getgenv().Toggles, getgenv().Options
 
 local Camera = workspace.CurrentCamera
 
@@ -123,6 +122,7 @@ function Combat.Tick(Delta)
         local Method = Options["combat/aimassist/method"].Value
         local InstantSnap = Toggles["combat/aimassist/instasnap"].Value
         local EasingName = Options["combat/aimassist/easingstyle"].Value
+        local Speed = Options["combat/aimassist/speed"].Value
 
         local Target
         local Hitbox
@@ -203,7 +203,7 @@ function Combat.Tick(Delta)
                     if InstantSnap then
                         Alpha = 1
                     else
-                        Alpha = 1 - math.exp(-12 * Delta)
+                        Alpha = 1 - math.exp(-Speed * Delta)
 
                         local Easing = EasingStyle[EasingName]
 
