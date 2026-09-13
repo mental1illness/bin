@@ -33,7 +33,7 @@ end
 
 --# Variables
 
-local Utility = LoadModule("moehack.net/modules/utility.luau")
+local Utility = LoadModule("moehack.net/modules/utility.luau", true)
 local EasingStyle = Utility.EasingStyle
 
 local Toggles = getgenv().Toggles
@@ -203,7 +203,7 @@ function Combat.Tick(Delta)
                     if InstantSnap then
                         Alpha = 1
                     else
-                        Alpha = Clamp(Delta * 8, 0, 1)
+                        Alpha = 1 - math.exp(-12 * Delta)
 
                         local Easing = EasingStyle[EasingName]
 
@@ -213,10 +213,18 @@ function Combat.Tick(Delta)
                     end
 
                     if Method == "Camera" then
-                        local CameraPosition = Camera.CFrame.Position
+                        local Alpha = InstantSnap and 1 or (1 - math.exp(-12 * Delta))
+
+                        if not InstantSnap then
+                            local Easing = EasingStyle[EasingName]
+
+                            if Easing then
+                                Alpha = Easing(Alpha)
+                            end
+                        end
 
                         local BroCFrame = CFrame.lookAt(
-                            CameraPosition,
+                            Camera.CFrame.Position,
                             Hitbox.Position
                         )
 
@@ -225,12 +233,18 @@ function Combat.Tick(Delta)
                             Alpha
                         )
                     elseif Method == "Mouse" then
-                        if mousemoverel then
-                            mousemoverel(
-                                OffsetX * Alpha,
-                                OffsetY * Alpha
-                            )
+                        local MoveX = OffsetX * Alpha
+                        local MoveY = OffsetY * Alpha
+
+                        if Abs(MoveX) < 1 and Abs(OffsetX) > 0.5 then
+                            MoveX = OffsetX > 0 and 1 or -1
                         end
+
+                        if Abs(MoveY) < 1 and Abs(OffsetY) > 0.5 then
+                            MoveY = OffsetY > 0 and 1 or -1
+                        end
+
+                        mousemoverel(MoveX, MoveY)
                     end
                 elseif not StickyAim then
                     Combat.AimAssistTarget = nil
