@@ -313,7 +313,7 @@ local Library, SaveManager, ThemeManager = LoadModule("moehack.net/interface/lib
                 Movement:AddToggle("misc/movement/autojump", { Text = "Auto Jump", Default = false })
                 Movement:AddDropdown("misc/movement/autojump/method", { Text = "Auto Jump Method", Default = 1, Values = {"Humanoid", "Velocity"} })
 
-                Movement:AddToggle("misc/movement/pixelsurf", { Text = "Pixel Surf", Default = false }):AddKeyPicker("misc/movement/pixelsurf/key", { Text = "Pixel Surf Key",  SyncToggleState = false, Mode = "Hold", Default = "MB2" })
+                Movement:AddToggle("misc/movement/pixelsurf", { Text = "Pixel Surf", Default = false }):AddKeyPicker("misc/movement/pixelsurf/key", { Text = "Pixel Surf Key",  SyncToggleState = false, Mode = "Hold", Default = "F" })
 
             end
         end

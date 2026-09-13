@@ -1219,7 +1219,9 @@ do
 		function KeyPicker:Update()
 			local State = KeyPicker:GetState()
 
-			ContainerLabel.Text = string.format("[%s] %s (%s)", KeyPicker.Value, Info.Text, KeyPicker.Mode)
+			pcall(function()
+				ContainerLabel.Text = string.format("[%s] %s (%s)", KeyPicker.Value, Info.Text, KeyPicker.Mode)
+			end)
 
 			ContainerLabel.Visible = not KeyPicker.NoUI
 			ContainerLabel.TextColor3 = State and Library.AccentColor or Library.FontColor
