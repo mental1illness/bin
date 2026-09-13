@@ -377,7 +377,7 @@ function ESP.CreateElements()
     Objects.HealthTextHolder.Parent = Objects.Holder
     Objects.HealthTextHolder.Size = FromOffset(11, 10)
     Objects.HealthTextHolder.BackgroundTransparency = 1
-    Objects.HealthTextHolder.GroupTransparency = 1
+    Objects.HealthTextHolder.GroupTransparency = 0
     Objects.HealthTextHolder.AnchorPoint = Vector2.new(0, 0.5)
 
     Objects.HealthText = Create("TextLabel")
