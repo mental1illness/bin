@@ -12,8 +12,8 @@ local ToRunOnActor = {
 
 
 if ToRunOnActor[Game.PlaceId] then 
-    local RunFunc = run_on_thread or run_on_actor
-    local Actors  = getactorthreads or getactors
+    local RunFunc = run_on_actor
+    local Actors  = getactors
 
     RunFunc(Actors()[1], LoadModule("moehack.net/cheat.luau"))
 

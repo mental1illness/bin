@@ -106,6 +106,8 @@ Library:GiveSignal( Players.PlayerRemoving:Connect(function(Player)
     PlayersCache[Player] = nil
 end) )
 
+setthreadidentity(8)
+
 function ESP.CreateElements()
     local Objects = {}
 
