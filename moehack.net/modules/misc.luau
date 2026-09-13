@@ -120,8 +120,7 @@ Misc.Movement = {} do
             end
         end
 
-        if Toggles["misc/movement/pixelsurf"].Value
-            and Options["misc/movement/pixelsurf/key"]:GetValue() then
+        if Toggles["misc/movement/pixelsurf"].Value and Options["misc/movement/pixelsurf/key"]:GetState() then
 
             local WallPos, Dist, Result = Misc.Movement.GetNearestWall()
 
