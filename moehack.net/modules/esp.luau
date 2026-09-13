@@ -157,14 +157,14 @@ function ESP.CreateElements()
     Objects.BottomRight.AnchorPoint = Vector2.new(1, 1)
     Objects.BottomRight.Size = UDim2.new(0, 10, 0, 10)
     Objects.BottomRight.BorderSizePixel = 0
-    Objects.BottomRight.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    Objects.BottomRight.BackgroundColor3 = Options["esp/box/color"].Value
     Objects.BottomRight.Parent = Objects.CornerBox
 
     Objects.BottomRightInlineHorizontal = Create("Frame")
     Objects.BottomRightInlineHorizontal.Name = "InlineHorizontal"
     Objects.BottomRightInlineHorizontal.Size = UDim2.new(1, 0, 0, 1)
     Objects.BottomRightInlineHorizontal.BorderSizePixel = 0
-    Objects.BottomRightInlineHorizontal.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    Objects.BottomRightInlineHorizontal.BackgroundColor3 = Options["esp/box/color"].Value
     Objects.BottomRightInlineHorizontal.ZIndex = 2
     Objects.BottomRightInlineHorizontal.Parent = Objects.BottomRight
 
@@ -172,7 +172,7 @@ function ESP.CreateElements()
     Objects.BottomRightInlineVertical.Name = "InlineVertical"
     Objects.BottomRightInlineVertical.Size = UDim2.new(0, 1, 1, 0)
     Objects.BottomRightInlineVertical.BorderSizePixel = 0
-    Objects.BottomRightInlineVertical.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    Objects.BottomRightInlineVertical.BackgroundColor3 = Options["esp/box/color"].Value
     Objects.BottomRightInlineVertical.ZIndex = 5
     Objects.BottomRightInlineVertical.Parent = Objects.BottomRight
 
@@ -202,14 +202,13 @@ function ESP.CreateElements()
     Objects.TopRight.AnchorPoint = Vector2.new(1, 0)
     Objects.TopRight.Size = UDim2.new(0, 10, 0, 10)
     Objects.TopRight.BorderSizePixel = 0
-    Objects.TopRight.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
     Objects.TopRight.Parent = Objects.CornerBox
 
     Objects.TopRightInlineHorizontal = Create("Frame")
     Objects.TopRightInlineHorizontal.Name = "InlineHorizontal"
     Objects.TopRightInlineHorizontal.Size = UDim2.new(1, 0, 0, 1)
     Objects.TopRightInlineHorizontal.BorderSizePixel = 0
-    Objects.TopRightInlineHorizontal.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    Objects.TopRightInlineHorizontal.BackgroundColor3 = Options["esp/box/color"].Value
     Objects.TopRightInlineHorizontal.ZIndex = 2
     Objects.TopRightInlineHorizontal.Parent = Objects.TopRight
 
@@ -217,7 +216,7 @@ function ESP.CreateElements()
     Objects.TopRightInlineVertical.Name = "InlineVertical"
     Objects.TopRightInlineVertical.Size = UDim2.new(0, 1, 1, 0)
     Objects.TopRightInlineVertical.BorderSizePixel = 0
-    Objects.TopRightInlineVertical.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    Objects.TopRightInlineVertical.BackgroundColor3 = Options["esp/box/color"].Value
     Objects.TopRightInlineVertical.ZIndex = 5
     Objects.TopRightInlineVertical.Parent = Objects.TopRight
 
@@ -245,14 +244,13 @@ function ESP.CreateElements()
     Objects.TopLeft.BorderColor3 = Color3.fromRGB(0, 0, 0)
     Objects.TopLeft.Size = UDim2.new(0, 10, 0, 10)
     Objects.TopLeft.BorderSizePixel = 0
-    Objects.TopLeft.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
     Objects.TopLeft.Parent = Objects.CornerBox
 
     Objects.TopLeftInlineHorizontal = Create("Frame")
     Objects.TopLeftInlineHorizontal.Name = "InlineHorizontal"
     Objects.TopLeftInlineHorizontal.Size = UDim2.new(1, 0, 0, 1)
     Objects.TopLeftInlineHorizontal.BorderSizePixel = 0
-    Objects.TopLeftInlineHorizontal.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    Objects.TopLeftInlineHorizontal.BackgroundColor3 = Options["esp/box/color"].Value
     Objects.TopLeftInlineHorizontal.ZIndex = 2
     Objects.TopLeftInlineHorizontal.Parent = Objects.TopLeft
 
@@ -260,7 +258,7 @@ function ESP.CreateElements()
     Objects.TopLeftInlineVertical.Name = "InlineVertical"
     Objects.TopLeftInlineVertical.Size = UDim2.new(0, 1, 1, 0)
     Objects.TopLeftInlineVertical.BorderSizePixel = 0
-    Objects.TopLeftInlineVertical.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    Objects.TopLeftInlineVertical.BackgroundColor3 = Options["esp/box/color"].Value
     Objects.TopLeftInlineVertical.ZIndex = 5
     Objects.TopLeftInlineVertical.Parent = Objects.TopLeft
 
@@ -290,14 +288,13 @@ function ESP.CreateElements()
     Objects.BottomLeft.AnchorPoint = Vector2.new(0, 1)
     Objects.BottomLeft.Size = UDim2.new(0, 10, 0, 10)
     Objects.BottomLeft.BorderSizePixel = 0
-    Objects.BottomLeft.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
     Objects.BottomLeft.Parent = Objects.CornerBox
 
     Objects.BottomLeftInlineHorizontal = Create("Frame")
     Objects.BottomLeftInlineHorizontal.Name = "InlineHorizontal"
     Objects.BottomLeftInlineHorizontal.Size = UDim2.new(1, 0, 0, 1)
     Objects.BottomLeftInlineHorizontal.BorderSizePixel = 0
-    Objects.BottomLeftInlineHorizontal.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    Objects.BottomLeftInlineHorizontal.BackgroundColor3 = Options["esp/box/color"].Value
     Objects.BottomLeftInlineHorizontal.ZIndex = 2
     Objects.BottomLeftInlineHorizontal.Parent = Objects.BottomLeft
 
@@ -305,7 +302,7 @@ function ESP.CreateElements()
     Objects.BottomLeftInlineVertical.Name = "InlineVertical"
     Objects.BottomLeftInlineVertical.Size = UDim2.new(0, 1, 1, 0)
     Objects.BottomLeftInlineVertical.BorderSizePixel = 0
-    Objects.BottomLeftInlineVertical.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    Objects.BottomLeftInlineVertical.BackgroundColor3 = Options["esp/box/color"].Value
     Objects.BottomLeftInlineVertical.ZIndex = 5
     Objects.BottomLeftInlineVertical.Parent = Objects.BottomLeft
 
