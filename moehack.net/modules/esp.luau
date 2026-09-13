@@ -619,18 +619,19 @@ function ESP.Render(Entity: {})
 	local Objects = Entity.Objects
 
 	local Character = ESP.GetCharacter(Player)
+    local RealCharacter = Player.Character
 
     local ClientCharacter = LocalPlayer.Character
     local ClientRoot = ClientCharacter and ClientCharacter:FindFirstChild("HumanoidRootPart")
 
     local Distance = 0
 
-	if not Character then
+	if not RealCharacter then
 		Objects.Holder.Visible = false
 		return
 	end
 
-	local MaxHealth, Health = ESP.GetHealth(Player, Character)
+	local MaxHealth, Health = ESP.GetHealth(Player, RealCharacter)
 
 	if Health <= 0 then
 		Objects.Holder.Visible = false
@@ -644,7 +645,7 @@ function ESP.Render(Entity: {})
         return
     end
 
-    local TargetRoot = Character.PrimaryPart
+    local TargetRoot = RealCharacter.PrimaryPart
     if TargetRoot then
         Distance = (CurrentCamera.CFrame.Position - TargetRoot.Position).Magnitude
     end
@@ -741,7 +742,7 @@ function ESP.Render(Entity: {})
         if not Objects.Tool.Visible then
             Objects.Tool.Visible = true
         end
-        local ToolName = ESP.GetTool(Player, Character)
+        local ToolName = ESP.GetTool(Player, RealCharacter)
 
         if Objects.Tool.Text ~= ToolName then Objects.Tool.Text = ToolName end
         local ToolColor = Options["esp/tool/color"].Value
@@ -821,7 +822,7 @@ function ESP.Render(Entity: {})
             Objects.Distance.Visible = true
         end
 
-        local TargetRoot = Character:FindFirstChild("HumanoidRootPart")
+        local TargetRoot = RealCharacter.PrimaryPart
 
         if ClientRoot and TargetRoot then
             local DistanceText = tostring(Floor(Distance)) .. "st"
