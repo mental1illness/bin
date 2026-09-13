@@ -513,6 +513,7 @@ function ESP.GetCharacter(Player)
         end
         if not Player.Character then return nil end
         local Data = StateObject.get("Character", Player.Character)
+        if not Data then return end
         if not Data.values or not Data.values.viewmodels then return end
         return Data.values.viewmodels
     end
