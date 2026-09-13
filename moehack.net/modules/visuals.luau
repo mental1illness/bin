@@ -188,12 +188,12 @@ Visuals.World = {} do
                     return
                 end
             
-                if Visuals.World.Snow.Parent == nil then
+                if Visuals.World.Snow and Visuals.World.Snow.Parent == nil then
                     Visuals.World.Snow.Parent = Camera
                 end
                 Visuals.World.Snow.CFrame = Camera.CFrame  * SNOW_OFFSET
 
-                if Visuals.World.SnowParticles.Rate ~= Options["visuals/world/snow/rate"].Value then Visuals.World.SnowParticles.Rate = Options["visuals/world/snow/rate"].Value end
+                if Visuals.World.Snow and Visuals.World.SnowParticles.Rate ~= Options["visuals/world/snow/rate"].Value then Visuals.World.SnowParticles.Rate = Options["visuals/world/snow/rate"].Value end
             else
                 if Visuals.World.Snow.Parent ~= nil then
                     Visuals.World.Snow.Parent = nil
@@ -217,7 +217,7 @@ Visuals.World = {} do
                 Rain:Disable(TweenInfo.new(2, Enum.EasingStyle.Sine, Enum.EasingDirection.Out))
                 IsRainEnabled = false
             end
-            if Visuals.World.Snow.Parent ~= nil then
+            if Visuals.World.Snow and Visuals.World.Snow.Parent ~= nil then
                 Visuals.World.Snow.Parent = nil
             end
         end
