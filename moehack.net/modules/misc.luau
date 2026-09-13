@@ -28,13 +28,59 @@ local LocalPlayer        = Players.LocalPlayer
 
 --# Variables
 
+local Params = RaycastParams.new()
+Params.FilterType = Enum.RaycastFilterType.Exclude
+Params.IgnoreWater = true
 local Toggles, Options = getgenv().Toggles, getgenv().Options
+local Camera = workspace.CurrentCamera
 
 --# Main
 
 local Misc = {}
 
 Misc.Movement = {} do
+
+    function Misc.Movement.GetNearestWall()
+
+        local Character = LocalPlayer.Character
+        if not Character then return end
+
+        local RootPart = Character.PrimaryPart
+        if not RootPart then return end
+
+        local Origin = RootPart.Position
+
+        local Directions = {
+            -RootPart.CFrame.LookVector,
+            RootPart.CFrame.RightVector,
+            -RootPart.CFrame.RightVector,
+        }
+
+        local NearestResult
+        local NearestDistance = math.huge
+        
+        Params.FilterDescendantsInstances = { Character }
+
+        for _, Direction in Directions do
+            local Result = Raycast(workspace, Origin, Direction * 5, Params)
+
+            if Result then
+                local Distance = (Result.Position - Origin).Magnitude
+
+                if Distance < NearestDistance then
+                    NearestDistance = Distance
+                    NearestResult = Result
+                end
+            end
+        end
+
+        if not NearestResult then
+            return
+        end
+
+        return NearestResult.Position, NearestDistance, NearestResult
+    end
+
     function Misc.Movement.Tick()
         local Character = LocalPlayer.Character
         if not Character then return end
@@ -70,6 +116,29 @@ Misc.Movement = {} do
                         local CurrentVelocity = RootPart.AssemblyLinearVelocity
                         RootPart.AssemblyLinearVelocity = NewVector3(CurrentVelocity.X, JumpPower, CurrentVelocity.Z)
                     end
+                end
+            end
+        end
+
+        if Toggles["misc/movement/pixelsurf"].Value
+            and Options["misc/movement/pixelsurf/key"]:GetValue() then
+
+            local WallPos, Dist, Result = Misc.Movement.GetNearestWall()
+
+            if Result and RootPart then
+                local WallNormal = Result.Normal
+                local FlatNormal = NewVector3(WallNormal.X, 0, WallNormal.Z)
+
+                if FlatNormal.Magnitude > 0 then
+                    FlatNormal = FlatNormal.Unit
+
+                    local Velocity = RootPart.AssemblyLinearVelocity
+                    local HorizontalVelocity = NewVector3(Velocity.X, 0, Velocity.Z)
+
+                    local SurfVelocity = HorizontalVelocity - FlatNormal * HorizontalVelocity:Dot(FlatNormal)
+                    local VerticalVelocity = Maximum(Velocity.Y, 0)
+
+                    RootPart.AssemblyLinearVelocity = NewVector3(SurfVelocity.X, VerticalVelocity, SurfVelocity.Z)
                 end
             end
         end
