@@ -465,6 +465,26 @@ function ESP.CreateElements()
     DistStroke.Thickness = 1
     DistStroke.Color = Color3.new(0, 0, 0)
 
+    --# Tool
+
+    Objects.Tool = Create("TextLabel")
+    Objects.Tool.Parent = Objects.Bottom
+    Objects.Tool.Size = FromOffset(9, 9)
+    Objects.Tool.BackgroundTransparency = 1
+    Objects.Tool.Position = FromOffset(1, 0)
+    Objects.Tool.Text = "none"
+    Objects.Tool.TextXAlignment = Enum.TextXAlignment.Center
+    Objects.Tool.FontFace = Fonts.SmallestPixel7
+    Objects.Tool.TextColor3 = Options["esp/distance/color"].Value
+    Objects.Tool.TextSize = 9
+    Objects.Tool.ZIndex = 5
+
+    local ToolStroke = Create("UIStroke")
+    ToolStroke.Parent = Objects.Distance
+    ToolStroke.LineJoinMode = Enum.LineJoinMode.Miter
+    ToolStroke.Thickness = 1
+    ToolStroke.Color = Color3.new(0, 0, 0)
+
     return Objects
 end
 
