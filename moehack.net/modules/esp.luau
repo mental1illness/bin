@@ -144,6 +144,7 @@ function ESP.CreateElements()
     Objects.CornerBox.Position = UDim2New(0, -3, 0, -3)
     Objects.CornerBox.BorderSizePixel = 0
     Objects.CornerBox.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    Objects.CornerBox.Visible = false
     Objects.CornerBox.Parent = Objects.Holder
 
     -- Bottom Right
