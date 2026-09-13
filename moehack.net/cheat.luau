@@ -61,7 +61,7 @@ local Library, SaveManager, ThemeManager = LoadModule("moehack.net/interface/lib
             local AimAssist, TriggerBot = Tabs.Combat:AddGroupbox({ Side = 1, Name = "Aim Assistance" }), Tabs.Combat:AddGroupbox({ Side = 1, Name = "Trigger Bot" })
            
             do -- Aim Assist
-                AimAssist:AddToggle("combat/aimassist", { Text = "Enabled", Default = false }):AddKeyPicker("combat/aimassist/key", { Text = "Le Aim Assist Key", SyncToggleState = false, Mode = "Hold", Default = "MB2" })
+                AimAssist:AddToggle("combat/aimassist", { Text = "Enabled", Default = false }):AddKeyPicker("combat/aimassist/key", { Text = "Aim Assist Key", SyncToggleState = false, Mode = "Hold", Default = "MB2" })
                 AimAssist:AddSlider("combat/aimassist/fov", { Text = "Field Of View", Min = 1, Max = 360, Rounding = 0, Default = 120 })
                 AimAssist:AddDropdown("combat/aimassist/easingstyle", { Text = "Easing Style", Default = 1, Values = {
                     "Sine",
@@ -86,7 +86,7 @@ local Library, SaveManager, ThemeManager = LoadModule("moehack.net/interface/lib
             end
 
             do -- Trigger Bot
-                TriggerBot:AddToggle("combat/triggerbot", { Text = "Enabled", Default = false }):AddKeyPicker("combat/triggerbot/key", { SyncToggleState = false, Mode = "Hold", Default = "MB2" })
+                TriggerBot:AddToggle("combat/triggerbot", { Text = "Enabled", Default = false }):AddKeyPicker("combat/triggerbot/key", { Text = "Triggerbot Key",  SyncToggleState = false, Mode = "Hold", Default = "MB2" })
                 TriggerBot:AddSlider("combat/triggerbot/fov", { Text = "Field Of View", Min = 1, Max = 360, Rounding = 0, Default = 120 })
                 TriggerBot:AddSlider("combat/triggerbot/reactiontime", { Text = "Reaction Time", Min = 1, Max = 360, Rounding = 0, Default = 12 })
                 TriggerBot:AddToggle("combat/triggerbot/ignorebehindwalls", { Text = "Ignore Behind Walls", Default = false })
@@ -313,7 +313,7 @@ local Library, SaveManager, ThemeManager = LoadModule("moehack.net/interface/lib
                 Movement:AddToggle("misc/movement/autojump", { Text = "Auto Jump", Default = false })
                 Movement:AddDropdown("misc/movement/autojump/method", { Text = "Auto Jump Method", Default = 1, Values = {"Humanoid", "Velocity"} })
 
-                Movement:AddToggle("misc/movement/pixelsurf", { Text = "Pixel Surf", Default = false }):AddKeyPicker("misc/movement/pixelsurf/key", { SyncToggleState = false, Mode = "Hold", Default = "MB2" })
+                Movement:AddToggle("misc/movement/pixelsurf", { Text = "Pixel Surf", Default = false }):AddKeyPicker("misc/movement/pixelsurf/key", { Text = "Pixel Surf Key",  SyncToggleState = false, Mode = "Hold", Default = "MB2" })
 
             end
         end
