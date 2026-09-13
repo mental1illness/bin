@@ -114,7 +114,7 @@ function Combat.Tick(Delta)
 
     --# Aim Assist
 
-    if Toggles["combat/aimassist"].Value and Options["combat/aimassist/key"].Toggled then
+    if Toggles["combat/aimassist"].Value and Options["combat/aimassist/key"]:GetState() then
         
         local FOV = Options["combat/aimassist/fov"].Value
         local UseNearestHitbox = Toggles["combat/aimassist/usenearhitbox"].Value
