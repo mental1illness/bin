@@ -878,7 +878,7 @@ function ESP.Update(DeltaTime)
         LastHz -= Interval
     end
 
-    for _, Entity in ESP.Entities do ESP.Render, Entity end
+    for _, Entity in ESP.Entities do ESP.Render(Entity) end
 end 
 
 return ESP
