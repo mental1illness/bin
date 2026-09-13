@@ -76,5 +76,9 @@ Misc.Movement = {} do
 
     end
 end
-RunService.RenderStepped:Connect(Misc.Movement.Tick)
+
+function Misc.Tick(Delta)
+    Misc.Movement.Tick(Delta)
+end
+
 return Misc

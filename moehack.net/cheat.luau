@@ -51,7 +51,7 @@ local Library, SaveManager, ThemeManager = LoadModule("moehack.net/interface/lib
         Combat = Window:AddTab("Combat"),
         ESP = Window:AddTab("ESP"),
         Visuals = Window:AddTab("Visuals"),
-        Misc = Window:AddTab("Visuals"),,
+        Misc = Window:AddTab("Misc"),
         Settings = Window:AddTab("Settings")
     }
 
@@ -371,6 +371,7 @@ Library:Notify("Loading modules...", 2)
 local ESP = LoadModule("moehack.net/modules/esp.luau", true)
 local Visuals = LoadModule("moehack.net/modules/visuals.luau", true)
 local Combat = LoadModule("moehack.net/modules/combat.luau", true)
+local Misc = LoadModule("moehack.net/modules/misc.luau", true)
 
 --# Hooks
 
@@ -384,6 +385,7 @@ Library:GiveSignal(
         Visuals.Tick(Delta)
         Combat.Tick(Delta)
         ESP.Update(Delta)
+        Misc.Tick(Delta)
     end)
 )
 
