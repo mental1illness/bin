@@ -543,7 +543,7 @@ Visuals.Players = {} do
                 Visuals.Players.ChangeAvatar(OldAppearanceId)
             end
 
-            if OldCharacter ~= Character and Character ~= nil do
+            if OldCharacter ~= Character and Character ~= nil then
                 OldCharacter = Character
                 Visuals.Players.ChangeAvatar(OldAppearanceId)
             end
