@@ -3227,6 +3227,7 @@ function Library:CreateWindow(...)
 	if type(Config.BackgroundImage) == "string" and Config.BackgroundImage ~= "" then
 		local BackgroundImageFile = "background.png"
 		local Downloaded = pcall(function()
+			print(Config.BackgroundImage)
 			writefile(BackgroundImageFile, game:HttpGet(Config.BackgroundImage))
 		end)
 
