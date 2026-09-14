@@ -3224,28 +3224,6 @@ function Library:CreateWindow(...)
 		Parent = ScreenGui,
 	})
 
-	if type(Config.BackgroundImage) == "string" and Config.BackgroundImage ~= "" then
-		local BackgroundImageFile = "LibraryBackground.png"
-		local Downloaded = pcall(function()
-			writefile(BackgroundImageFile, game:HttpGet(Config.BackgroundImage))
-		end)
-
-		if Downloaded then
-			Library:Create("ImageLabel", {
-				Name = "BackgroundImage",
-				BackgroundTransparency = 1,
-				BorderSizePixel = 0,
-				Image = getcustomasset(BackgroundImageFile),
-				ImageTransparency = Config.BackgroundImageTransparency,
-				ScaleType = Config.BackgroundImageScaleType,
-				Size = UDim2.fromScale(1, 1),
-				Position = UDim2.fromScale(0, 0),
-				ZIndex = 0,
-				Parent = Outer,
-			})
-		end
-	end
-
 	Library:MakeDraggable(Outer, 25)
 
 	local Glow = Library:Create("ImageLabel", {
@@ -3339,7 +3317,7 @@ function Library:CreateWindow(...)
 		Parent = TabArea,
 	})
 
-	local TabContainer = Library:Create("Frame", {
+	local TabContainer = Library:Create("Frame", { -- works the best so here we go
 		BackgroundColor3 = Library.MainColor,
 		BorderColor3 = Library.OutlineColor,
 		Position = UDim2.new(0, 8, 0, 30),
@@ -3347,6 +3325,28 @@ function Library:CreateWindow(...)
 		ZIndex = 2,
 		Parent = MainSectionInner,
 	})
+
+	if type(Config.BackgroundImage) == "string" and Config.BackgroundImage ~= "" then
+		local BackgroundImageFile = "LibraryBackground.png"
+		local Downloaded = pcall(function()
+			writefile(BackgroundImageFile, game:HttpGet(Config.BackgroundImage))
+		end)
+
+		if Downloaded then
+			Library:Create("ImageLabel", {
+				Name = "BackgroundImage",
+				BackgroundTransparency = 1,
+				BorderSizePixel = 0,
+				Image = getcustomasset(BackgroundImageFile),
+				ImageTransparency = Config.BackgroundImageTransparency,
+				ScaleType = Config.BackgroundImageScaleType,
+				Size = UDim2.fromScale(1, 1),
+				Position = UDim2.fromScale(0, 0),
+				ZIndex = 3,
+				Parent = Outer,
+			})
+		end
+	end
 
 	Library:AddToRegistry(TabContainer, {
 		BackgroundColor3 = "MainColor",
