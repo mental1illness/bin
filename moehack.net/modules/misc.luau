@@ -5,12 +5,13 @@
 local FromOffset, FromScale, UDim2New = UDim2.fromOffset, UDim2.fromScale, UDim2.new
 local Atan2, Rad, Pi, Abs, Minimum, Maximum, Floor, Clamp = math.atan2, math.rad, math.pi, math.abs, math.min, math.max, math.floor, math.clamp
 local NewVector, NewVector3, NewCFrame = vector.create, Vector3.new, CFrame.new
-local Create, IsA = Instance.new, workspace.IsA
+local Create, IsA, QueryDescendants = Instance.new, workspace.IsA, workspace.QueryDescendants
 local Spawn, Wait = task.spawn, task.wait
 local ForEach, Insert, RemoveTable = table.foreach, table.insert, table.remove
 local FindFirstChild, WaitForChild, FindFirstChildOfClass, Raycast  = workspace.FindFirstChild, workspace.WaitForChild, workspace.FindFirstChildOfClass, workspace.Raycast
 local WorldToViewportPoint = workspace.CurrentCamera.WorldToViewportPoint
 local GetService, IsKeyDown = Game.GetService, cloneref(Game:GetService("UserInputService")).IsKeyDown
+
 --# Services
 
 local MarketplaceService = GetService(Game, "MarketplaceService")
@@ -157,7 +158,7 @@ Misc.Exploits = {  } do
             for _, Player in PlayersCache do
                 local Character = Player.Character
                 if Character then
-                    for _, Part in Character:QueryDescendant("BasePart") do
+                    for _, Part in QueryDescendants(Character, "BasePart") do
                         Part.CustomPhysicalProperties = PhysicalProperties.new(0,0,0,0,0)
                         Part.Velocity = Vector3.new(0,0,0)
                         Part.RotVelocity = Vector3.new(0,0,0)
