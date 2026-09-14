@@ -538,13 +538,8 @@ Visuals.Players = {} do
 
         if Toggles["visuals/player/appearance"].Value then
             local Character = Visuals.GetClientCharacter()
-            if OldAppearanceId ~= Options["visuals/player/appearance/id"].Value and tonumber(Options["visuals/player/appearance/id"].Value) == nil then
+            if OldAppearanceId ~= Options["visuals/player/appearance/id"].Value and tonumber(Options["visuals/player/appearance/id"].Value) ~= nil then
                 OldAppearanceId = Options["visuals/player/appearance/id"].Value
-                Visuals.Players.ChangeAvatar(OldAppearanceId)
-            end
-
-            if OldCharacter ~= Character and Character ~= nil then
-                OldCharacter = Character
                 Visuals.Players.ChangeAvatar(OldAppearanceId)
             end
         end
