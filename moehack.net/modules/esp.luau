@@ -720,6 +720,12 @@ function ESP.Render(Entity: {})
         Distance = (CurrentCamera.CFrame.Position - TargetRoot.Position).Magnitude
     end
 
+    if Distance > Options["esp/settings/renderdist"].Value then
+        Objects.Holder.Visible = false
+        return
+    end
+
+
     if Toggles["esp/box"].Value then
         if not Objects.BoundingBox.Visible and Options["esp/box/type"].Value ~= "Corner" then
             if Objects.CornerBox.Visible then
