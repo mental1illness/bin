@@ -151,13 +151,12 @@ Misc.Movement = {} do
     end
 end
 
-Misc.Exploits = { AntiFlingedBitchAFuckNiggaThatsTheShitIdontLikeASnitchNiggaThatsTheShitIdontLike = {} } do
+Misc.Exploits = {  } do
     function Misc.Exploits.Tick()
         if Toggles["misc/exploits/antifling"].Value then
             for _, Player in PlayersCache do
                 local Character = Player.Character
                 if Character then
-                    AntiFlingedBitchAFuckNiggaThatsTheShitIdontLikeASnitchNiggaThatsTheShitIdontLike[Character] = true
                     for _, Part in Character:QueryDescendant("BasePart") do
                         Part.CustomPhysicalProperties = PhysicalProperties.new(0,0,0,0,0)
                         Part.Velocity = Vector3.new(0,0,0)
