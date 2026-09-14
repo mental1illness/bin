@@ -33,6 +33,14 @@ Params.IgnoreWater = true
 local Toggles, Options = getgenv().Toggles, getgenv().Options
 local Camera = workspace.CurrentCamera
 
+local PlayersCache = Players:GetPlayers()
+Library:GiveSignal(Players.PlayerAdded:Connect(function()
+    PlayersCache = Players:GetPlayers()
+end))
+Library:GiveSignal(Players.PlayerRemoving:Connect(function()
+    PlayersCache = Players:GetPlayers()
+end))
+
 --# Main
 
 local Misc = {}
@@ -143,8 +151,28 @@ Misc.Movement = {} do
     end
 end
 
+Misc.Exploits = { AntiFlingedBitchAFuckNiggaThatsTheShitIdontLikeASnitchNiggaThatsTheShitIdontLike = {} } do
+    function Misc.Exploits.Tick()
+        if Toggles["misc/exploits/antifling"].Value then
+            for _, Player in PlayersCache do
+                local Character = Player.Character
+                if Character then
+                    AntiFlingedBitchAFuckNiggaThatsTheShitIdontLikeASnitchNiggaThatsTheShitIdontLike[Character] = true
+                    for _, Part in Character:QueryDescendant("BasePart") do
+                        Part.CustomPhysicalProperties = PhysicalProperties.new(0,0,0,0,0)
+                        Part.Velocity = Vector3.new(0,0,0)
+                        Part.RotVelocity = Vector3.new(0,0,0)
+                        Part.CanCollide = false
+                    end
+                end
+            end
+        end
+    end
+end
+
 function Misc.Tick(Delta)
     Misc.Movement.Tick(Delta)
+    Misc.Exploits.Tick(Delta)
 end
 
 return Misc

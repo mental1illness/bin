@@ -304,7 +304,7 @@ local Library, SaveManager, ThemeManager = LoadModule("moehack.net/interface/lib
         end
 
         do -- Misc
-            local Movement = Tabs.Misc:AddGroupbox({ Side = 1, Name = "Movement" })
+            local Movement, Exploits = Tabs.Misc:AddGroupbox({ Side = 1, Name = "Movement" }), Tabs.Misc:AddGroupbox({ Side = 1, Name = "Exploits" })
 
             do -- Movement
                 Movement:AddToggle("misc/movement/speed", { Text = "Speed Hack", Default = false })
@@ -314,7 +314,11 @@ local Library, SaveManager, ThemeManager = LoadModule("moehack.net/interface/lib
                 Movement:AddDropdown("misc/movement/autojump/method", { Text = "Auto Jump Method", Default = 1, Values = {"Humanoid", "Velocity"} })
 
                 Movement:AddToggle("misc/movement/pixelsurf", { Text = "Pixel Surf", Default = false }):AddKeyPicker("misc/movement/pixelsurf/key", { Text = "Pixel Surf Key",  SyncToggleState = false, Mode = "Hold", Default = "F" })
+                
+            end
 
+            do -- Exploits
+                Exploits:AddToggle("misc/exploits/antifling", { Text = "Anti Fling", Default = false })
             end
         end
     end
