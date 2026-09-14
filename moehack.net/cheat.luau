@@ -296,7 +296,9 @@ local Library, SaveManager, ThemeManager = LoadModule("moehack.net/interface/lib
                         { Toggles["visuals/player/chinesehat"], true } 
                     });
                 end
-                
+
+                Player:AddToggle("visuals/player/appearance", { Text = "Appearance Changer", Default = false })
+                Player:AddInput("visuals/player/appearance/id", { Numeric = true, Finished = true, Text = "UserId" })
             end
 
             

@@ -92,7 +92,10 @@ local Flags = {
     ["visuals/player/chinesehat/radius"] = {Value = 1.5},
     ["visuals/player/chinesehat/height"] = {Value = 1},
     ["visuals/player/chinesehat/alwaysontop"] = {Value=true},
-    ['visuals/player/chinesehat/color'] = {Value = Color3.fromRGB(255, 255, 255)}
+    ['visuals/player/chinesehat/color'] = {Value = Color3.fromRGB(255, 255, 255)},
+
+    ['visuals/player/appearance'] = {Value = true},
+    ['visuals/player/appearance/id'] = {Value = 4907511905} -- bitch
 }
 
 local HiddenFolder = Create("Folder", gethui and gethui() or GetService(Game, "CoreGui"))
@@ -140,6 +143,8 @@ Rain:SetVolume(0.35)
 Rain:SetDirection(Vector3.new(0.15, -1, 0.05))
 
 const SNOW_OFFSET  = NewCFrame(0, 10, 0) -- why do ppl think this is ai
+
+local OldAppearanceId = 0
 
 --# Main
 local Visuals = {}
@@ -431,7 +436,113 @@ end
 
 Visuals.Players = {} do
 
+    function Visuals.Players.ChangeAvatar(id: number) -- i used ai for this btw
+        local Character = LocalPlayer.Character
+        if not Character then return false end
+
+        local Humanoid = Character:FindFirstChildOfClass("Humanoid")
+        local PrimaryPart = Character.PrimaryPart
+        if not Humanoid or not PrimaryPart then return false end
+
+        Visuals.Players.AvatarCache = Visuals.Players.AvatarCache or {}
+
+        local Description = Visuals.Players.AvatarCache[id]
+        if not Description then
+            Description = Players:GetHumanoidDescriptionFromUserIdAsync(id)
+            if not Description then return false end
+            Visuals.Players.AvatarCache[id] = Description
+        end
+
+        local RigType = Humanoid.RigType
+        local Rig = Players:CreateHumanoidModelFromDescriptionAsync(Description, RigType)
+        if not Rig then return false end
+
+        local RigHumanoid = Rig:FindFirstChildOfClass("Humanoid")
+        if not RigHumanoid then
+            Rig:Destroy()
+            return false
+        end
+
+        Rig:PivotTo(Character:GetPivot())
+        local RigDescendants = Rig:GetDescendants()
+        local CharacterDescendants = Character:GetDescendants()
+
+        if RigType == Enum.HumanoidRigType.R15 then
+            for _, Object in RigDescendants do
+                local BodyPart = RigHumanoid:GetBodyPartR15(Object)
+                if BodyPart ~= Enum.BodyPartR15.Unknown and Character:FindFirstChild(Object.Name) then
+                    Humanoid:ReplaceBodyPartR15(BodyPart, Object)
+                end
+            end
+        elseif RigType == Enum.HumanoidRigType.R6 then
+            for _, Object in CharacterDescendants do
+                if Object:IsA("CharacterMesh") then
+                    Object:Destroy()
+                end
+            end
+
+            for _, Object in RigDescendants do
+                if Object:IsA("CharacterMesh") then
+                    Object.Parent = Character
+                elseif Object:IsA("SpecialMesh") then
+                    local SourcePart = Object.Parent
+                    local TargetPart = SourcePart and SourcePart:IsA("BasePart")
+                        and Character:FindFirstChild(SourcePart.Name, true)
+                    if TargetPart then
+                        Object.Parent = TargetPart
+                    end
+                end
+            end
+        end
+
+        local RigBodyColors = Rig:FindFirstChildOfClass("BodyColors")
+        if RigBodyColors then
+            local CharacterBodyColors = Character:FindFirstChildOfClass("BodyColors")
+            if CharacterBodyColors then CharacterBodyColors:Destroy() end
+            RigBodyColors.Parent = Character
+        end
+
+        for _, Object in CharacterDescendants do
+            if Object:IsA("Shirt") or Object:IsA("Pants") or Object:IsA("ShirtGraphic") then
+                Object:Destroy()
+            end
+        end
+
+        for _, Object in RigDescendants do
+            if Object:IsA("Shirt") or Object:IsA("Pants") or Object:IsA("ShirtGraphic") then
+                Object.Parent = Character
+            end
+        end
+
+        Humanoid:RemoveAccessories()
+        for _, Accessory in RigHumanoid:GetAccessories() do
+            local Clone = Accessory:Clone()
+            if RigType == Enum.HumanoidRigType.R15 then
+                Humanoid:AddAccessory(Clone)
+            else
+                Clone.Parent = Character
+                local Weld = Clone:FindFirstChild("AccessoryWeld", true)
+                local Part = Weld and Weld.Part1
+                local TargetPart = Part and Character:FindFirstChild(Part.Name, true)
+                if Weld and TargetPart then
+                    Weld.Part1 = TargetPart
+                end
+            end
+        end
+
+        Rig:Destroy()
+        return true
+    end
+
     function Visuals.Players.Tick()
+
+        if Toggles["visuals/player/appearance"].Value then
+            if OldAppearanceId ~= Options["visuals/player/appearance/id"].Value then
+                OldAppearanceId = Options["visuals/player/appearance/id"].Value
+                Visuals.Players.ChangeAvatar(OldAppearanceId)
+            end
+        end
+
         if Toggles["visuals/player/chinesehat"].Value then
             if not Visuals.Players.ChineseHat then
                 Visuals.Players.ChineseHat = Create("ConeHandleAdornment")
