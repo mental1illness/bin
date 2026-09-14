@@ -42,6 +42,9 @@ Library:GiveSignal(Players.PlayerRemoving:Connect(function()
     PlayersCache = Players:GetPlayers()
 end))
 
+local EmptyVec3 = NewVector3()
+local EmptyPhysicProp = PhysicalProperties.new(0,0,0,0,0)
+
 --# Main
 
 local Misc = {}
@@ -160,9 +163,9 @@ Misc.Exploits = {  } do
                 local Character = Player.Character
                 if Character then
                     for _, Part in QueryDescendants(Character, "BasePart") do
-                        Part.CustomPhysicalProperties = PhysicalProperties.new(0,0,0,0,0)
-                        Part.Velocity = Vector3.new(0,0,0)
-                        Part.RotVelocity = Vector3.new(0,0,0)
+                        Part.CustomPhysicalProperties = EmptyPhysicProp
+                        Part.Velocity = EmptyVec3
+                        Part.RotVelocity = EmptyVec3
                         Part.CanCollide = false
                     end
                 end
