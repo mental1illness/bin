@@ -156,6 +156,7 @@ Misc.Exploits = {  } do
     function Misc.Exploits.Tick()
         if Toggles["misc/exploits/antifling"].Value then
             for _, Player in PlayersCache do
+                if Player ~= LocalPlayer then continue end
                 local Character = Player.Character
                 if Character then
                     for _, Part in QueryDescendants(Character, "BasePart") do
