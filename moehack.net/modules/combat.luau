@@ -6,7 +6,7 @@
 local FromOffset, FromScale, UDim2New = UDim2.fromOffset, UDim2.fromScale, UDim2.new
 local Atan2, Rad, Pi, Abs, Minimum, Maximum, Floor, Clamp, Sqrt = math.atan2, math.rad, math.pi, math.abs, math.min, math.max, math.floor, math.clamp, math.sqrt
 local NewVector, NewVector3, NewCFrame = vector.create, Vector3.new, CFrame.new
-local Create, IsA, IsDescendantOf, GetChildren = Instance.new, workspace.IsA, workspace.IsDescendantOf, workspace.GetChildren
+local Create, IsA, IsDescendantOf, GetChildren, QueryDescendants = Instance.new, workspace.IsA, workspace.IsDescendantOf, workspace.GetChildren, workspace.QueryDescendants
 local Spawn, Wait = task.spawn, task.wait
 local ForEach, Insert, RemoveTable = table.foreach, table.insert, table.remove
 local FindFirstChild, WaitForChild, Raycast = workspace.FindFirstChild, workspace.WaitForChild, workspace.Raycast
@@ -125,12 +125,12 @@ function Combat.GetTarget(FOV: number, BestHitbox: boolean)
 
             if Character then
                 local Humanoid = FindFirstChild(Character, "Humanoid")
-                local RootPart = RealCharacter.PrimaryPart
+                local RootPart = PlaceId == 72920620366355 and FindFirstChild(Character, "head", true) or Character.PrimaryPart
 
                 if Humanoid and RootPart and Humanoid.Health > 0 then
                     if BestHitbox then
-                        for _, Hitbox in GetChildren(Character) do
-                            if Hitbox:IsA("BasePart") then
+                        for _, Hitbox in QueryDescendants(Character, "BasePart") do
+                            --if IsA(Hitbox, "BasePart") then
                                 local Position, OnScreen = WorldToViewportPoint(Camera, Hitbox.Position)
 
                                 if OnScreen and Position.Z > 0 then
@@ -142,7 +142,7 @@ function Combat.GetTarget(FOV: number, BestHitbox: boolean)
                                         BestHitboxPart = Hitbox
                                     end
                                 end
-                            end
+                            --end
                         end
                     else
                         local Position, OnScreen = WorldToViewportPoint(Camera, RootPart.Position)
@@ -153,7 +153,8 @@ function Combat.GetTarget(FOV: number, BestHitbox: boolean)
                             if Distance <= BestDistance then
                                 BestDistance = Distance
                                 BestTarget = Player
-                                BestHitboxPart = PlaceId == 72920620366355 and FindFirstChild(Character, "head") or FindFirstChild(Character, "Head")
+                                print(RootPart)
+                                BestHitboxPart = RootPart
                             end
                         end
                     end
