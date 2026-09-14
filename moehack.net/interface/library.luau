@@ -1535,14 +1535,14 @@ do
 		local Container = Groupbox.Container
 
 		local function CreateBaseButton(Button)
-			local Outer = Library:Create("Frame", {
+	local Outer = Library:Create("Frame", {
 				BackgroundColor3 = Color3.new(0, 0, 0),
 				BorderColor3 = Color3.new(0, 0, 0),
 				Size = UDim2.new(1, -4, 0, 20),
 				ZIndex = 5,
 			})
 
-			local Inner = Library:Create("Frame", {
+	local Inner = Library:Create("Frame", {
 				BackgroundColor3 = Library.MainColor,
 				BorderColor3 = Library.OutlineColor,
 				BorderMode = Enum.BorderMode.Inset,
@@ -3196,6 +3196,14 @@ function Library:CreateWindow(...)
 		Config.Size = UDim2.fromOffset(550, 600)
 	end
 
+	if type(Config.BackgroundImageTransparency) ~= "number" then
+		Config.BackgroundImageTransparency = 0.35
+	end
+	Config.BackgroundImageTransparency = math.clamp(Config.BackgroundImageTransparency, 0, 1)
+	if typeof(Config.BackgroundImageScaleType) ~= "EnumItem" then
+		Config.BackgroundImageScaleType = Enum.ScaleType.Crop
+	end
+
 	if Config.Center then
 		Config.AnchorPoint = Vector2.new(0.5, 0.5)
 		Config.Position = UDim2.fromScale(0.5, 0.5)
@@ -3215,6 +3223,28 @@ function Library:CreateWindow(...)
 		ZIndex = 1,
 		Parent = ScreenGui,
 	})
+
+	if type(Config.BackgroundImage) == "string" and Config.BackgroundImage ~= "" then
+		local BackgroundImageFile = "background.png"
+		local Downloaded = pcall(function()
+			writefile(BackgroundImageFile, game:HttpGet(Config.BackgroundImage))
+		end)
+
+		if Downloaded then
+			Library:Create("ImageLabel", {
+				Name = "BackgroundImage",
+				BackgroundTransparency = 1,
+				BorderSizePixel = 0,
+				Image = getcustomasset(BackgroundImageFile),
+				ImageTransparency = Config.BackgroundImageTransparency,
+				ScaleType = Config.BackgroundImageScaleType,
+				Size = UDim2.fromScale(1, 1),
+				Position = UDim2.fromScale(0, 0),
+				ZIndex = 0,
+				Parent = Outer,
+			})
+		end
+	end
 
 	Library:MakeDraggable(Outer, 25)
 
@@ -3240,6 +3270,7 @@ function Library:CreateWindow(...)
 
 	local Inner = Library:Create("Frame", {
 		BackgroundColor3 = Library.MainColor,
+		BackgroundTransparency = Config.BackgroundImage and 0.15 or 0,
 		BorderColor3 = Library.AccentColor,
 		BorderMode = Enum.BorderMode.Inset,
 		Position = UDim2.new(0, 1, 0, 1),
@@ -3248,6 +3279,15 @@ function Library:CreateWindow(...)
 		Parent = Outer,
 	})
 
+	if type(Config.BackgroundImage) == "string" and Config.BackgroundImage ~= "" then
+		local BackgroundImage = Outer:FindFirstChild("BackgroundImage")
+		if BackgroundImage then
+			BackgroundImage.Parent = Inner
+			BackgroundImage.Size = UDim2.fromScale(1, 1)
+			BackgroundImage.ZIndex = 1
+		end
+	end
+	
 	Library:AddToRegistry(Inner, {
 		BackgroundColor3 = "MainColor",
 		BorderColor3 = "AccentColor",
