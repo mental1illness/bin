@@ -3343,7 +3343,7 @@ function Library:CreateWindow(...)
 				Size = UDim2.fromScale(1, 1),
 				Position = UDim2.fromScale(0, 0),
 				ZIndex = 3,
-				Parent = Outer,
+				Parent = TabContainer,
 			})
 		end
 	end
