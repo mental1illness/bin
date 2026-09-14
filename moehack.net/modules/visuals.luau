@@ -484,7 +484,8 @@ Visuals.Players = {} do
             for _, Object in RigDescendants do
                 if Object:IsA("CharacterMesh") then
                     Object.Parent = Character
-                elseif Object:IsA("SpecialMesh") then
+                elseif Object:IsA("SpecialMesh")
+                    and not Object:FindFirstAncestorOfClass("Accessory") then
                     local SourcePart = Object.Parent
                     local TargetPart = SourcePart and SourcePart:IsA("BasePart")
                         and Character:FindFirstChild(SourcePart.Name, true)
@@ -533,6 +534,7 @@ Visuals.Players = {} do
         -- Rig:Destroy()
         return true
     end
+
 
     function Visuals.Players.Tick()
 
