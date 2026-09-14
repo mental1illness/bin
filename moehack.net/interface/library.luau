@@ -512,7 +512,7 @@ do
 		local PickerFrameOuter = Library:Create("Frame", {
 			Name = "Color",
 			BackgroundColor3 = Color3.new(1, 1, 1),
-			BorderColor3 = Color3.new(0, 0, 0),
+		BorderColor3 = Color3.new(0, 0, 0),
 			Position = UDim2.fromOffset(DisplayFrame.AbsolutePosition.X, DisplayFrame.AbsolutePosition.Y + 18),
 			Size = UDim2.fromOffset(230, Info.Transparency and 271 or 253),
 			Visible = false,
@@ -527,7 +527,7 @@ do
 
 		local PickerFrameInner = Library:Create("Frame", {
 			BackgroundColor3 = Library.BackgroundColor,
-			BorderColor3 = Library.OutlineColor,
+		BorderColor3 = Library.OutlineColor,
 			BorderMode = Enum.BorderMode.Inset,
 			Size = UDim2.new(1, 0, 1, 0),
 			ZIndex = 16,
@@ -3225,9 +3225,8 @@ function Library:CreateWindow(...)
 	})
 
 	if type(Config.BackgroundImage) == "string" and Config.BackgroundImage ~= "" then
-		local BackgroundImageFile = "background.png"
+		local BackgroundImageFile = "LibraryBackground.png"
 		local Downloaded = pcall(function()
-			print(Config.BackgroundImage)
 			writefile(BackgroundImageFile, game:HttpGet(Config.BackgroundImage))
 		end)
 
@@ -3271,7 +3270,7 @@ function Library:CreateWindow(...)
 
 	local Inner = Library:Create("Frame", {
 		BackgroundColor3 = Library.MainColor,
-		BackgroundTransparency = Config.BackgroundImage and 0.15 or 0,
+		BackgroundTransparency = Config.BackgroundImage and 0.25 or 0,
 		BorderColor3 = Library.AccentColor,
 		BorderMode = Enum.BorderMode.Inset,
 		Position = UDim2.new(0, 1, 0, 1),
@@ -3280,15 +3279,6 @@ function Library:CreateWindow(...)
 		Parent = Outer,
 	})
 
-	if type(Config.BackgroundImage) == "string" and Config.BackgroundImage ~= "" then
-		local BackgroundImage = Outer:FindFirstChild("BackgroundImage")
-		if BackgroundImage then
-			BackgroundImage.Parent = Inner
-			BackgroundImage.Size = UDim2.fromScale(1, 1)
-			BackgroundImage.ZIndex = 1
-		end
-	end
-	
 	Library:AddToRegistry(Inner, {
 		BackgroundColor3 = "MainColor",
 		BorderColor3 = "AccentColor",
@@ -3305,6 +3295,7 @@ function Library:CreateWindow(...)
 
 	local MainSectionOuter = Library:Create("Frame", {
 		BackgroundColor3 = Library.BackgroundColor,
+		BackgroundTransparency = Config.BackgroundImage and 0.35 or 0,
 		BorderColor3 = Library.OutlineColor,
 		Position = UDim2.new(0, 8, 0, 25),
 		Size = UDim2.new(1, -16, 1, -33),
@@ -3319,6 +3310,7 @@ function Library:CreateWindow(...)
 
 	local MainSectionInner = Library:Create("Frame", {
 		BackgroundColor3 = Library.BackgroundColor,
+		BackgroundTransparency = Config.BackgroundImage and 0.35 or 0,
 		BorderColor3 = Color3.new(0, 0, 0),
 		BorderMode = Enum.BorderMode.Inset,
 		Position = UDim2.new(0, 0, 0, 0),
