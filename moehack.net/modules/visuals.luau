@@ -530,7 +530,7 @@ Visuals.Players = {} do
             end
         end
 
-        Rig:Destroy()
+        -- Rig:Destroy()
         return true
     end
 
