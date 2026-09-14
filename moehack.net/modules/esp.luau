@@ -520,31 +520,84 @@ function ESP.GetCharacter(Player)
     return Player.Character
 end
 
-local function _ESPConnectCharacter(Player, Entity)
-    Entity.BodyParts = {}
-    local Character = ESP.GetCharacter(Player)
-    if not Character then return end
-    for _, Object in Character:QueryDescendants("BasePart") do
-        --if IsA(Object, "BasePart") then
-            Insert(Entity.BodyParts, Object)
-        --end
+local function _ESPDisconnectTarget(Entity)
+    if Entity.TargetConnections then
+        for _, Connection in Entity.TargetConnections do
+            Connection:Disconnect()
+        end
     end
-    Library:GiveSignal(
-        Character.DescendantAdded:Connect(function(Object)
-            if IsA(Object, "BasePart") then
-                Insert(Entity.BodyParts, Object)
+    Entity.TargetConnections = {}
+end
+
+local function _ESPConnectTarget(Target, Entity)
+    _ESPDisconnectTarget(Entity)
+    Entity.BodyParts = {}
+    if not Target or not Target.Parent then return end
+
+    if IsA(Target, "BasePart") then
+        Insert(Entity.BodyParts, Target)
+        return
+    end
+
+    for _, Object in Target:GetDescendants() do
+        if IsA(Object, "BasePart") then
+            Insert(Entity.BodyParts, Object)
+        end
+    end
+
+    Insert(Entity.TargetConnections, Target.DescendantAdded:Connect(function(Object)
+        if IsA(Object, "BasePart") then
+            Insert(Entity.BodyParts, Object)
+        end
+    end))
+    Insert(Entity.TargetConnections, Target.DescendantRemoving:Connect(function(Object)
+        for i, Part in Entity.BodyParts do
+            if Part == Object then
+                RemoveTable(Entity.BodyParts, i)
+                break
             end
-        end)
-    ); Library:GiveSignal(
-        Character.DescendantRemoving:Connect(function(Object)
-            for i, Part in Entity.BodyParts do
-                if Part == Object then
-                    RemoveTable(Entity.BodyParts, i)
-                    break
-                end
-            end
-        end)
-    )
+        end
+    end))
+end
+
+function ESP.AddTarget(Target, Settings)
+    Settings = Settings or {}
+    if ESP.Entities[Target] then
+        ESP.RemoveTarget(Target)
+    end
+
+    local Entity = {
+        Objects = ESP.CreateElements(),
+        Target = Target,
+        Player = Settings.Player,
+        Name = Settings.Name or Target.Name,
+        UseHealth = Settings.Health ~= false,
+        BodyParts = {},
+        TargetConnections = {},
+        IsCustom = true,
+    }
+    ESP.Entities[Target] = Entity
+    _ESPConnectTarget(Target, Entity)
+    return Entity
+end
+
+function ESP.RemoveTarget(TargetOrEntity)
+    local Entity = ESP.Entities[TargetOrEntity] or TargetOrEntity
+    if not Entity then return end
+    for Key, Value in ESP.Entities do
+        if Value == Entity then
+            ESP.Entities[Key] = nil
+            break
+        end
+    end
+    _ESPDisconnectTarget(Entity)
+    if Entity.Objects and Entity.Objects.Holder then
+        Entity.Objects.Holder:Destroy()
+    end
+end
+
+local function _ESPConnectCharacter(Player, Entity)
+    _ESPConnectTarget(ESP.GetCharacter(Player), Entity)
 end
 
 function ESP.ApplyAllPlayer()
@@ -629,15 +682,18 @@ function ESP.GetTool(Player, Character)
 end
 
 function ESP.Render(Entity: {})
-	local Player = Entity.Player
-	local Objects = Entity.Objects
+    local Player = Entity.Player
+    local Objects = Entity.Objects
 
-	local Character = ESP.GetCharacter(Player)
-    local RealCharacter = Player.Character
+    local RealCharacter = Entity.IsCustom and Entity.Target or (Player and Player.Character)
+    local Character = Entity.IsCustom and Entity.Target or (Player and ESP.GetCharacter(Player))
+    if Entity.IsCustom and (not RealCharacter or not RealCharacter.Parent) then
+        ESP.RemoveTarget(Entity)
+        return
+    end
 
     local ClientCharacter = LocalPlayer.Character
-    local ClientRoot = ClientCharacter and ClientCharacter:FindFirstChild("HumanoidRootPart")
-
+    local ClientRoot = ClientCharacter and ClientCharacter.PrimaryPart
     local Distance = 0
 
 	if not RealCharacter then
@@ -735,9 +791,12 @@ function ESP.Render(Entity: {})
             Objects.NameHolder.Visible = true
         end
 
-        local Name = Player.DisplayName
-        if Name == "" then
-            Name = Player.Name
+        local Name = Entity.Name
+        if Player then
+            Name = Player.DisplayName
+            if Name == "" then
+                Name = Player.Name
+            end
         end
 
         if Objects.Name.Text ~= Name then
@@ -756,7 +815,7 @@ function ESP.Render(Entity: {})
         if not Objects.Tool.Visible then
             Objects.Tool.Visible = true
         end
-        local ToolName = ESP.GetTool(Player, RealCharacter)
+        local ToolName = Player and ESP.GetTool(Player, RealCharacter) or "none"
 
         if Objects.Tool.Text ~= ToolName then Objects.Tool.Text = ToolName end
         local ToolColor = Options["esp/tool/color"].Value
@@ -772,7 +831,7 @@ function ESP.Render(Entity: {})
             Objects.HealthBar.Visible = true
         end
 
-        local HealthPercent = Health / MaxHealth
+        local HealthPercent = MaxHealth > 0 and Clamp(Health / MaxHealth, 0, 1) or 1
         local HealthHeight = (HighY - LowY) * HealthPercent
 
         if Objects.HealthBar.Size.X.Offset ~= Options["esp/healthbar/thickness"].Value then
@@ -836,7 +895,7 @@ function ESP.Render(Entity: {})
             Objects.Distance.Visible = true
         end
 
-        local TargetRoot = RealCharacter.PrimaryPart
+        local TargetRoot = RealCharacter:IsA("Model") and RealCharacter.PrimaryPart or (RealCharacter:IsA("BasePart") and RealCharacter or nil)
 
         if ClientRoot and TargetRoot then
             local DistanceText = tostring(Floor(Distance)) .. "st"
