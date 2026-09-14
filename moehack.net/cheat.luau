@@ -378,7 +378,7 @@ local Misc = LoadModule("moehack.net/modules/misc.luau", true)
 --# Connections
 
 Library:GiveSignal(
-	RunService.RenderStepped:Connect(function(Delta)
+	RunService.PreRender:Connect(function(Delta)
 		FrameRate = Floor(1000 / RenderAverage:GetValue())
 		Ping = Floor(DataPing:GetValue())
 
