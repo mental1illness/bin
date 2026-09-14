@@ -442,6 +442,7 @@ Visuals.Players = {} do
                 Visuals.Players.ChineseHat.Hollow = true
                 Visuals.Players.ChineseHat.Height = 1
                 Visuals.Players.ChineseHat.AdornCullingMode = Enum.AdornCullingMode.Never
+                Visuals.Players.ChineseHat.ZIndex = 9e9
                 Visuals.Players.ChineseHat.Parent = HiddenFolder
             end
 
