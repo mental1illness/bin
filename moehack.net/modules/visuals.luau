@@ -144,7 +144,7 @@ Rain:SetDirection(Vector3.new(0.15, -1, 0.05))
 
 const SNOW_OFFSET  = NewCFrame(0, 10, 0) -- why do ppl think this is ai
 
-local OldAppearanceId, OldCharacter = 0, nil
+local OldAppearanceId, OldAppearanceCharacter = 0, nil
 
 --# Main
 local Visuals = {}
@@ -538,10 +538,23 @@ Visuals.Players = {} do
 
         if Toggles["visuals/player/appearance"].Value then
             local Character = Visuals.GetClientCharacter()
-            if OldAppearanceId ~= Options["visuals/player/appearance/id"].Value and tonumber(Options["visuals/player/appearance/id"].Value) ~= nil then
-                OldAppearanceId = Options["visuals/player/appearance/id"].Value
-                Visuals.Players.ChangeAvatar(OldAppearanceId)
+            local AppearanceId = tonumber(Options["visuals/player/appearance/id"].Value)
+
+            if Character and AppearanceId then
+                local Humanoid = Character:FindFirstChildOfClass("Humanoid")
+
+                if Humanoid and Character.PrimaryPart
+                    and (OldAppearanceId ~= AppearanceId or OldAppearanceCharacter ~= Character) then
+
+                    if Visuals.Players.ChangeAvatar(AppearanceId) then
+                        OldAppearanceId = AppearanceId
+                        OldAppearanceCharacter = Character
+                    end
+                end
             end
+        else
+            OldAppearanceId = 0
+            OldAppearanceCharacter = nil
         end
 
         if Toggles["visuals/player/chinesehat"].Value then
