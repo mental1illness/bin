@@ -87,7 +87,7 @@ local Library, SaveManager, ThemeManager = LoadModule("moehack.net/interface/lib
 
             do -- Trigger Bot
                 TriggerBot:AddToggle("combat/triggerbot", { Text = "Enabled", Default = false }):AddKeyPicker("combat/triggerbot/key", { Text = "Triggerbot Key",  SyncToggleState = false, Mode = "Hold", Default = "MB2" })
-                TriggerBot:AddSlider("combat/triggerbot/fov", { Text = "Field Of View", Min = 1, Max = 360, Rounding = 0, Default = 120 })
+                TriggerBot:AddSlider("combat/triggerbot/fov", { Text = "Field Of View", Min = 1, Max = 50, Rounding = 0, Default = 35 })
                 TriggerBot:AddSlider("combat/triggerbot/reactiontime", { Text = "Reaction Time", Min = 1, Max = 360, Rounding = 0, Default = 12 })
                 TriggerBot:AddToggle("combat/triggerbot/ignorebehindwalls", { Text = "Ignore Behind Walls", Default = false })
             end
@@ -98,9 +98,11 @@ local Library, SaveManager, ThemeManager = LoadModule("moehack.net/interface/lib
             end
 
             do -- Bullet Redirection
-
+                BulletRedirection:AddToggle("combat/bulletredirection", { Text = "Enabled", Default = false })
+                BulletRedirection:AddSlider("combat/bulletredirection/fov", { Text = "Field Of View", Min = 1, Max = 360, Rounding = 0, Default = 120 })
+                BulletRedirection:AddDropdown("combat/bulletredirection/method", { Text = "Method", Default = 1, Values = {'FindPartOnRay', 'FindPartOnRayWithIgnoreList', 'FindPartOnRayWithWhitelist', 'ScreenPointToRay', 'ViewportPointToRay', 'Raycast', 'Ray'} })
+                BulletRedirection:AddToggle("combat/bulletredirection/magicbullet", { Text = "Magic Bullet", Default = false })
             end
-        end
 
         do -- ESP
             local Main, Settings = Tabs.ESP:AddGroupbox({ Side = 1, Name = "Players" }), Tabs.ESP:AddGroupbox({ Side = 2, Name = "Settings" })
