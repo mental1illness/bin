@@ -95,6 +95,7 @@ local Library, SaveManager, ThemeManager = LoadModule("moehack.net/interface/lib
             do -- RCS
                 RCS:AddToggle("combat/rcs", { Text = "Enabled", Default = false }):AddKeyPicker("combat/rcs/key", { Text = "RCS Key",  SyncToggleState = false, Mode = "Hold", Default = "MB1" })
                 RCS:AddSlider("combat/rcs/speed", {Text = "Speed", Min = 1, Max = 40, Rounding = 1, Default = 12})
+                RCS:AddSlider("combat/rcs/strength", { Text = "Strength", Min = 0, Max = 200, Rounding = 0, Default = 100 })
                 RCS:AddDropdown("combat/rcs/method", { Text = "Method", Default = 1, Values = {
                     "Camera",
                     "Mouse",

@@ -351,46 +351,35 @@ function Combat.Tick(Delta)
 
             Combat.RCSCorrection = 0
 
-            if Abs(RealMouseY) >= 2 and Abs(CameraDelta) < 0.05 then
+            if Abs(RealMouseY) > 2 and Abs(CameraDelta) < 0.04 then
                 local MeasuredSensitivity = CameraDelta / RealMouseY
 
                 if Abs(MeasuredSensitivity) > 0.0001 and Abs(MeasuredSensitivity) < 0.02 then
-                    Combat.RCSMouseSensitivity += (MeasuredSensitivity - Sensitivity) * Clamp(Delta * 2, 0, 1)
+                    Combat.RCSMouseSensitivity += (MeasuredSensitivity - Sensitivity) * Clamp(Delta * 4, 0, 1)
                     Sensitivity = Combat.RCSMouseSensitivity
                 end
             end
 
-            local ExpectedCameraDelta = RealMouseY * Sensitivity
-            local RecoilDelta = CameraDelta - ExpectedCameraDelta
+            local ExpectedDelta = RealMouseY * Sensitivity
+            local RecoilDelta = CameraDelta - ExpectedDelta
 
-            if Abs(RecoilDelta) > 0.0005 then
-                Combat.RCSRecoil += RecoilDelta
+            if Abs(RecoilDelta) < 0.0015 then
+                RecoilDelta = 0
             end
 
-            Combat.RCSRecoil = Clamp(Combat.RCSRecoil, -0.5, 0.5)
+            Combat.RCSRecoil += (RecoilDelta - Combat.RCSRecoil) * Clamp(Delta * 10, 0, 1)
 
             local Speed = Options["combat/rcs/speed"].Value
-            local Method = Options["combat/rcs/method"].Value
+            local Alpha = Clamp(Speed * Delta, 0, 1)
 
-            if Method == "Camera" then
-                local Correction = Combat.RCSRecoil * Clamp(Speed * Delta, 0, 1)
+            if Abs(Combat.RCSRecoil) > 0.001 and Abs(Sensitivity) > 0.0001 then
+                local Correction = (Combat.RCSRecoil / Sensitivity) * Alpha
 
-                Camera.CFrame = Camera.CFrame * CFrame.Angles(-Correction, 0, 0)
+                Correction = Clamp(Correction, -3, 3)
 
-                Combat.RCSRecoil -= Correction
-            elseif Method == "Mouse" then
-                if Abs(Sensitivity) > 0.0001 then
-                    local Pixels = -(Combat.RCSRecoil / Sensitivity)
-                    local Correction = Pixels * Clamp(Speed * Delta, 0, 1)
-
-                    Correction = Clamp(Correction, -30, 30)
-
-                    if Abs(Correction) >= 0.1 then
-                        mousemoverel(0, Correction)
-                        Combat.RCSCorrection = Correction
-
-                        Combat.RCSRecoil -= Correction * Sensitivity
-                    end
+                if Abs(Correction) > 0.1 then
+                    mousemoverel(0, Correction)
+                    Combat.RCSCorrection = Correction
                 end
             end
         end
