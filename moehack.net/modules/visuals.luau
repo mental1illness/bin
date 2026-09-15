@@ -480,12 +480,12 @@ Visuals.Players = {} do
         end
 
         Rig:PivotTo(Character:GetPivot())
-        local RigDescendants = Rig:GetDescendants()
+        local RigDescendants = Rig:QueryDescendants()
         local CharacterDescendants = Character:GetDescendants()
 
         if RigType == Enum.HumanoidRigType.R15 then
             for _, Object in RigDescendants do
-                local BodyPart = RigHumanoid:GetBodyPartR15(Object)
+                local BodyPart = pcall(RigHumanoid.GetBodyPartR15, RigHumanoid, Object)
                 if BodyPart ~= Enum.BodyPartR15.Unknown and Character:FindFirstChild(Object.Name) then
                     Humanoid:ReplaceBodyPartR15(BodyPart, Object)
                 end
