@@ -480,7 +480,7 @@ Visuals.Players = {} do
         end
 
         Rig:PivotTo(Character:GetPivot())
-        local RigDescendants = Rig:QueryDescendants()
+        local RigDescendants = Rig:GetDescendants()
         local CharacterDescendants = Character:GetDescendants()
 
         if RigType == Enum.HumanoidRigType.R15 then
