@@ -179,7 +179,6 @@ function Combat.GetTarget(FOV: number, BestHitbox: boolean)
                             if Distance <= BestDistance then
                                 BestDistance = Distance
                                 BestTarget = Player
-                                print(RootPart)
                                 BestHitboxPart = RootPart
                             end
                         end

@@ -1,6 +1,15 @@
+
+local IsDescendantOf, Raycast = workspace.IsDescendantOf, workspace.Raycast
 local Pack, Unpack = table.pack, table.unpack
 local LookAt = CFrame.lookAt
 local Lower = string.lower
+
+--# Vars
+
+local Params = RaycastParams.new()
+Params.FilterType = Enum.RaycastFilterType.Exclude
+
+local Camera = workspace.CurrentCamera
 
 --# Helper Funcs (USELESS)
 
@@ -37,6 +46,10 @@ local SilentAimHook = {
 
         local Target, Hitbox = Combat.GetTarget(Options["combat/bulletredirection/fov"].Value, Toggles["combat/bulletredirection/usenearhitbox"])
 
+        if Toggles["combat/bulletredirection/ignorebehindwalls"].Value and not Combat.IsBehindWalls(Target, Hitbox) then
+            Target, Hitbox = nil, nil
+        end
+
         if MagicBullet then
            
         end
@@ -49,6 +62,10 @@ local SilentAimHook = {
         local MagicBullet = Toggles["combat/bulletredirection/magicbullet"].Value
 
         local Target, Hitbox = Combat.GetTarget(Options["combat/bulletredirection/fov"].Value, Toggles["combat/bulletredirection/usenearhitbox"])
+
+        if Toggles["combat/bulletredirection/ignorebehindwalls"].Value and not Combat.IsBehindWalls(Target, Hitbox) then
+            Target, Hitbox = nil, nil
+        end
 
         if MagicBullet then
            
@@ -63,6 +80,10 @@ local SilentAimHook = {
 
         local Target, Hitbox = Combat.GetTarget(Options["combat/bulletredirection/fov"].Value, Toggles["combat/bulletredirection/usenearhitbox"])
 
+        if Toggles["combat/bulletredirection/ignorebehindwalls"].Value and not Combat.IsBehindWalls(Target, Hitbox) then
+            Target, Hitbox = nil, nil
+        end
+
         if MagicBullet then
             
         end
@@ -75,6 +96,10 @@ local SilentAimHook = {
         local MagicBullet = Toggles["combat/bulletredirection/magicbullet"].Value
 
         local Target, Hitbox = Combat.GetTarget(Options["combat/bulletredirection/fov"].Value, Toggles["combat/bulletredirection/usenearhitbox"])
+
+        if Toggles["combat/bulletredirection/ignorebehindwalls"].Value and not Combat.IsBehindWalls(Target, Hitbox) then
+            Target, Hitbox = nil, nil
+        end
 
         if MagicBullet then
             
@@ -89,6 +114,10 @@ local SilentAimHook = {
 
         local Target, Hitbox = Combat.GetTarget(Options["combat/bulletredirection/fov"].Value, Toggles["combat/bulletredirection/usenearhitbox"])
 
+        if Toggles["combat/bulletredirection/ignorebehindwalls"].Value and not Combat.IsBehindWalls(Target, Hitbox) then
+            Target, Hitbox = nil, nil
+        end
+
         if MagicBullet then
 
         end
@@ -101,6 +130,10 @@ local SilentAimHook = {
         local MagicBullet = Toggles["combat/bulletredirection/magicbullet"].Value
 
         local Target, Hitbox = Combat.GetTarget(Options["combat/bulletredirection/fov"].Value, Toggles["combat/bulletredirection/usenearhitbox"])
+
+        if Toggles["combat/bulletredirection/ignorebehindwalls"].Value and not Combat.IsBehindWalls(Target, Hitbox) then
+            Target, Hitbox = nil, nil
+        end
 
         if MagicBullet then
 
@@ -115,7 +148,7 @@ local __Namecall = newcclosure(function(self, ...)
         return
     end
 
-    if Toggles["combat/bulletredirection"].Value then
+    if Toggles["combat/bulletredirection"].Value and not checkcaller() then
         local Method = getnamecallmethod()
         local Handler = SilentAimHook[Method]
 
