@@ -615,7 +615,11 @@ local function _ESPConnectCharacter(Player, Entity)
 end
 
 function ESP.ApplyAllPlayer()
+
 	for _, Player in PlayersCache do
+
+        if Player == LocalPlayer then continue end
+
 		if ESP.Entities[Player] then
 			continue
 		end
