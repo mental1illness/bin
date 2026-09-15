@@ -58,7 +58,7 @@ local Library, SaveManager, ThemeManager = LoadModule("moehack.net/interface/lib
     do
 
         do -- Combat
-            local AimAssist, TriggerBot, RCS = Tabs.Combat:AddGroupbox({ Side = 1, Name = "Aim Assistance" }), Tabs.Combat:AddGroupbox({ Side = 1, Name = "Trigger Bot" }), Tabs.Combat:AddGroupbox({ Side = 2, Name = "Recoil Control System" })
+            local AimAssist, TriggerBot, RCS, BulletRedirection = Tabs.Combat:AddGroupbox({ Side = 1, Name = "Aim Assistance" }), Tabs.Combat:AddGroupbox({ Side = 1, Name = "Trigger Bot" }), Tabs.Combat:AddGroupbox({ Side = 2, Name = "Recoil Control System" }), Tabs.Combat:AddGroupbox({ Side = 2, Name = "Bullet Redirection" })
            
             do -- Aim Assist
                 AimAssist:AddToggle("combat/aimassist", { Text = "Enabled", Default = false }):AddKeyPicker("combat/aimassist/key", { Text = "Aim Assist Key", SyncToggleState = false, Mode = "Hold", Default = "MB2" })
@@ -95,6 +95,10 @@ local Library, SaveManager, ThemeManager = LoadModule("moehack.net/interface/lib
             do -- RCS
                 RCS:AddToggle("combat/rcs", { Text = "Enabled", Default = false }):AddKeyPicker("combat/rcs/key", { Text = "RCS Key",  SyncToggleState = false, Mode = "Hold", Default = "MB1",  Modes = {"Hold"} })
                 RCS:AddSlider("combat/rcs/speed", {Text = "Speed", Min = 1, Max = 40, Rounding = 1, Default = 12})
+            end
+
+            do -- Bullet Redirection
+
             end
         end
 
