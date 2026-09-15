@@ -374,11 +374,9 @@ function Combat.Tick(Delta)
             Combat.RCSRecoil = Clamp(Combat.RCSRecoil, -0.5, 0.5)
 
             local Speed = Options["combat/rcs/speed"].Value
-            local Strength = 0.5
-
             if Sensitivity > 0.0001 and Abs(Combat.RCSRecoil) > 0.0005 then
                 local Pixels = -Combat.RCSRecoil / Sensitivity
-                local CorrectionAmount = Pixels * Strength * Clamp(Speed * Delta, 0, 1)
+                local CorrectionAmount = Pixels * 0.35 * Clamp(Speed * Delta, 0, 1)
 
                 CorrectionAmount = Clamp(CorrectionAmount, -15, 15)
 
