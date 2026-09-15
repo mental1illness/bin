@@ -355,7 +355,7 @@ function Combat.Tick(Delta)
                 local MeasuredSensitivity = CameraDelta / RealMouseY
 
                 if Abs(MeasuredSensitivity) > 0.0001 and Abs(MeasuredSensitivity) < 0.02 then
-                    Combat.RCSMouseSensitivity += (MeasuredSensitivity - Sensitivity) * Clamp(Delta * 4, 0, 1)
+                    Combat.RCSMouseSensitivity += (MeasuredSensitivity - Sensitivity) * Clamp(Delta * 2, 0, 1)
                     Sensitivity = Combat.RCSMouseSensitivity
                 end
             end
@@ -363,19 +363,19 @@ function Combat.Tick(Delta)
             local ExpectedDelta = RealMouseY * Sensitivity
             local RecoilDelta = CameraDelta - ExpectedDelta
 
-            if Abs(RecoilDelta) < 0.0015 then
+            if Abs(RecoilDelta) < 0.001 then
                 RecoilDelta = 0
             end
 
-            Combat.RCSRecoil += (RecoilDelta - Combat.RCSRecoil) * Clamp(Delta * 10, 0, 1)
+            Combat.RCSRecoil += (RecoilDelta - Combat.RCSRecoil) * Clamp(Delta * 15, 0, 1)
 
             local Speed = Options["combat/rcs/speed"].Value
             local Alpha = Clamp(Speed * Delta, 0, 1)
 
-            if Abs(Combat.RCSRecoil) > 0.001 and Abs(Sensitivity) > 0.0001 then
-                local Correction = (Combat.RCSRecoil / Sensitivity) * Alpha
+            if Abs(Combat.RCSRecoil) > 0.001 then
+                local Correction = -(Combat.RCSRecoil / 0.0025) * Alpha
 
-                Correction = Clamp(Correction, -3, 3)
+                Correction = Clamp(Correction, -5, 5)
 
                 if Abs(Correction) > 0.1 then
                     mousemoverel(0, Correction)
