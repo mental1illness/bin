@@ -4,7 +4,7 @@
 --# Aliases
 
 local FromOffset, FromScale, UDim2New = UDim2.fromOffset, UDim2.fromScale, UDim2.new
-local Atan2, Rad, Pi, Abs, Minimum, Maximum, Floor, Clamp, Sqrt = math.atan2, math.rad, math.pi, math.abs, math.min, math.max, math.floor, math.clamp, math.sqrt
+local Atan2, Rad, Pi, Abs, Minimum, Maximum, Floor, Clamp, Sqrt, Asin = math.atan2, math.rad, math.pi, math.abs, math.min, math.max, math.floor, math.clamp, math.sqrt, math.asin
 local NewVector, NewVector3, NewCFrame = vector.create, Vector3.new, CFrame.new
 local Create, IsA, IsDescendantOf, GetChildren, QueryDescendants = Instance.new, workspace.IsA, workspace.IsDescendantOf, workspace.GetChildren, workspace.QueryDescendants
 local Spawn, Wait = task.spawn, task.wait
