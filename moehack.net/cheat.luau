@@ -58,7 +58,7 @@ local Library, SaveManager, ThemeManager = LoadModule("moehack.net/interface/lib
     do
 
         do -- Combat
-            local AimAssist, TriggerBot = Tabs.Combat:AddGroupbox({ Side = 1, Name = "Aim Assistance" }), Tabs.Combat:AddGroupbox({ Side = 1, Name = "Trigger Bot" })
+            local AimAssist, TriggerBot, RCS = Tabs.Combat:AddGroupbox({ Side = 1, Name = "Aim Assistance" }), Tabs.Combat:AddGroupbox({ Side = 1, Name = "Trigger Bot" }), Tabs.Combat:AddGroupbox({ Side = 2, Name = "Recoil Control System" })
            
             do -- Aim Assist
                 AimAssist:AddToggle("combat/aimassist", { Text = "Enabled", Default = false }):AddKeyPicker("combat/aimassist/key", { Text = "Aim Assist Key", SyncToggleState = false, Mode = "Hold", Default = "MB2" })
@@ -90,6 +90,15 @@ local Library, SaveManager, ThemeManager = LoadModule("moehack.net/interface/lib
                 TriggerBot:AddSlider("combat/triggerbot/fov", { Text = "Field Of View", Min = 1, Max = 360, Rounding = 0, Default = 120 })
                 TriggerBot:AddSlider("combat/triggerbot/reactiontime", { Text = "Reaction Time", Min = 1, Max = 360, Rounding = 0, Default = 12 })
                 TriggerBot:AddToggle("combat/triggerbot/ignorebehindwalls", { Text = "Ignore Behind Walls", Default = false })
+            end
+
+            do -- RCS
+                RCS:AddToggle("combat/rcs", { Text = "Enabled", Default = false }):AddKeyPicker("combat/rcs/key", { Text = "RCS Key",  SyncToggleState = false, Mode = "Hold", Default = "MB1" })
+                RCS:AddSlider("combat/rcs/speed", {Text = "Speed", Min = 1, Max = 40, Rounding = 1, Default = 12})
+                RCS:AddDropdown("combat/rcs/method", { Text = "Method", Default = 1, Values = {
+                    "Camera",
+                    "Mouse",
+                } })
             end
         end
 

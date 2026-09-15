@@ -23,6 +23,8 @@ local DataPing = Stats.Network.ServerStatsItem["Data Ping"]
 local VirtualInputManager = Create("VirtualInputManager")
 local Players = GetService(Game, "Players")
 
+local UserGameSettings = UserSettings():GetService("UserGameSettings")
+
 local LocalPlayer = Players.LocalPlayer
 
 --# Helper Funcs
@@ -49,7 +51,9 @@ RaycastParams.FilterType = Enum.RaycastFilterType.Exclude
 local Combat = {
     AimAssistTarget = nil,
     TriggerBotTarget = nil,
-    TriggerBotTime = nil
+    TriggerBotTime = nil,
+    RCSLastPitch = nil,
+    RCSLastMouseY = 0,
 }
 
 function Combat.IsBehindWalls(Target, Hitbox)
@@ -325,6 +329,45 @@ function Combat.Tick(Delta)
     else
         Combat.TriggerBotTarget = nil
         Combat.TriggerBotTime = nil
+    end
+
+    if Toggles["combat/rcs"].Value and Options["combat/rcs/key"]:GetState() then
+        local MouseDelta = UserInputService:GetMouseDelta()
+        local MouseY = MouseDelta.Y
+
+        local MouseSensitivity = UserGameSettings.MouseSensitivity
+        local MouseDeltaSensitivity = UserInputService.MouseDeltaSensitivity
+
+        local RCSMouseSensitivity = 0.0025 * MouseSensitivity * MouseDeltaSensitivity
+
+        local LookVector = Camera.CFrame.LookVector
+        local CurrentPitch = Asin(Clamp(-LookVector.Y, -1, 1))
+
+        if not Combat.RCSLastPitch then
+            Combat.RCSLastPitch = CurrentPitch
+        else
+            local CameraPitchDelta = CurrentPitch - Combat.RCSLastPitch
+            local ExpectedPitchDelta = MouseY * RCSMouseSensitivity
+            local RecoilDelta = CameraPitchDelta - ExpectedPitchDelta
+
+            Combat.RCSLastPitch = CurrentPitch
+
+            local Speed = Options["combat/rcs/speed"].Value
+            local Alpha = Clamp(Speed * Delta, 0, 1)
+            local Method = Options["combat/rcs/method"].Value
+
+            if Method == "Camera" then
+                Camera.CFrame = Camera.CFrame * CFrame.Angles(-RecoilDelta * Alpha, 0, 0)
+            elseif Method == "Mouse" then
+                local MouseMove = (RecoilDelta / RCSMouseSensitivity) * Alpha
+
+                if Abs(MouseMove) > 0.1 then
+                    mousemoverel(0, MouseMove)
+                end
+            end
+        end
+    else
+        Combat.RCSLastPitch = nil
     end
 end
 
