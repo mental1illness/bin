@@ -30,9 +30,24 @@ local LocalPlayer = Players.LocalPlayer
 
 --# Helper Funcs
 
-LoadModule = function(Path, Load)
+LoadModule = function(Path)
+    local FuckYouCacheBitch = getgenv().FuckYouCacheBitch
+
+    if not FuckYouCacheBitch then
+        FuckYouCacheBitch = {}
+        getgenv().FuckYouCacheBitch = FuckYouCacheBitch
+    end
+
+    if FuckYouCacheBitch[Path] ~= nil then
+        return FuckYouCacheBitch[Path]
+    end
+
     local url = "https://cats-cure-depression.vercel.app/" .. Path
-    return Load == true and loadstring(game:HttpGet(url))() or game:HttpGet(url)
+    local Result = loadstring(game:HttpGet(url))()
+
+    FuckYouCacheBitch[Path] = Result
+
+    return Result
 end
 
 local function ExpSmoothing(Rate, DeltaTime)
