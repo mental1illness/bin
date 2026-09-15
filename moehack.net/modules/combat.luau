@@ -54,7 +54,9 @@ local Combat = {
     TriggerBotTarget = nil,
     TriggerBotTime = nil,
     RCSLastPitch = nil,
-    RCSLastMouseY = 0,
+    RCSMouseSensitivity = 0.0025,
+    RCSRecoil = 0,
+    RCSCorrection = 0,
 }
 
 function Combat.IsBehindWalls(Target, Hitbox)
@@ -336,10 +338,6 @@ function Combat.Tick(Delta)
         local MouseDelta = UserInputService:GetMouseDelta()
         local MouseY = MouseDelta.Y
 
-        local MouseSensitivity = UserGameSettings.MouseSensitivity
-        local MouseDeltaSensitivity = UserInputService.MouseDeltaSensitivity
-        local RCSMouseSensitivity = 0.0025 * MouseSensitivity * MouseDeltaSensitivity
-
         local LookVector = Camera.CFrame.LookVector
         local CurrentPitch = Asin(Clamp(-LookVector.Y, -1, 1))
 
@@ -347,27 +345,52 @@ function Combat.Tick(Delta)
             Combat.RCSLastPitch = CurrentPitch
         else
             local CameraPitchDelta = CurrentPitch - Combat.RCSLastPitch
-            local ExpectedPitchDelta = MouseY * RCSMouseSensitivity
-            local RecoilDelta = CameraPitchDelta - ExpectedPitchDelta
-
             Combat.RCSLastPitch = CurrentPitch
+
+            local Sensitivity = Combat.RCSMouseSensitivity
+
+            local CorrectedMouseY = MouseY - Combat.RCSCorrection
+            Combat.RCSCorrection = 0
+
+            if Abs(CorrectedMouseY) > 1 then
+                local MeasuredSensitivity = CameraPitchDelta / CorrectedMouseY
+
+                if Abs(MeasuredSensitivity) > 0.00005 and Abs(MeasuredSensitivity) < 0.05 then
+                    Combat.RCSMouseSensitivity += (MeasuredSensitivity - Sensitivity) * Clamp(Delta * 8, 0, 1)
+                    Sensitivity = Combat.RCSMouseSensitivity
+                end
+            end
+            local ExpectedCameraDelta = CorrectedMouseY * Sensitivity
+
+            local RecoilDelta = CameraPitchDelta - ExpectedCameraDelta
+
+            if Abs(RecoilDelta) < 0.0008 then
+                RecoilDelta = 0
+            end
+            
+            Combat.RCSRecoil += (RecoilDelta - Combat.RCSRecoil) * Clamp(Delta * 14, 0, 1)
 
             local Speed = Options["combat/rcs/speed"].Value
             local Alpha = Clamp(Speed * Delta, 0, 1)
             local Method = Options["combat/rcs/method"].Value
 
-            if Method == "Camera" then
-                Camera.CFrame = Camera.CFrame * CFrame.Angles(-RecoilDelta * Alpha, 0, 0)
-            elseif Method == "Mouse" then
-                local MouseMove = -(RecoilDelta / RCSMouseSensitivity) * Alpha
+            if Abs(Combat.RCSRecoil) > 0.0002 then
+                if Method == "Camera" then
+                    Camera.CFrame = Camera.CFrame * CFrame.Angles(-Combat.RCSRecoil * Alpha, 0, 0)
+                elseif Method == "Mouse" then
+                    local MouseMove = -(Combat.RCSRecoil / Sensitivity) * Alpha
 
-                if Abs(MouseMove) > 0.1 then
-                    mousemoverel(0, MouseMove)
+                    if Abs(MouseMove) > 0.1 then
+                        mousemoverel(0, MouseMove)
+                        Combat.RCSCorrection = MouseMove
+                    end
                 end
             end
         end
     else
         Combat.RCSLastPitch = nil
+        Combat.RCSRecoil = 0
+        Combat.RCSCorrection = 0
     end
 end
 
