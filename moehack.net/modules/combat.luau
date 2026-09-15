@@ -367,8 +367,12 @@ function Combat.Tick(Delta)
             local ExpectedCameraDelta = RealMouseY * Sensitivity
             local RecoilDelta = CameraDelta - ExpectedCameraDelta
 
-            if Abs(RecoilDelta) > 0.0005 then
+            local RecoilDelta = CameraDelta - ExpectedCameraDelta
+
+            if RecoilDelta < -0.0005 then
                 Combat.RCSRecoil += RecoilDelta
+            elseif Combat.RCSRecoil < 0 then
+                Combat.RCSRecoil = Minimum(Combat.RCSRecoil + Delta * 0.5, 0)
             end
 
             Combat.RCSRecoil = Clamp(Combat.RCSRecoil, -0.5, 0.5)
@@ -376,7 +380,7 @@ function Combat.Tick(Delta)
             local Speed = Options["combat/rcs/speed"].Value
             if Sensitivity > 0.0001 and Abs(Combat.RCSRecoil) > 0.0005 then
                 local Pixels = -Combat.RCSRecoil / Sensitivity
-                local CorrectionAmount = Pixels * 0.35 * Clamp(Speed * Delta, 0, 1)
+                local CorrectionAmount = Pixels * 0.25 * Clamp(Speed * Delta, 0, 1)
 
                 CorrectionAmount = Clamp(CorrectionAmount, -15, 15)
 
