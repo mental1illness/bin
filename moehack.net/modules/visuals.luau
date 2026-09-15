@@ -485,7 +485,8 @@ Visuals.Players = {} do
 
         if RigType == Enum.HumanoidRigType.R15 then
             for _, Object in RigDescendants do
-                local BodyPart = pcall(RigHumanoid.GetBodyPartR15, RigHumanoid, Object)
+                local IsOk, BodyPart = pcall(RigHumanoid.GetBodyPartR15, RigHumanoid, Object)
+                if not IsOk then continue end
                 if BodyPart ~= Enum.BodyPartR15.Unknown and Character:FindFirstChild(Object.Name) then
                     Humanoid:ReplaceBodyPartR15(BodyPart, Object)
                 end
