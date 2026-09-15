@@ -338,7 +338,6 @@ function Combat.Tick(Delta)
 
         local MouseSensitivity = UserGameSettings.MouseSensitivity
         local MouseDeltaSensitivity = UserInputService.MouseDeltaSensitivity
-
         local RCSMouseSensitivity = 0.0025 * MouseSensitivity * MouseDeltaSensitivity
 
         local LookVector = Camera.CFrame.LookVector
@@ -360,7 +359,7 @@ function Combat.Tick(Delta)
             if Method == "Camera" then
                 Camera.CFrame = Camera.CFrame * CFrame.Angles(-RecoilDelta * Alpha, 0, 0)
             elseif Method == "Mouse" then
-                local MouseMove = (RecoilDelta / RCSMouseSensitivity) * Alpha
+                local MouseMove = -(RecoilDelta / RCSMouseSensitivity) * Alpha
 
                 if Abs(MouseMove) > 0.1 then
                     mousemoverel(0, MouseMove)
