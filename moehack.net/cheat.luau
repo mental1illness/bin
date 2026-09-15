@@ -115,10 +115,11 @@ local Library, SaveManager, ThemeManager = LoadModule("moehack.net/interface/lib
                 BulletRedirection:AddToggle("combat/bulletredirection", { Text = "Enabled", Default = false })
                 BulletRedirection:AddSlider("combat/bulletredirection/fov", { Text = "Field Of View", Min = 1, Max = 360, Rounding = 0, Default = 120 })
                 BulletRedirection:AddDropdown("combat/bulletredirection/method", { Text = "Method", Default = 1, Values = {'FindPartOnRay', 'FindPartOnRayWithIgnoreList', 'FindPartOnRayWithWhitelist', 'ScreenPointToRay', 'ViewportPointToRay', 'Raycast', 'Ray'} })
+                BulletRedirection:AddToggle("combat/bulletredirection/usenearhitbox", { Text = "Use Nearest Hitbox", Default = false })
                 BulletRedirection:AddToggle("combat/bulletredirection/magicbullet", { Text = "Magic Bullet", Default = false })
             end
         end
-        
+
         do -- ESP
             local Main, Settings = Tabs.ESP:AddGroupbox({ Side = 1, Name = "Players" }), Tabs.ESP:AddGroupbox({ Side = 2, Name = "Settings" })
             do -- Players

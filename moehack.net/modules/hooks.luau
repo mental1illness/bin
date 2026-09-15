@@ -35,6 +35,8 @@ local SilentAimHook = {
         local Args = Pack(...)
         local MagicBullet = Toggles["combat/bulletredirection/magicbullet"].Value
 
+        local Target, Hitbox = Combat.GetTarget(Options["combat/bulletredirection/fov"].Value, Toggles["combat/bulletredirection/usenearhitbox"])
+
         if MagicBullet then
            
         end
@@ -45,6 +47,8 @@ local SilentAimHook = {
     FindPartOnRayWithIgnoreList = function(self, ...)
         local Args = Pack(...)
         local MagicBullet = Toggles["combat/bulletredirection/magicbullet"].Value
+
+        local Target, Hitbox = Combat.GetTarget(Options["combat/bulletredirection/fov"].Value, Toggles["combat/bulletredirection/usenearhitbox"])
 
         if MagicBullet then
            
@@ -57,6 +61,8 @@ local SilentAimHook = {
         local Args = Pack(...)
         local MagicBullet = Toggles["combat/bulletredirection/magicbullet"].Value
 
+        local Target, Hitbox = Combat.GetTarget(Options["combat/bulletredirection/fov"].Value, Toggles["combat/bulletredirection/usenearhitbox"])
+
         if MagicBullet then
             
         end
@@ -67,6 +73,8 @@ local SilentAimHook = {
     ScreenPointToRay = function(self, ...)
         local Args = Pack(...)
         local MagicBullet = Toggles["combat/bulletredirection/magicbullet"].Value
+
+        local Target, Hitbox = Combat.GetTarget(Options["combat/bulletredirection/fov"].Value, Toggles["combat/bulletredirection/usenearhitbox"])
 
         if MagicBullet then
             
@@ -79,6 +87,8 @@ local SilentAimHook = {
         local Args = Pack(...)
         local MagicBullet = Toggles["combat/bulletredirection/magicbullet"].Value
 
+        local Target, Hitbox = Combat.GetTarget(Options["combat/bulletredirection/fov"].Value, Toggles["combat/bulletredirection/usenearhitbox"])
+
         if MagicBullet then
 
         end
@@ -89,6 +99,8 @@ local SilentAimHook = {
     Raycast = function(self, ...)
         local Args = Pack(...)
         local MagicBullet = Toggles["combat/bulletredirection/magicbullet"].Value
+
+        local Target, Hitbox = Combat.GetTarget(Options["combat/bulletredirection/fov"].Value, Toggles["combat/bulletredirection/usenearhitbox"])
 
         if MagicBullet then
 
