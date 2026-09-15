@@ -21,6 +21,7 @@ local RunService = GetService(Game, "RunService")
 local Stats = GetService(Game, "Stats")
 local DataPing = Stats.Network.ServerStatsItem["Data Ping"]
 local VirtualInputManager = Create("VirtualInputManager")
+local UserInputService = GetService(Game, "UserInputService")
 local Players = GetService(Game, "Players")
 
 local UserGameSettings = UserSettings():GetService("UserGameSettings")
