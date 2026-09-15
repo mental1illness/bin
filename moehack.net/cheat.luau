@@ -93,7 +93,7 @@ local Library, SaveManager, ThemeManager = LoadModule("moehack.net/interface/lib
             end
 
             do -- RCS
-                RCS:AddToggle("combat/rcs", { Text = "Enabled", Default = false }):AddKeyPicker("combat/rcs/key", { Text = "RCS Key",  SyncToggleState = false, Mode = "Hold", Default = "MB1" })
+                RCS:AddToggle("combat/rcs", { Text = "Enabled", Default = false }):AddKeyPicker("combat/rcs/key", { Text = "RCS Key",  SyncToggleState = false, Mode = "Hold", Default = "MB1",  Modes = {"Hold"} })
                 RCS:AddSlider("combat/rcs/speed", {Text = "Speed", Min = 1, Max = 40, Rounding = 1, Default = 12})
             end
         end
