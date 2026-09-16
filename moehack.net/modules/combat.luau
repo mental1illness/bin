@@ -63,6 +63,15 @@ local Toggles, Options = getgenv().Toggles, getgenv().Options
 local Camera = workspace.CurrentCamera
 
 local RaycastParams = RaycastParams.new()
+local PlayersCache = Players:GetPlayers()
+
+Library:GiveSignal( Players.PlayerAdded:Connect(function(Player)
+    PlayersCache[Player] = Player
+end) )
+
+Library:GiveSignal( Players.PlayerRemoving:Connect(function(Player)
+    PlayersCache[Player] = nil
+end) )
 
 --# Main
 
@@ -144,7 +153,7 @@ function Combat.GetTarget(FOV: number, BestHitbox: boolean)
     local BestHitboxPart = nil
     local BestDistance = FOV
 
-    for _, Player in Players:GetPlayers() do
+    for _, Player in PlayersCache do
         if Player ~= LocalPlayer then
             local Character = Combat.GetCharacter(Player)
             local RealCharacter = Player.Character
