@@ -2,6 +2,9 @@
   "72920620366355": {
     "use_custom_silent_aim": true,
     "run_on_actor": true,
+    "tab_to_remove": {
+        
+    },
     "game_name": "Operation One"
   }
 }
