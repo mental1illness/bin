@@ -9,7 +9,7 @@ local NewVector, NewVector3, NewCFrame = vector.create, Vector3.new, CFrame.new
 local Create, IsA, IsDescendantOf, GetChildren, QueryDescendants = Instance.new, workspace.IsA, workspace.IsDescendantOf, workspace.GetChildren, workspace.QueryDescendants
 local Spawn, Wait = task.spawn, task.wait
 local ForEach, Insert, RemoveTable = table.foreach, table.insert, table.remove
-local FindFirstChild, WaitForChild, Raycast = workspace.FindFirstChild, workspace.WaitForChild, workspace.Raycast
+local FindFirstChild, WaitForChild, Raycast = workspace.FindFirstChild, workspace.WaitForChild, clonefunction(workspace.Raycast)
 local WorldToViewportPoint = workspace.CurrentCamera.WorldToViewportPoint
 local GetService = Game.GetService
 

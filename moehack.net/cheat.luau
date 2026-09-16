@@ -407,7 +407,7 @@ local ESP = LoadModule("moehack.net/modules/esp.luau", true)
 local Visuals = LoadModule("moehack.net/modules/visuals.luau", true)
 local Combat = LoadModule("moehack.net/modules/combat.luau", true)
 local Misc = LoadModule("moehack.net/modules/misc.luau", true)
-local Hooks = LoadModule("moehack.net/modules/hooks.luau", true)
+LoadModule("moehack.net/modules/hooks.luau", true)
 
 --# Hooks
 
