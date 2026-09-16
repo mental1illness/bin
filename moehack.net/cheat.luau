@@ -65,7 +65,7 @@ local Library, SaveManager, ThemeManager = LoadModule("moehack.net/interface/lib
     local Tabs = {}
 
     for _, Name in {"Combat", "ESP", "Visuals", "Misc", "Settings"} do
-        if not TableFind(moehack.data.tab_to_remove, Lower(Name)) then
+        if not moehack.data.tab_to_remove[Lower(Name)] then
             Tabs[Name] = Window:AddTab(Name)
         end
     end
