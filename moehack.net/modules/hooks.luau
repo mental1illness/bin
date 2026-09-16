@@ -39,6 +39,51 @@ LoadModule = function(Path)
     return Result
 end
 
+function IsBehindWalls(Hitbox)
+    if not Hitbox then
+        return true
+    end
+
+    local Origin = Camera.CFrame.Position
+    local Direction = Hitbox.Position - Origin
+
+    local IgnoreList = {
+        LocalPlayer.Character
+    }
+
+    for _ = 1, 20 do
+        Params.FilterDescendantsInstances = IgnoreList
+
+        local Result = Raycast(
+            workspace,
+            Origin,
+            Direction,
+            Params
+        )
+
+        if not Result then
+            return true
+        end
+
+        local Part = Result.Instance
+
+        if Part == Hitbox then
+            return false
+        end
+
+        if Part.Transparency >= 1 or not Part.CanCollide then
+            table.insert(IgnoreList, Part)
+
+            Origin = Result.Position + Direction.Unit * 0.01
+            Direction = Hitbox.Position - Origin
+        else
+            return true
+        end
+    end
+
+    return true
+end
+
 --# Modules
 
 local Combat = LoadModule("moehack.net/modules/combat.luau", true)
@@ -56,7 +101,7 @@ local SilentAimHook = {
             return
         end
 
-        if Toggles["combat/bulletredirection/ignorebehindwalls"].Value and Combat.IsBehindWalls(Target, Hitbox) then
+        if Toggles["combat/bulletredirection/ignorebehindwalls"].Value and IsBehindWalls(Hitbox) then
             return
         end
 
@@ -80,7 +125,7 @@ local SilentAimHook = {
             return
         end
 
-        if Toggles["combat/bulletredirection/ignorebehindwalls"].Value and Combat.IsBehindWalls(Target, Hitbox) then
+        if Toggles["combat/bulletredirection/ignorebehindwalls"].Value and IsBehindWalls(Hitbox) then
             return
         end
 
@@ -104,7 +149,7 @@ local SilentAimHook = {
             return
         end
 
-        if Toggles["combat/bulletredirection/ignorebehindwalls"].Value and Combat.IsBehindWalls(Target, Hitbox) then
+        if Toggles["combat/bulletredirection/ignorebehindwalls"].Value and IsBehindWalls(Hitbox) then
             return
         end
 
@@ -128,7 +173,7 @@ local SilentAimHook = {
             return
         end
 
-        if Toggles["combat/bulletredirection/ignorebehindwalls"].Value and Combat.IsBehindWalls(Target, Hitbox) then
+        if Toggles["combat/bulletredirection/ignorebehindwalls"].Value and IsBehindWalls(Hitbox) then
             return
         end
 
@@ -159,7 +204,7 @@ local SilentAimHook = {
             return
         end
 
-        if Toggles["combat/bulletredirection/ignorebehindwalls"].Value and Combat.IsBehindWalls(Target, Hitbox) then
+        if Toggles["combat/bulletredirection/ignorebehindwalls"].Value and IsBehindWalls(Hitbox) then
             return
         end
 
@@ -190,7 +235,7 @@ local SilentAimHook = {
             return
         end
 
-        if Toggles["combat/bulletredirection/ignorebehindwalls"].Value and Combat.IsBehindWalls(Target, Hitbox) then
+        if Toggles["combat/bulletredirection/ignorebehindwalls"].Value and IsBehindWalls(Hitbox) then
             return
         end
 
