@@ -45,7 +45,7 @@ local Combat = LoadModule("moehack.net/modules/combat.luau", true)
 local Hooks = {}
 
 local SilentAimHook = {
-    FindPartOnRay = function(self, Args)
+    FindPartOnRay = function(Args)
         if Typeof(Args[1]) ~= "Ray" then
             return
         end
@@ -69,7 +69,7 @@ local SilentAimHook = {
         Args[1] = NewRay(Args[1].Origin, LookAt(Args[1].Origin, Hitbox.Position).LookVector * Args[1].Direction.Magnitude)
     end,
 
-    FindPartOnRayWithIgnoreList = function(self, Args)
+    FindPartOnRayWithIgnoreList = function(Args)
         if Typeof(Args[1]) ~= "Ray" then
             return
         end
@@ -93,7 +93,7 @@ local SilentAimHook = {
         Args[1] = NewRay(Args[1].Origin, LookAt(Args[1].Origin, Hitbox.Position).LookVector * Args[1].Direction.Magnitude)
     end,
 
-    FindPartOnRayWithWhitelist = function(self, Args)
+    FindPartOnRayWithWhitelist = function(Args)
         if Typeof(Args[1]) ~= "Ray" then
             return
         end
@@ -117,7 +117,7 @@ local SilentAimHook = {
         Args[1] = NewRay(Args[1].Origin, LookAt(Args[1].Origin, Hitbox.Position).LookVector * Args[1].Direction.Magnitude)
     end,
 
-    ScreenPointToRay = function(self, Args)
+    ScreenPointToRay = function(Args)
         if Args[3] and Type(Args[3]) ~= "number" then
             return
         end
@@ -148,7 +148,7 @@ local SilentAimHook = {
         }
     end,
 
-    ViewportPointToRay = function(self, Args)
+    ViewportPointToRay = function(Args)
         if Args[3] and Type(Args[3]) ~= "number" then
             return
         end
@@ -179,7 +179,7 @@ local SilentAimHook = {
         Args[2] = ViewPoint.Y
     end,
 
-    Raycast = function(self, Args)
+    Raycast = function(Args)
         if Typeof(Args[1]) ~= "Vector3" or Typeof(Args[2]) ~= "Vector3" or Args[3] and Typeof(Args[3]) ~= "RaycastParams" then
             return
         end
