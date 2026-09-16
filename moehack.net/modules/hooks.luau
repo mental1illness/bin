@@ -1,5 +1,7 @@
-
 local IsDescendantOf, Raycast = workspace.IsDescendantOf, workspace.Raycast
+local NewVector3, NewVector = Vector3.new, vector.create
+local WorldToViewportPoint = workspace.CurrentCamera.WorldToViewportPoint
+local NewRay = clonefunction(Ray.new)
 local Typeof, Type = typeof, type
 local Pack, Unpack = table.pack, table.unpack
 local LookAt = CFrame.lookAt
@@ -14,8 +16,9 @@ local ParamsWhitelist = RaycastParams.new()
 ParamsWhitelist.FilterType = Enum.RaycastFilterType.Include
 
 local Camera = workspace.CurrentCamera
+local MagicBulletOffset = NewVector3(0, 0, -3)
 
---# Helper Funcs (USELESS)
+--# Helper Funcs
 
 LoadModule = function(Path)
     local FuckYouCacheBitch = getgenv().FuckYouCacheBitch
@@ -29,134 +32,176 @@ LoadModule = function(Path)
         return FuckYouCacheBitch[Path]
     end
 
-    local url = "https://cats-cure-depression.vercel.app/" .. Path
-    local Result = loadstring(game:HttpGet(url))()
+    local URL = "https://cats-cure-depression.vercel.app/" .. Path
+    local Result = loadstring(game:HttpGet(URL))()
 
     FuckYouCacheBitch[Path] = Result
-
     return Result
 end
 
 --# Modules
 
 local Combat = LoadModule("moehack.net/modules/combat.luau", true)
-
 local Hooks = {}
 
 local SilentAimHook = {
-    FindPartOnRay = function(self, ...)
-        local Args = Pack(...)
-        local MagicBullet = Toggles["combat/bulletredirection/magicbullet"].Value
-
-        local Target, Hitbox = Combat.GetTarget(Options["combat/bulletredirection/fov"].Value, Toggles["combat/bulletredirection/usenearhitbox"])
-        if not Target or not Hitbox then return end
-
-        if Toggles["combat/bulletredirection/ignorebehindwalls"].Value and not Combat.IsBehindWalls(Target, Hitbox) then
+    FindPartOnRay = function(self, Args)
+        if Typeof(Args[1]) ~= "Ray" then
             return
         end
 
-        if MagicBullet then
-           
+        local Target, Hitbox = Combat.GetTarget(Options["combat/bulletredirection/fov"].Value, Toggles["combat/bulletredirection/usenearhitbox"])
+
+        if not Target or not Hitbox then
+            return
         end
 
-        return Args
+        if Toggles["combat/bulletredirection/ignorebehindwalls"].Value and Combat.IsBehindWalls(Target, Hitbox) then
+            return
+        end
+
+        local MagicBullet = Toggles["combat/bulletredirection/magicbullet"].Value
+
+        if MagicBullet then
+            ParamsWhitelist.FilterDescendantsInstances = {Hitbox}
+        end
+
+        Args[1] = NewRay(Args[1].Origin, LookAt(Args[1].Origin, Hitbox.Position).LookVector * Args[1].Direction.Magnitude)
     end,
 
-    FindPartOnRayWithIgnoreList = function(self, ...)
-        local Args = Pack(...)
-        local MagicBullet = Toggles["combat/bulletredirection/magicbullet"].Value
-
-        local Target, Hitbox = Combat.GetTarget(Options["combat/bulletredirection/fov"].Value, Toggles["combat/bulletredirection/usenearhitbox"])
-        if not Target or not Hitbox then return end
-
-        if Toggles["combat/bulletredirection/ignorebehindwalls"].Value and not Combat.IsBehindWalls(Target, Hitbox) then
+    FindPartOnRayWithIgnoreList = function(self, Args)
+        if Typeof(Args[1]) ~= "Ray" then
             return
         end
 
-        if MagicBullet then
-           
+        local Target, Hitbox = Combat.GetTarget(Options["combat/bulletredirection/fov"].Value, Toggles["combat/bulletredirection/usenearhitbox"])
+
+        if not Target or not Hitbox then
+            return
         end
 
-        return Args
+        if Toggles["combat/bulletredirection/ignorebehindwalls"].Value and Combat.IsBehindWalls(Target, Hitbox) then
+            return
+        end
+
+        local MagicBullet = Toggles["combat/bulletredirection/magicbullet"].Value
+
+        if MagicBullet then
+            ParamsWhitelist.FilterDescendantsInstances = {Hitbox}
+        end
+
+        Args[1] = NewRay(Args[1].Origin, LookAt(Args[1].Origin, Hitbox.Position).LookVector * Args[1].Direction.Magnitude)
     end,
 
-    FindPartOnRayWithWhitelist = function(self, ...)
-        local Args = Pack(...)
-        local MagicBullet = Toggles["combat/bulletredirection/magicbullet"].Value
-
-        local Target, Hitbox = Combat.GetTarget(Options["combat/bulletredirection/fov"].Value, Toggles["combat/bulletredirection/usenearhitbox"])
-        if not Target or not Hitbox then return end
-
-        if Toggles["combat/bulletredirection/ignorebehindwalls"].Value and not Combat.IsBehindWalls(Target, Hitbox) then
+    FindPartOnRayWithWhitelist = function(self, Args)
+        if Typeof(Args[1]) ~= "Ray" then
             return
         end
 
-        if MagicBullet then
-            
+        local Target, Hitbox = Combat.GetTarget(Options["combat/bulletredirection/fov"].Value, Toggles["combat/bulletredirection/usenearhitbox"])
+
+        if not Target or not Hitbox then
+            return
         end
 
-        return Args
+        if Toggles["combat/bulletredirection/ignorebehindwalls"].Value and Combat.IsBehindWalls(Target, Hitbox) then
+            return
+        end
+
+        local MagicBullet = Toggles["combat/bulletredirection/magicbullet"].Value
+
+        if MagicBullet then
+            ParamsWhitelist.FilterDescendantsInstances = {Hitbox}
+        end
+
+        Args[1] = NewRay(Args[1].Origin, LookAt(Args[1].Origin, Hitbox.Position).LookVector * Args[1].Direction.Magnitude)
     end,
 
-    ScreenPointToRay = function(self, ...)
-        local Args = Pack(...)
-        local MagicBullet = Toggles["combat/bulletredirection/magicbullet"].Value
-
-        local Target, Hitbox = Combat.GetTarget(Options["combat/bulletredirection/fov"].Value, Toggles["combat/bulletredirection/usenearhitbox"])
-        if not Target or not Hitbox then return end
-
-        if Toggles["combat/bulletredirection/ignorebehindwalls"].Value and not Combat.IsBehindWalls(Target, Hitbox) then
+    ScreenPointToRay = function(self, Args)
+        if Args[3] and Type(Args[3]) ~= "number" then
             return
         end
 
-        if MagicBullet then
-            
+        local Target, Hitbox = Combat.GetTarget(Options["combat/bulletredirection/fov"].Value, Toggles["combat/bulletredirection/usenearhitbox"])
+
+        if not Target or not Hitbox then
+            return
         end
 
-        return Args
+        if Toggles["combat/bulletredirection/ignorebehindwalls"].Value and Combat.IsBehindWalls(Target, Hitbox) then
+            return
+        end
+
+        local MagicBullet = Toggles["combat/bulletredirection/magicbullet"].Value
+
+        if MagicBullet then
+            return {
+                NewRay(Camera.CFrame.Position, LookAt(Camera.CFrame.Position, Hitbox.Position).LookVector)
+            }
+        end
+
+        local Direction = LookAt(Camera.CFrame.Position, Hitbox.Position).LookVector
+        local Depth = Args[3]
+
+        return {
+            NewRay(Camera.CFrame.Position + (Depth and Direction * Depth or Vector3.zero), Direction)
+        }
     end,
 
-    ViewportPointToRay = function(self, ...)
-        local Args = Pack(...)
-        local MagicBullet = Toggles["combat/bulletredirection/magicbullet"].Value
-
-        local Target, Hitbox = Combat.GetTarget(Options["combat/bulletredirection/fov"].Value, Toggles["combat/bulletredirection/usenearhitbox"])
-        if not Target or not Hitbox then return end
-
-        if Toggles["combat/bulletredirection/ignorebehindwalls"].Value and not Combat.IsBehindWalls(Target, Hitbox) then
+    ViewportPointToRay = function(self, Args)
+        if Args[3] and Type(Args[3]) ~= "number" then
             return
         end
 
-        if MagicBullet then
+        local Target, Hitbox = Combat.GetTarget(Options["combat/bulletredirection/fov"].Value, Toggles["combat/bulletredirection/usenearhitbox"])
 
+        if not Target or not Hitbox then
+            return
         end
 
-        return Args
+        if Toggles["combat/bulletredirection/ignorebehindwalls"].Value and Combat.IsBehindWalls(Target, Hitbox) then
+            return
+        end
+
+        local MagicBullet = Toggles["combat/bulletredirection/magicbullet"].Value
+
+        if MagicBullet then
+            local Origin = Camera.CFrame.Position
+            local Direction = LookAt(Origin, Hitbox.Position).LookVector
+
+            return {
+                NewRay(Origin + (Args[3] and Direction * Args[3] or Vector3.zero), Direction)
+            }
+        end
+
+        local ViewPoint = WorldToViewportPoint(Camera, Hitbox.Position)
+        Args[1] = ViewPoint.X
+        Args[2] = ViewPoint.Y
     end,
 
-    Raycast = function(self, ...)
-        local Args = Pack(...)
+    Raycast = function(self, Args)
+        if Typeof(Args[1]) ~= "Vector3" or Typeof(Args[2]) ~= "Vector3" or Args[3] and Typeof(Args[3]) ~= "RaycastParams" then
+            return
+        end
 
-        if Typeof(Args[1]) ~= 'Vector3' or Typeof(Args[2]) ~= 'Vector3' or Args[3] and Typeof(Args[3]) ~= 'RaycastParams' then
+        local Target, Hitbox = Combat.GetTarget(Options["combat/bulletredirection/fov"].Value, Toggles["combat/bulletredirection/usenearhitbox"])
+
+        if not Target or not Hitbox then
+            return
+        end
+
+        if Toggles["combat/bulletredirection/ignorebehindwalls"].Value and Combat.IsBehindWalls(Target, Hitbox) then
             return
         end
 
         local MagicBullet = Toggles["combat/bulletredirection/magicbullet"].Value
 
-        local Target, Hitbox = Combat.GetTarget(Options["combat/bulletredirection/fov"].Value, Toggles["combat/bulletredirection/usenearhitbox"])
-        if not Target or not Hitbox then return end
-
-        if Toggles["combat/bulletredirection/ignorebehindwalls"].Value and not Combat.IsBehindWalls(Target, Hitbox) then
-            return
-        end
-
         if MagicBullet then
-            ParamsWhitelist.FilterDescendantsInstances = {targetPart}
+            ParamsWhitelist.FilterDescendantsInstances = {Hitbox}
             Args[3] = ParamsWhitelist
         end
 
         Args[2] = LookAt(Args[1], Hitbox.Position).LookVector * Args[2].Magnitude
-        return Args
     end,
 }
 
@@ -170,10 +215,14 @@ local __Namecall = newcclosure(function(self, ...)
         local Handler = SilentAimHook[Method]
 
         if Handler and Lower(Method) == Lower(Options["combat/bulletredirection/method"].Value) then
-            local Args = Handler(self, ...)
-            if Args then
-                return Hooks.__Namecall(self, Unpack(Args, 1, Args.n)) -- we do nothin if there's nothin
+            local Args = Pack(...)
+            local Data = Handler(Args)
+
+            if Data then
+                return Hooks.__Namecall(self, Unpack(Data, 1, Data.n or #Data))
             end
+
+            return Hooks.__Namecall(self, Unpack(Args, 1, Args.n))
         end
     end
 
