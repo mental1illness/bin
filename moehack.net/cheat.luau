@@ -411,10 +411,27 @@ end
 
 Library:Notify("Loading modules...", 2)
 
-local ESP = LoadModule("moehack.net/modules/esp.luau", true)
-local Visuals = LoadModule("moehack.net/modules/visuals.luau", true)
-local Combat = LoadModule("moehack.net/modules/combat.luau", true)
-local Misc = LoadModule("moehack.net/modules/misc.luau", true)
+local ESP
+local Visuals
+local Combat
+local Misc
+
+if not TableFind(moehack.data.tab_to_remove   or {}, "esp") then
+    ESP = LoadModule("moehack.net/modules/esp.luau", true)
+end
+
+if not TableFind(moehack.data.tab_to_remove   or {}, "visuals") then
+    Visuals = LoadModule("moehack.net/modules/visuals.luau", true)
+end
+
+if not TableFind(moehack.data.tab_to_remove   or {}, "combat") then
+    Combat = LoadModule("moehack.net/modules/combat.luau", true)
+end
+
+if not TableFind(moehack.data.tab_to_remove   or {}, "misc") then
+    Misc = LoadModule("moehack.net/modules/misc.luau", true)
+end
+
 LoadModule("moehack.net/modules/hooks.luau", true)
 
 --# Hooks
