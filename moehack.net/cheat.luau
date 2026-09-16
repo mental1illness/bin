@@ -64,9 +64,27 @@ local Library, SaveManager, ThemeManager = LoadModule("moehack.net/interface/lib
     
     local Tabs = {}
 
+    if moehack.game_name == "Kick an Uma" then
+        Tabs["Main"] = Window:AddTab("Main")
+    end
+
     for _, Name in {"Combat", "ESP", "Visuals", "Misc", "Settings"} do
         if not moehack.data.tab_to_remove[Lower(Name)] then
             Tabs[Name] = Window:AddTab(Name)
+        end
+    end
+
+    do -- Custom Game Support
+        if moehack.game_name == "Kick an Uma" then
+            local Auto, Exploits = Tabs.Main:AddGroupbox({ Side = 1, Name = "Auto" }), Tabs.Main:AddGroupbox({ Side = 1, Name = "Exploit" })
+            
+            do -- Auto
+
+            end
+            
+            do -- Exploits
+                Exploits:AddToggle("main/forceperfect", { Text = "forceperfect", Default = false })
+            end
         end
     end
 
