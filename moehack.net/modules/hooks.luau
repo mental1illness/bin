@@ -294,6 +294,8 @@ if setstackhidden then
     end
 end
 
-Hooks.__Namecall = hookmetamethod(game, "__namecall", __Namecall)
+if not moehack.data.use_custom_silent_aim then
+    Hooks.__Namecall = hookmetamethod(game, "__namecall", __Namecall)
+end
 
 return Hooks

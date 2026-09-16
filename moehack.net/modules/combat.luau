@@ -135,7 +135,7 @@ function Combat.IsBehindWalls(Target, Hitbox)
 end
 
 function Combat.GetCharacter(Player)
-    if PlaceId == 72920620366355 then
+    if moehack.data.game_name == "Operation One" then
         if not StateObject then
             StateObject = require(ReplicatedStorage.Modules.StateObject)
         end
@@ -160,7 +160,7 @@ function Combat.GetTarget(FOV: number, BestHitbox: boolean)
 
             if Character then
                 local Humanoid = FindFirstChild(Character, "Humanoid")
-                local RootPart = PlaceId == 72920620366355 and FindFirstChild(Character, "head", true) or Character.PrimaryPart
+                local RootPart = moehack.data.game_name == "Operation One" and FindFirstChild(Character, "head", true) or Character.PrimaryPart
 
                 if Humanoid and RootPart and Humanoid.Health > 0 then
                     if BestHitbox then

@@ -1,6 +1,7 @@
 {
   "72920620366355": {
-    "use-custom-silent-aim": true,
-    "run_on_actor": true
+    "use_custom_silent_aim": true,
+    "run_on_actor": true,
+    "game_name": "Operation One"
   }
 }

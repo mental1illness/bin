@@ -102,7 +102,7 @@ local LastHz = 0
 local CurrentCamera = workspace.CurrentCamera
 local PlayersCache = Players:GetPlayers()
 
-if PlaceId == 72920620366355 then
+if moehack.data.game_name == "Operation One" then
     StateObject = require(ReplicatedStorage.Modules.StateObject)
 end
 
@@ -521,7 +521,7 @@ function ESP.GetHealth(Player, Character)
 end
 
 function ESP.GetCharacter(Player)
-    if PlaceId == 72920620366355 then
+    if moehack.data.game_name == "Operation One" then
         if not StateObject then
             StateObject = require(ReplicatedStorage.Modules.StateObject)
         end
@@ -640,7 +640,7 @@ function ESP.ApplyAllPlayer()
 		Library:GiveSignal(
 			Player.CharacterAdded:Connect(function(Character)
                 
-                if PlaceId == 72920620366355 then
+                if moehack.data.game_name == "Operation One" then
                     local count = 0
                     repeat Wait(); count += 1 until ESP.GetCharacter(Player) ~= nil or count == 100
                 end
@@ -685,7 +685,7 @@ end
 
 function ESP.GetTool(Player, Character)
 
-    if PlaceId == 72920620366355 then
+    if moehack.data.game_name == "Operation One" then
         if not StateObject then
             StateObject = require(ReplicatedStorage.Modules.StateObject)
         end
