@@ -24,6 +24,8 @@ ParamsWhitelist.FilterType = Enum.RaycastFilterType.Include
 local Camera = workspace.CurrentCamera
 local MagicBulletOffset = NewVector3(0, 0, -3)
 
+local LocalPlayer = Players.LocalPlayer
+
 --# Helper Funcs
 
 LoadModule = function(Path)
