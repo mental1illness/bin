@@ -53,7 +53,14 @@ local HttpService = GetService(Game, "HttpService")
 
 --# Variables
 
-local GameData = HttpService.JSONDecode(HttpService, Game:HttpGet("https://cats-cure-depression.vercel.app/moehack.net/data/supported_game.json"))[Game.PlaceId] or { game_name == "Universal", run_on_actor = false, use_custom_silent_aim = true, tab_to_remove = {} }
+local GameData = HttpService:JSONDecode(
+    Game:HttpGet("https://cats-cure-depression.vercel.app/moehack.net/data/supported_game.json")
+)[tostring(Game.PlaceId)] or {
+    game_name = "Universal",
+    run_on_actor = false,
+    use_custom_silent_aim = true,
+    tab_to_remove = {},
+}
 
 --# Main
 
