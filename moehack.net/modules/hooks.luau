@@ -4,8 +4,14 @@ local WorldToViewportPoint = workspace.CurrentCamera.WorldToViewportPoint
 local NewRay = clonefunction(Ray.new)
 local Typeof, Type = typeof, type
 local Pack, Unpack = table.pack, table.unpack
+local GetService = Game.GetService
 local LookAt = CFrame.lookAt
 local Lower = string.lower
+
+
+--# Services
+
+local Players = GetService(Game, "Players")
 
 --# Vars
 
