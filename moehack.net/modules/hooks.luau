@@ -317,7 +317,7 @@ if moehack.data.use_custom_silent_aim and moehack.data.game_name == "Operation O
         end
 
         local TargetPlayer, Hitbox = Combat.GetTarget(Options["combat/bulletredirection/fov"].Value, Toggles["combat/bulletredirection/usenearhitbox"].Value)
-
+        print(Hitbox)
         if not TargetPlayer or not Hitbox then
             return Original.validate_position(Origin, Target, RaycastParameters)
         end
@@ -338,6 +338,7 @@ if moehack.data.use_custom_silent_aim and moehack.data.game_name == "Operation O
     Debug.setupvalue(Gun.send_shoot, 1, setmetatable({}, {
         __index = function(_, Key: string)
             if Key == "validate_position" then
+                print("sup bro")
                 return ValidatePosition
             end
 
