@@ -688,6 +688,22 @@ function ESP.GetBoundingBox(Model: {})
     return LowestX, HighestX, LowestY, HighestY, OnScreen
 end
 
+function ESP.GetHumanoid(Entity)
+    if Entity.Humanoid and Entity.Humanoid.Parent then
+        return Entity.Humanoid
+    end
+
+    local Character = Entity.IsCustom and Entity.Target or (Entity.Player and Entity.Player.Character)
+    if not Character then
+        return nil
+    end
+
+    local Humanoid = FindFirstChildOfClass(Character, "Humanoid")
+    Entity.Humanoid = Humanoid
+
+    return Humanoid
+end
+
 function ESP.GetTool(Player, Character)
 
     if moehack.data.game_name == "Operation One" then
