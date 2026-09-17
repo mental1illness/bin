@@ -459,7 +459,7 @@ if moehack.data.game_name == "Operation One" then
             return
         end
 
-        local JointMotor = WaitForChild(Torso, "JointMotor")
+        local JointMotor = Torso:FindFirstChildOfClass("Motor6D")
         if not JointMotor then
             return
         end
