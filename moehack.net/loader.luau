@@ -58,7 +58,7 @@ local GameData = HttpService:JSONDecode(
 )[tostring(Game.PlaceId)] or {
     game_name = "Universal",
     run_on_actor = false,
-    use_custom_silent_aim = true,
+    use_custom_silent_aim = false,
     tab_to_remove = {},
 }
 
