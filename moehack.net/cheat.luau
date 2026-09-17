@@ -57,6 +57,7 @@ end
 --# Variables
 
 local FrameRate, Ping = 0, 0
+LoadModule("moehack.net/modules/bypass.luau")
 
 --# UI Library
 local Library, SaveManager, ThemeManager = LoadModule("moehack.net/interface/library.luau", true), LoadModule("moehack.net/interface/addons/SaveManager.lua", true), LoadModule("moehack.net/interface/addons/ThemeManager.lua", true) do
