@@ -487,6 +487,12 @@ if moehack.data.game_name == "Operation One" then
         end)
     )
 
+    Library:GiveSignal(
+        workspace.Viewmodels.ChildRemoving:Connect(function(PlayerViewmodel: Model)
+            ESP.RemoveTarget(PlayerViewmodel)
+        end)
+    )
+
     for _, PlayerViewmodel in workspace.Viewmodels:GetChildren() do
         AddViewmodelTarget(PlayerViewmodel)
     end
