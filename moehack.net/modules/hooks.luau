@@ -329,7 +329,7 @@ if moehack.data.use_custom_silent_aim and moehack.data.game_name == "Operation O
         local CFrameValue = Debug.getstack(2, 3)
 
         if typeof(CFrameValue) == "CFrame" then
-            Debug.setstack(2, 5, CFrame.lookAt(CFrameValue.Position, Hitbox.Position))
+            Debug.setstack(2, 5, LookAt(CFrameValue.Position, Hitbox.Position))
         end
 
         return Original.validate_position(Origin, Target, RaycastParameters)

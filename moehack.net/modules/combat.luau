@@ -147,49 +147,29 @@ function Combat.GetTarget(FOV: number, NearestHitbox: boolean)
             return
         end
 
-        for _, Character in Viewmodels:GetChildren() do
+        local MousePosition = UserInputService:GetMouseLocation()
+        local Mouse = NewVector(MousePosition.X, MousePosition.Y)
+
+        for _, Character in GetChildren(Viewmodels) do
             if Character.Name == "LocalViewmodel" then
                 continue
             end
 
-            local Humanoid = FindFirstChild(Character, "Humanoid")
-            local RootPart = Character.PrimaryPart or FindFirstChild(Character, "head", true)
+            local Hitbox = FindFirstChild(Character, "head")
 
-            if not Humanoid or not RootPart or Humanoid.Health <= 0 then
+            if not Hitbox or not IsA(Hitbox, "BasePart") or Hitbox.Transparency >= 1 then
                 continue
             end
 
-            if NearestHitbox then
-                for _, Hitbox in QueryDescendants(Character, "BasePart") do
-                    if Hitbox.Transparency < 1 then
-                        local Position, OnScreen = WorldToViewportPoint(Camera, Hitbox.Position)
+            local Position, OnScreen = WorldToViewportPoint(Camera, Hitbox.Position)
 
-                        if OnScreen and Position.Z > 0 then
-                            local Distance = (NewVector(Position.X, Position.Y) - Center).Magnitude
+            if OnScreen and Position.Z > 0 then
+                local Distance = (NewVector(Position.X, Position.Y) - Mouse).Magnitude
 
-                            if Distance <= BestDistance then
-                                BestDistance = Distance
-                                BestTarget = Character
-                                BestHitboxPart = Hitbox
-                            end
-                        end
-                    end
-                end
-            else
-                local Hitbox = FindFirstChild(Character, "head", true)
-
-                if Hitbox and Hitbox:IsA("BasePart") and Hitbox.Transparency < 1 then
-                    local Position, OnScreen = WorldToViewportPoint(Camera, Hitbox.Position)
-
-                    if OnScreen and Position.Z > 0 then
-                        local Distance = (NewVector(Position.X, Position.Y) - Center).Magnitude
-
-                        if Distance <= BestDistance then
-                            BestDistance = Distance
-                            BestTarget = Character
-                            BestHitboxPart = Hitbox
-                        end
-                    end
+                if Distance <= BestDistance then
+                    BestDistance = Distance
+                    BestTarget = Character
+                    BestHitboxPart = Hitbox
                 end
             end
         end
