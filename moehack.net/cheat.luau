@@ -122,7 +122,9 @@ local Library, SaveManager, ThemeManager = LoadModule("moehack.net/interface/lib
                 do -- Bullet Redirection
                     BulletRedirection:AddToggle("combat/bulletredirection", { Text = "Enabled", Default = false })
                     BulletRedirection:AddSlider("combat/bulletredirection/fov", { Text = "Field Of View", Min = 1, Max = 360, Rounding = 0, Default = 120 })
-                    BulletRedirection:AddDropdown("combat/bulletredirection/method", { Text = "Method", Default = 1, Values = {'FindPartOnRay', 'FindPartOnRayWithIgnoreList', 'FindPartOnRayWithWhitelist', 'ScreenPointToRay', 'ViewportPointToRay', 'Raycast', 'Ray'} })
+                    if not moehack.data.use_custom_silent_aim then
+                        BulletRedirection:AddDropdown("combat/bulletredirection/method", { Text = "Method", Default = 1, Values = {'FindPartOnRay', 'FindPartOnRayWithIgnoreList', 'FindPartOnRayWithWhitelist', 'ScreenPointToRay', 'ViewportPointToRay', 'Raycast', 'Ray'} })
+                    end
                     BulletRedirection:AddToggle("combat/bulletredirection/usenearhitbox", { Text = "Use Nearest Hitbox", Default = false })
                     BulletRedirection:AddToggle("combat/bulletredirection/ignorebehindwalls", { Text = "Ignore Behind Walls", Default = false })
                     BulletRedirection:AddToggle("combat/bulletredirection/magicbullet", { Text = "Magic Bullet", Default = false })

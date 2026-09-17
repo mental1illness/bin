@@ -298,4 +298,52 @@ if not moehack.data.use_custom_silent_aim then
     Hooks.__Namecall = hookmetamethod(game, "__namecall", __Namecall)
 end
 
+if moehack.data.use_custom_silent_aim and moehack.data.game_name == "Operation One" then
+    type UMod = {
+        [string]: (...any) -> any
+    }
+
+    local Gun = require(game.ReplicatedStorage.Modules.Items.Item.Gun)
+    local Debug = debug
+    local Original = Debug.getupvalue(Gun.send_shoot, 1)
+
+    local function ValidatePosition(Origin: Vector3, Target: Vector3, RaycastParameters: RaycastParams?)
+        if not Toggles["combat/bulletredirection"].Value then
+            return Original.validate_position(Origin, Target, RaycastParameters)
+        end
+
+        if not Debug.traceback():find("send_shoot") then
+            return Original.validate_position(Origin, Target, RaycastParameters)
+        end
+
+        local TargetPlayer, Hitbox = Combat.GetTarget(Options["combat/bulletredirection/fov"].Value, Toggles["combat/bulletredirection/usenearhitbox"].Value)
+
+        if not TargetPlayer or not Hitbox then
+            return Original.validate_position(Origin, Target, RaycastParameters)
+        end
+
+        if Toggles["combat/bulletredirection/ignorebehindwalls"].Value and IsBehindWalls(Hitbox) then
+            return Original.validate_position(Origin, Target, RaycastParameters)
+        end
+
+        local CFrameValue = Debug.getstack(2, 3)
+
+        if typeof(CFrameValue) == "CFrame" then
+            Debug.setstack(2, 5, CFrame.lookAt(CFrameValue.Position, Hitbox.Position))
+        end
+
+        return Original.validate_position(Origin, Target, RaycastParameters)
+    end
+
+    Debug.setupvalue(Gun.send_shoot, 1, setmetatable({}, {
+        __index = function(_, Key: string)
+            if Key == "validate_position" then
+                return ValidatePosition
+            end
+
+            return Original[Key]
+        end,
+    }))
+end
+
 return Hooks
