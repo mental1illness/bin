@@ -135,62 +135,57 @@ function Combat.IsBehindWalls(Target, Hitbox)
 end
 
 function Combat.GetCharacter(Player)
-    if moehack.data.game_name == "Operation One" then
-        if not StateObject then
-            StateObject = require(ReplicatedStorage.Modules.StateObject)
-        end
-        if not Player.Character then return nil end
-        local Data = StateObject.get("Character", Player.Character)
-        return Data.values.viewmodels
-    end
     return Player.Character
 end
 
-function Combat.GetTarget(FOV: number, BestHitbox: boolean)
-    local ViewportSize = Camera.ViewportSize
-    local Center = NewVector(ViewportSize.X * 0.5, ViewportSize.Y * 0.5)
-    local BestTarget = nil
-    local BestHitboxPart = nil
-    local BestDistance = FOV
+if moehack.data.game_name == "Operation One" then
+    local Viewmodels = FindFirstChild(workspace, "Viewmodels")
 
-    for _, Player in PlayersCache do
-        if Player ~= LocalPlayer then
-            local Character = Combat.GetCharacter(Player)
-            local RealCharacter = Player.Character
+    if not Viewmodels then
+        return
+    end
 
-            if Character then
-                local Humanoid = FindFirstChild(Character, "Humanoid")
-                local RootPart = moehack.data.game_name == "Operation One" and FindFirstChild(Character, "head", true) or Character.PrimaryPart
+    for _, Character in Viewmodels:GetChildren() do
+        if Character.Name == "LocalViewmodel" then
+            continue
+        end
 
-                if Humanoid and RootPart and Humanoid.Health > 0 then
-                    if BestHitbox then
-                        for _, Hitbox in QueryDescendants(Character, "BasePart") do
-                            --if IsA(Hitbox, "BasePart") then
-                                local Position, OnScreen = WorldToViewportPoint(Camera, Hitbox.Position)
+        local Humanoid = FindFirstChild(Character, "Humanoid")
+        local RootPart = Character.PrimaryPart or FindFirstChild(Character, "head", true)
 
-                                if OnScreen and Position.Z > 0 then
-                                    local Distance = (NewVector(Position.X, Position.Y) - Center).Magnitude
+        if not Humanoid or not RootPart or Humanoid.Health <= 0 then
+            continue
+        end
 
-                                    if Distance <= BestDistance then
-                                        BestDistance = Distance
-                                        BestTarget = Player
-                                        BestHitboxPart = Hitbox
-                                    end
-                                end
-                            --end
+        if NearestHitbox then
+            for _, Hitbox in QueryDescendants(Character, "BasePart") do
+                if Hitbox.Transparency < 1 then
+                    local Position, OnScreen = WorldToViewportPoint(Camera, Hitbox.Position)
+
+                    if OnScreen and Position.Z > 0 then
+                        local Distance = (NewVector(Position.X, Position.Y) - Center).Magnitude
+
+                        if Distance <= BestDistance then
+                            BestDistance = Distance
+                            BestTarget = Character
+                            BestHitboxPart = Hitbox
                         end
-                    else
-                        local Position, OnScreen = WorldToViewportPoint(Camera, RootPart.Position)
+                    end
+                end
+            end
+        else
+            local Hitbox = FindFirstChild(Character, "head", true)
 
-                        if OnScreen and Position.Z > 0 then
-                            local Distance = (NewVector(Position.X, Position.Y) - Center).Magnitude
+            if Hitbox and Hitbox:IsA("BasePart") and Hitbox.Transparency < 1 then
+                local Position, OnScreen = WorldToViewportPoint(Camera, Hitbox.Position)
 
-                            if Distance <= BestDistance then
-                                BestDistance = Distance
-                                BestTarget = Player
-                                BestHitboxPart = RootPart
-                            end
-                        end
+                if OnScreen and Position.Z > 0 then
+                    local Distance = (NewVector(Position.X, Position.Y) - Center).Magnitude
+
+                    if Distance <= BestDistance then
+                        BestDistance = Distance
+                        BestTarget = Character
+                        BestHitboxPart = Hitbox
                     end
                 end
             end
