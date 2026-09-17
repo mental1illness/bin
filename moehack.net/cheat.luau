@@ -439,7 +439,24 @@ end
 
 LoadModule("moehack.net/modules/hooks.luau", true)
 
---# Hooks
+--# Game Support
+
+if moehack.data.game_name == "Operation One" then
+    Library:GiveSignal(
+        workspace.Viewmodels.ChildAdded:Connect(function(PlayerViewmodel: Model)
+            if PlayerViewmodel.Name == "LocalViewmodel" then return end
+            if ESP then
+                local HumanoidRootPart = FindFirstChild(FindFirstChild(PlayerViewmodel, "torso"), "JointMotor").Part0
+                local RealCharacter    = HumanoidRootPart.Parent
+                local RealPlayer       = Players:GetPlayerFromCharacter(RealCharacter)
+                ESP.AddTarget(PlayerViewmodel, {
+                    Player = RealPlayer,
+                    Humanoid = FindFirstChild(RealCharacter, "Humanoid")
+                })
+            end
+        end)
+    )
+end
 
 --# Connections
 

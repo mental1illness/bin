@@ -576,6 +576,7 @@ end
 
 function ESP.AddTarget(Target, Settings)
     Settings = Settings or {}
+
     if ESP.Entities[Target] then
         ESP.RemoveTarget(Target)
     end
@@ -585,13 +586,16 @@ function ESP.AddTarget(Target, Settings)
         Target = Target,
         Player = Settings.Player,
         Name = Settings.Name or Target.Name,
-        UseHealth = Settings.Health ~= false,
+        Humanoid = Settings.Humanoid,
         BodyParts = {},
         TargetConnections = {},
         IsCustom = true,
     }
+
     ESP.Entities[Target] = Entity
+
     _ESPConnectTarget(Target, Entity)
+
     return Entity
 end
 
@@ -616,6 +620,11 @@ end
 
 function ESP.ApplyAllPlayer()
 
+    if moehack.data.game_name == "Operation One" then -- we use custom players instead
+        return
+    end
+
+
 	for _, Player in PlayersCache do
 
         if Player == LocalPlayer then continue end
@@ -624,11 +633,12 @@ function ESP.ApplyAllPlayer()
 			continue
 		end
 
-		local Entity = {
-			Objects = ESP.CreateElements(),
-			Player = Player,
-			BodyParts = {},
-		}
+        local Entity = {
+            Objects = ESP.CreateElements(),
+            Player = Player,
+            Humanoid = nil,
+            BodyParts = {},
+        }
 
 		ESP.Entities[Player] = Entity
 
@@ -639,11 +649,6 @@ function ESP.ApplyAllPlayer()
 
 		Library:GiveSignal(
 			Player.CharacterAdded:Connect(function(Character)
-                
-                if moehack.data.game_name == "Operation One" then
-                    local count = 0
-                    repeat Wait(); count += 1 until ESP.GetCharacter(Player) ~= nil or count == 100
-                end
 				_ESPConnectCharacter(Player, Entity)
 			end)
 		)
@@ -719,12 +724,20 @@ function ESP.Render(Entity: {})
 		return
 	end
 
-	local MaxHealth, Health = ESP.GetHealth(Player, RealCharacter)
+    local MaxHealth, Health = ESP.GetHealth(Player, RealCharacter)
+    local Humanoid = ESP.GetHumanoid(Entity)
 
-	if Health <= 0 then
-		Objects.Holder.Visible = false
-		return
-	end
+    if Entity.IsCustom then
+        if Humanoid then
+            MaxHealth = Humanoid.MaxHealth
+            Health = Humanoid.Health
+        end
+    end
+
+    if Health <= 0 then
+        Objects.Holder.Visible = false
+        return
+    end
 
     local LowX, HighX, LowY, HighY, OnScreen = ESP.GetBoundingBox(Entity.BodyParts)
 
@@ -850,7 +863,7 @@ function ESP.Render(Entity: {})
         if Objects.Tool.Visible then Objects.Tool.Visible = false end
     end
 
-    if Toggles["esp/healthbar"].Value then
+    if Toggles["esp/healthbar"].Value and (Entity.IsCustom and Humanoid) then
         if not Objects.HealthBar.Visible then
             Objects.HealthBar.Visible = true
         end
