@@ -451,12 +451,12 @@ if moehack.data.game_name == "Operation One" then
             return
         end
 
-        local Torso = FindFirstChild(PlayerViewmodel, "torso")
+        local Torso = WaitForChild(PlayerViewmodel, "torso")
         if not Torso then
             return
         end
 
-        local JointMotor = FindFirstChild(Torso, "JointMotor")
+        local JointMotor = WaitForChild(Torso, "JointMotor")
         if not JointMotor then
             return
         end
