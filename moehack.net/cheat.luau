@@ -442,32 +442,52 @@ LoadModule("moehack.net/modules/hooks.luau", true)
 --# Game Support
 
 if moehack.data.game_name == "Operation One" then
+    local function AddViewmodelTarget(PlayerViewmodel: Model)
+        if PlayerViewmodel.Name ~= "Viewmodel" then
+            return
+        end
+
+        if not ESP then
+            return
+        end
+
+        local Torso = FindFirstChild(PlayerViewmodel, "torso")
+        if not Torso then
+            return
+        end
+
+        local JointMotor = FindFirstChild(Torso, "JointMotor")
+        if not JointMotor then
+            return
+        end
+
+        local HumanoidRootPart = JointMotor.Part0
+        if not HumanoidRootPart then
+            return
+        end
+
+        local RealCharacter = HumanoidRootPart.Parent
+        if not RealCharacter then
+            return
+        end
+
+        local RealPlayer = Players:GetPlayerFromCharacter(RealCharacter)
+        local Humanoid = FindFirstChild(RealCharacter, "Humanoid")
+
+        ESP.AddTarget(PlayerViewmodel, {
+            Player = RealPlayer,
+            Humanoid = Humanoid,
+        })
+    end
+
     Library:GiveSignal(
         workspace.Viewmodels.ChildAdded:Connect(function(PlayerViewmodel: Model)
-            if PlayerViewmodel.Name ~= "Viewmodel" then return end
-            if ESP then
-                local HumanoidRootPart = FindFirstChild(FindFirstChild(PlayerViewmodel, "torso"), "JointMotor").Part0
-                local RealCharacter    = HumanoidRootPart.Parent
-                local RealPlayer       = Players:GetPlayerFromCharacter(RealCharacter)
-                ESP.AddTarget(PlayerViewmodel, {
-                    Player = RealPlayer,
-                    Humanoid = FindFirstChild(RealCharacter, "Humanoid")
-                })
-            end
+            AddViewmodelTarget(PlayerViewmodel)
         end)
     )
 
-    for _,PlayerViewmodel in workspace.Viewmodels:GetChildren() do
-        if PlayerViewmodel.Name ~= "Viewmodel" then return end
-        if ESP then
-            local HumanoidRootPart = FindFirstChild(FindFirstChild(PlayerViewmodel, "torso"), "JointMotor").Part0
-            local RealCharacter    = HumanoidRootPart.Parent
-            local RealPlayer       = Players:GetPlayerFromCharacter(RealCharacter)
-            ESP.AddTarget(PlayerViewmodel, {
-                Player = RealPlayer,
-                Humanoid = FindFirstChild(RealCharacter, "Humanoid")
-            })
-        end
+    for _, PlayerViewmodel in workspace.Viewmodels:GetChildren() do
+        AddViewmodelTarget(PlayerViewmodel)
     end
 end
 
