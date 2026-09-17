@@ -88,7 +88,11 @@ local Combat = {
 }
 
 function Combat.IsBehindWalls(Target, Hitbox)
-    local Character = Target and Target.Character
+    local Character = Target
+
+    if moehack.data.game_name ~= "Operation One" then
+        Character = Target and Target.Character
+    end
 
     if not Character or not Hitbox or not Hitbox:IsDescendantOf(Character) then
         return true
@@ -96,20 +100,12 @@ function Combat.IsBehindWalls(Target, Hitbox)
 
     local Origin = Camera.CFrame.Position
     local Direction = Hitbox.Position - Origin
-
-    local IgnoreList = {
-        LocalPlayer.Character
-    }
+    local IgnoreList = {LocalPlayer.Character}
 
     for _ = 1, 20 do
         RaycastParams.FilterDescendantsInstances = IgnoreList
 
-        local Result = Raycast(
-            workspace,
-            Origin,
-            Direction,
-            RaycastParams
-        )
+        local Result = Raycast(workspace, Origin, Direction, RaycastParams)
 
         if not Result then
             return false
@@ -123,7 +119,6 @@ function Combat.IsBehindWalls(Target, Hitbox)
 
         if Part.Transparency >= 1 or not Part.CanCollide then
             Insert(IgnoreList, Part)
-
             Origin = Result.Position + Direction.Unit * 0.01
             Direction = Hitbox.Position - Origin
         else
@@ -138,28 +133,52 @@ function Combat.GetCharacter(Player)
     return Player.Character
 end
 
-if moehack.data.game_name == "Operation One" then
-    local Viewmodels = FindFirstChild(workspace, "Viewmodels")
+function Combat.GetTarget(FOV: number, NearestHitbox: boolean)
+    local ViewportSize = Camera.ViewportSize
+    local Center = NewVector(ViewportSize.X * 0.5, ViewportSize.Y * 0.5)
+    local BestTarget = nil
+    local BestHitboxPart = nil
+    local BestDistance = FOV
 
-    if not Viewmodels then
-        return
-    end
+    if moehack.data.game_name == "Operation One" then
+        local Viewmodels = FindFirstChild(workspace, "Viewmodels")
 
-    for _, Character in Viewmodels:GetChildren() do
-        if Character.Name == "LocalViewmodel" then
-            continue
+        if not Viewmodels then
+            return
         end
 
-        local Humanoid = FindFirstChild(Character, "Humanoid")
-        local RootPart = Character.PrimaryPart or FindFirstChild(Character, "head", true)
+        for _, Character in Viewmodels:GetChildren() do
+            if Character.Name == "LocalViewmodel" then
+                continue
+            end
 
-        if not Humanoid or not RootPart or Humanoid.Health <= 0 then
-            continue
-        end
+            local Humanoid = FindFirstChild(Character, "Humanoid")
+            local RootPart = Character.PrimaryPart or FindFirstChild(Character, "head", true)
 
-        if NearestHitbox then
-            for _, Hitbox in QueryDescendants(Character, "BasePart") do
-                if Hitbox.Transparency < 1 then
+            if not Humanoid or not RootPart or Humanoid.Health <= 0 then
+                continue
+            end
+
+            if NearestHitbox then
+                for _, Hitbox in QueryDescendants(Character, "BasePart") do
+                    if Hitbox.Transparency < 1 then
+                        local Position, OnScreen = WorldToViewportPoint(Camera, Hitbox.Position)
+
+                        if OnScreen and Position.Z > 0 then
+                            local Distance = (NewVector(Position.X, Position.Y) - Center).Magnitude
+
+                            if Distance <= BestDistance then
+                                BestDistance = Distance
+                                BestTarget = Character
+                                BestHitboxPart = Hitbox
+                            end
+                        end
+                    end
+                end
+            else
+                local Hitbox = FindFirstChild(Character, "head", true)
+
+                if Hitbox and Hitbox:IsA("BasePart") and Hitbox.Transparency < 1 then
                     local Position, OnScreen = WorldToViewportPoint(Camera, Hitbox.Position)
 
                     if OnScreen and Position.Z > 0 then
@@ -173,19 +192,46 @@ if moehack.data.game_name == "Operation One" then
                     end
                 end
             end
-        else
-            local Hitbox = FindFirstChild(Character, "head", true)
+        end
 
-            if Hitbox and Hitbox:IsA("BasePart") and Hitbox.Transparency < 1 then
-                local Position, OnScreen = WorldToViewportPoint(Camera, Hitbox.Position)
+        return BestTarget, BestHitboxPart
+    end
 
-                if OnScreen and Position.Z > 0 then
-                    local Distance = (NewVector(Position.X, Position.Y) - Center).Magnitude
+    for _, Player in PlayersCache do
+        if Player ~= LocalPlayer then
+            local Character = Combat.GetCharacter(Player)
 
-                    if Distance <= BestDistance then
-                        BestDistance = Distance
-                        BestTarget = Character
-                        BestHitboxPart = Hitbox
+            if Character then
+                local Humanoid = FindFirstChild(Character, "Humanoid")
+                local RootPart = Character.PrimaryPart
+
+                if Humanoid and RootPart and Humanoid.Health > 0 then
+                    if NearestHitbox then
+                        for _, Hitbox in QueryDescendants(Character, "BasePart") do
+                            local Position, OnScreen = WorldToViewportPoint(Camera, Hitbox.Position)
+
+                            if OnScreen and Position.Z > 0 then
+                                local Distance = (NewVector(Position.X, Position.Y) - Center).Magnitude
+
+                                if Distance <= BestDistance then
+                                    BestDistance = Distance
+                                    BestTarget = Character
+                                    BestHitboxPart = Hitbox
+                                end
+                            end
+                        end
+                    else
+                        local Position, OnScreen = WorldToViewportPoint(Camera, RootPart.Position)
+
+                        if OnScreen and Position.Z > 0 then
+                            local Distance = (NewVector(Position.X, Position.Y) - Center).Magnitude
+
+                            if Distance <= BestDistance then
+                                BestDistance = Distance
+                                BestTarget = Character
+                                BestHitboxPart = RootPart
+                            end
+                        end
                     end
                 end
             end
