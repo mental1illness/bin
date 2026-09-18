@@ -334,7 +334,7 @@ local Library, SaveManager, ThemeManager = LoadModule("moehack.net/interface/lib
                     Player:AddToggle("visuals/player/chinesehat", { Text = "Chinese Hat", Default = false }):AddColorPicker('visuals/player/chinesehat/color', { Default = Color3.fromRGB(255, 255, 255), Title = 'Chinese Hat Color' }) do
                         local DepBox = Player:AddDependencyBox()
 
-                        DepBox:AddSlider("visuals/player/chinesehat/glowfac", { Text = "Glow Factor", Min = 10, Max = 20, Rounding = 0, Default = 5 })
+                        DepBox:AddSlider("visuals/player/chinesehat/glowfac", { Text = "Glow Factor", Min = 10, Max = 20, Rounding = 0, Default = 10 })
                         DepBox:AddSlider("visuals/player/chinesehat/radius", { Text = "Radius", Min = 0, Max = 2, Rounding = 1, Default = 1.5 })
                         DepBox:AddSlider("visuals/player/chinesehat/height", { Text = "Height", Min = 0, Max = 2, Rounding = 1 ,Default = 1 })
 
@@ -351,7 +351,7 @@ local Library, SaveManager, ThemeManager = LoadModule("moehack.net/interface/lib
                     Player:AddToggle("visuals/player/breadcrumbs", { Text = "Breadcrumbs", Default = false }):AddColorPicker('visuals/player/breadcrumbs/color', { Default = Color3.fromRGB(255, 255, 255), Title = 'Breadcrumbs Color' }) do
                         local DepBox = Player:AddDependencyBox()
 
-                        DepBox:AddSlider("visuals/player/breadcrumbs/glowfac", { Text = "Glow Factor", Min = 10, Max = 20, Rounding = 0, Default = 5 })
+                        DepBox:AddSlider("visuals/player/breadcrumbs/glowfac", { Text = "Glow Factor", Min = 10, Max = 20, Rounding = 0, Default = 10 })
                         DepBox:AddSlider("visuals/player/breadcrumbs/lifetime", { Text = "Life Time", Min = 0.1, Max = 5, Rounding = 1, Default = 5 })
                         DepBox:AddSlider("visuals/player/breadcrumbs/fadetime", { Text = "Fade Time", Min = 0.1, Max = 5, Rounding = 1, Default = 5 })
 
