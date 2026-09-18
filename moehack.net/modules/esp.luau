@@ -52,39 +52,8 @@ local Fonts = LoadModule("globals/fonts.luau", true)
 
 --# Variables
 
-local PlaceId = Game.PlaceId
-local FakeLibrary = {  } do 
-    function FakeLibrary:GiveSignal() end
-end
-
-local Flags = {
-    ["esp/enabled"] = {Value = true},
-    ["esp/settings/renderhz"] = {Value = 60},
-
-    ["esp/box"] = {Value = true},
-    ["esp/box/color"] = {Value = Color3.fromRGB(255, 255, 255)},
-    ["esp/box/type"] = {Value = "Corner"},
-
-    ["esp/healthbar"] = {Value = true},
-    ["esp/healthbar/colora"] = {Value = Color3.fromRGB(255, 105, 180)},
-    ["esp/healthbar/colorb"] = {Value = Color3.fromRGB(255, 20, 147)},
-    ["esp/healthbar/thickness"] = {Value = 2},
-    ["esp/healthtext"] = {Value = true},
-    ["esp/healthtext/color"] = {Value = Color3.fromRGB(255, 255, 255)},
-    ["esp/name"] = {Value = true},
-    ["esp/name/color"] = {Value = Color3.fromRGB(255, 255, 255)},
-    ["esp/box/fill"] = {Value = true},
-    ["esp/box/fillcolor"] = {Value = Color3.fromRGB(255, 255, 255), Transparency = 0.5},
-
-    ["esp/distance"] = {Value = true},
-    ["esp/distance/color"] = {Value = Color3.fromRGB(255, 255, 255)},
-
-    ["esp/tool"] = {Value = true},
-    ["esp/tool/color"] = {Value = Color3.fromRGB(255, 255, 255)},
-}
-
-local Library = getgenv().Library or FakeLibrary
-local Toggles, Options = getgenv().Toggles or Flags, getgenv().Options or Flags
+local Library = getgenv().Library
+local Toggles, Options = getgenv().Toggles, getgenv().Options
 local ScreenGui = Create("ScreenGui", gethui())
 
 local Corners = {
@@ -720,6 +689,10 @@ function ESP.GetTool(Player, Character)
     return "none"
 end
 
+function ESP.IsTeammate(Player1, Player2)
+    return Player1.Team == Player2.Team
+end
+
 function ESP.Render(Entity: {})
     local Player = Entity.Player
     local Objects = Entity.Objects
@@ -742,12 +715,18 @@ function ESP.Render(Entity: {})
 
     local MaxHealth, Health = ESP.GetHealth(Player, RealCharacter)
     local Humanoid = ESP.GetHumanoid(Entity)
+    local IsTeammate = ESP.IsTeammate(Player, LocalPlayer)
 
     if Entity.IsCustom then
         if Humanoid then
             MaxHealth = Humanoid.MaxHealth
             Health = Humanoid.Health
         end
+    end
+
+    if IsTeammate and not Toggles["esp/settings/renderteam"].Value then
+        Objects.Holder.Visible = false
+        return
     end
 
     if Health <= 0 then

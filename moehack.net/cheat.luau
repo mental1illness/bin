@@ -167,6 +167,7 @@ local Library, SaveManager, ThemeManager = LoadModule("moehack.net/interface/lib
                 do -- Settings
                     Settings:AddSlider("esp/settings/renderhz", { Text = "Render Hertz", Min = 10, Max = 240, Rounding = 0, Default = 60 })
                     Settings:AddSlider("esp/settings/renderdist", { Text = "Render Distance", Min = 10, Max = 1000, Rounding = 0, Default = 500 })
+                    Settings:AddToggle("esp/settings/renderteam", { Text = "Render Teammates", Default = false })
                 end
             end
         end

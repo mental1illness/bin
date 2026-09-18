@@ -46,6 +46,7 @@
 --# Aliases
 
 local GetService = Game.GetService
+local QueueOnTeleport = queueonteleport or queue_on_teleport -- ik this shit has scuffed variables name
 
 --# Services
 
