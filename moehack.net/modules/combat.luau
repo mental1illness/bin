@@ -185,7 +185,7 @@ function Combat.GetTarget(FOV: number, NearestHitbox: boolean)
     for _, Player in PlayersCache do
         if Player ~= LocalPlayer then
             if Utility.IsTeammate(Player, LocalPlayer) and not Toggles["combat/settings/targetteammates"].Value then
-                return
+                continue
             end
             local Character = Utility.GetCharacter(Player)
 
