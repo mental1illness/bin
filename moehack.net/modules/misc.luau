@@ -23,6 +23,7 @@ local DataPing           = Stats.Network.ServerStatsItem["Data Ping"]
 local FrameRateManager   = Stats:FindFirstChild("FrameRateManager")
 local RenderAverage      = FrameRateManager:FindFirstChild("RenderAverage")
 local Players            = GetService(Game, "Players")
+local StarterPlayer      = GetService(Game, "StarterPlayer")
 
 local LocalPlayer        = Players.LocalPlayer
 
@@ -123,14 +124,13 @@ Misc.Movement = {} do
                 if Humanoid.FloorMaterial ~= Enum.Material.Air and Humanoid:GetState() ~= Enum.HumanoidStateType.Jumping then
                     local JumpVelocity
 
-                    if Humanoid.UseJumpPower then
-                        JumpVelocity = Humanoid.JumpPower
+                    if StarterPlayer.CharacterUseJumpPower then
+                        JumpVelocity = StarterPlayer.CharacterJumpPower
                     else
-                        JumpVelocity = math.sqrt(2 * workspace.Gravity * Humanoid.JumpHeight)
+                        JumpVelocity = math.sqrt(2 * workspace.Gravity * StarterPlayer.CharacterJumpHeight)
                     end
 
                     local Velocity = RootPart.AssemblyLinearVelocity
-                    -- Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
                     RootPart.AssemblyLinearVelocity = NewVector3(Velocity.X, JumpVelocity, Velocity.Z)
                 end
             end
