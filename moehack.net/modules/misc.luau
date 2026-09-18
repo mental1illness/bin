@@ -116,17 +116,22 @@ Misc.Movement = {} do
 
         if Toggles["misc/movement/autojump"].Value and IsKeyDown(InputService, "Space") then
             local Method = Options["misc/movement/autojump/method"].Value
+
             if Method == "Humanoid" then
                 Humanoid.Jump = true
             elseif Method == "Velocity" then
-                local State = Humanoid:GetState()
-                if State == Enum.HumanoidStateType.Running or State == Enum.HumanoidStateType.RunningNoPhysics then
-                    local RootPart = Character:FindFirstChild("HumanoidRootPart")
-                    if RootPart then
-                        local JumpPower = Humanoid.UseJumpPower and Humanoid.JumpPower or math.sqrt(2 * workspace.Gravity * Humanoid.JumpHeight)
-                        local CurrentVelocity = RootPart.AssemblyLinearVelocity
-                        RootPart.AssemblyLinearVelocity = NewVector3(CurrentVelocity.X, JumpPower, CurrentVelocity.Z)
+                if Humanoid.FloorMaterial ~= Enum.Material.Air and Humanoid:GetState() ~= Enum.HumanoidStateType.Jumping then
+                    local JumpVelocity
+
+                    if Humanoid.UseJumpPower then
+                        JumpVelocity = Humanoid.JumpPower
+                    else
+                        JumpVelocity = math.sqrt(2 * workspace.Gravity * Humanoid.JumpHeight)
                     end
+
+                    local Velocity = RootPart.AssemblyLinearVelocity
+                    -- Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+                    RootPart.AssemblyLinearVelocity = NewVector3(Velocity.X, JumpVelocity, Velocity.Z)
                 end
             end
         end
