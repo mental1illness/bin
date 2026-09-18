@@ -879,7 +879,7 @@ function ESP.Render(Entity: {})
         if Objects.Tool.Visible then Objects.Tool.Visible = false end
     end
 
-    if Toggles["esp/healthbar"].Value and (Entity.IsCustom and Humanoid) then
+    if Toggles["esp/healthbar"].Value and Humanoid then
         if not Objects.HealthBar.Visible then
             Objects.HealthBar.Visible = true
         end
