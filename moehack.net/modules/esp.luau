@@ -49,6 +49,7 @@ end
 --# Modules
 
 local Fonts = LoadModule("globals/fonts.luau", true)
+local Utility = LoadModule("moehack.net/modules/utility.luau", true)
 
 --# Variables
 
