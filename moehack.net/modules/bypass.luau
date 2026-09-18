@@ -1,4 +1,4 @@
-do  -- Common Stuff
+do 
     if setstackhidden then
         setstackhidden(getgenv().getfenv, true)
     end
