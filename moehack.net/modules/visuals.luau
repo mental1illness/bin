@@ -519,7 +519,7 @@ Visuals.Players = {} do
             Part.Position = pos
         end
 
-        Part.Parent = parent
+        Part.Parent = HiddenFolder
 
         local Color = Options["visuals/player/breadcrumbs/color"].Value
         local GlowFactor = Options["visuals/player/breadcrumbs/glowfac"].Value
