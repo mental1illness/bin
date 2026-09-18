@@ -669,6 +669,8 @@ Visuals.Players = {} do
                     Visuals.Players.MakeBreadcrumbs(PrimaryPart.Position, PrimaryPart)
                 end
             end
+        else
+            LastBreadcrumbPosition = nil
         end
         
     end
