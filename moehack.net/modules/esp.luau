@@ -478,69 +478,52 @@ function ESP.CreateElements()
     return Objects
 end
 
-function ESP.GetHealth(Player, Character)
-    local MaxHealth, Health = 0, 0
-    local Humanoid = Character:FindFirstChildOfClass("Humanoid")
-    if Humanoid then
-        MaxHealth = Humanoid.MaxHealth
-        Health = Humanoid.Health
-    end
+do -- All the fucking helper funcs that looks extremely not clean do stay
 
-    return MaxHealth, Health
-end
-
-function ESP.GetCharacter(Player)
-    if moehack.data.game_name == "Operation One" then
-        if not StateObject then
-            StateObject = require(ReplicatedStorage.Modules.StateObject)
-        end
-        if not Player.Character then return nil end
-        local Data = StateObject.get("Character", Player.Character)
-        if not Data then return end
-        if not Data.values or not Data.values.viewmodels then return end
-        return Data.values.viewmodels
-    end
-    return Player.Character
-end
-
-local function _ESPDisconnectTarget(Entity)
-    if Entity.TargetConnections then
-        for _, Connection in Entity.TargetConnections do
-            Connection:Disconnect()
-        end
-    end
-    Entity.TargetConnections = {}
-end
-
-local function _ESPConnectTarget(Target, Entity)
-    _ESPDisconnectTarget(Entity)
-    Entity.BodyParts = {}
-    if not Target or not Target.Parent then return end
-
-    if IsA(Target, "BasePart") then
-        Insert(Entity.BodyParts, Target)
-        return
-    end
-
-    for _, Object in Target:GetDescendants() do
-        if IsA(Object, "BasePart") then
-            Insert(Entity.BodyParts, Object)
-        end
-    end
-
-    Insert(Entity.TargetConnections, Target.DescendantAdded:Connect(function(Object)
-        if IsA(Object, "BasePart") then
-            Insert(Entity.BodyParts, Object)
-        end
-    end))
-    Insert(Entity.TargetConnections, Target.DescendantRemoving:Connect(function(Object)
-        for i, Part in Entity.BodyParts do
-            if Part == Object then
-                RemoveTable(Entity.BodyParts, i)
-                break
+    function _ESPDisconnectTarget(Entity)
+        if Entity.TargetConnections then
+            for _, Connection in Entity.TargetConnections do
+                Connection:Disconnect()
             end
         end
-    end))
+        Entity.TargetConnections = {}
+    end
+
+    function _ESPConnectTarget(Target, Entity)
+        _ESPDisconnectTarget(Entity)
+        Entity.BodyParts = {}
+        if not Target or not Target.Parent then return end
+
+        if IsA(Target, "BasePart") then
+            Insert(Entity.BodyParts, Target)
+            return
+        end
+
+        for _, Object in Target:GetDescendants() do
+            if IsA(Object, "BasePart") then
+                Insert(Entity.BodyParts, Object)
+            end
+        end
+
+        Insert(Entity.TargetConnections, Target.DescendantAdded:Connect(function(Object)
+            if IsA(Object, "BasePart") then
+                Insert(Entity.BodyParts, Object)
+            end
+        end))
+        Insert(Entity.TargetConnections, Target.DescendantRemoving:Connect(function(Object)
+            for i, Part in Entity.BodyParts do
+                if Part == Object then
+                    RemoveTable(Entity.BodyParts, i)
+                    break
+                end
+            end
+        end))
+    end
+
+    function _ESPConnectCharacter(Player, Entity)
+        _ESPConnectTarget(Utility.GetCharacter(Player), Entity)
+    end
+
 end
 
 function ESP.AddTarget(Target, Settings)
@@ -581,10 +564,6 @@ function ESP.RemoveTarget(TargetOrEntity)
     if Entity.Objects and Entity.Objects.Holder then
         Entity.Objects.Holder:Destroy()
     end
-end
-
-local function _ESPConnectCharacter(Player, Entity)
-    _ESPConnectTarget(ESP.GetCharacter(Player), Entity)
 end
 
 function ESP.ApplyAllPlayer()
@@ -657,48 +636,12 @@ function ESP.GetBoundingBox(Model: {})
     return LowestX, HighestX, LowestY, HighestY, OnScreen
 end
 
-function ESP.GetHumanoid(Entity)
-    if Entity.Humanoid and Entity.Humanoid.Parent then
-        return Entity.Humanoid
-    end
-
-    local Character = Entity.IsCustom and Entity.Target or (Entity.Player and Entity.Player.Character)
-    if not Character then
-        return nil
-    end
-
-    local Humanoid = FindFirstChildOfClass(Character, "Humanoid")
-    Entity.Humanoid = Humanoid
-
-    return Humanoid
-end
-
-function ESP.GetTool(Player, Character)
-
-    if moehack.data.game_name == "Operation One" then
-        if not StateObject then
-            StateObject = require(ReplicatedStorage.Modules.StateObject)
-        end
-        if not Player.Character then return nil end
-        local Data = StateObject.get("Character", Player.Character)
-        return Data.values.equipped and Data.values.equipped.Name or "NONE"
-    end
-
-    local Tool = FindFirstChildOfClass(Character, "Tool")
-    if Tool then return Tool.Name end
-    return "none"
-end
-
-function ESP.IsTeammate(Player1, Player2)
-    return Player1.Team == Player2.Team
-end
-
 function ESP.Render(Entity: {})
     local Player = Entity.Player
     local Objects = Entity.Objects
 
     local RealCharacter = Entity.IsCustom and Entity.Target or (Player and Player.Character)
-    local Character = Entity.IsCustom and Entity.Target or (Player and ESP.GetCharacter(Player))
+    local Character = Entity.IsCustom and Entity.Target or (Player and Utility.GetCharacter(Player))
     if Entity.IsCustom and (not RealCharacter or not RealCharacter.Parent) then
         ESP.RemoveTarget(Entity)
         return
@@ -713,9 +656,9 @@ function ESP.Render(Entity: {})
 		return
 	end
 
-    local MaxHealth, Health = ESP.GetHealth(Player, RealCharacter)
-    local Humanoid = ESP.GetHumanoid(Entity)
-    local IsTeammate = ESP.IsTeammate(Player, LocalPlayer)
+    local MaxHealth, Health = Utility.GetHealth(Player, RealCharacter)
+    local Humanoid = Utility.GetHumanoid(Entity)
+    local IsTeammate = Utility.IsTeammate(Player, LocalPlayer)
 
     if Entity.IsCustom then
         if Humanoid then
@@ -847,7 +790,7 @@ function ESP.Render(Entity: {})
         if not Objects.Tool.Visible then
             Objects.Tool.Visible = true
         end
-        local ToolName = Player and ESP.GetTool(Player, RealCharacter) or "none"
+        local ToolName = Player and Utility.GetTool(Player, RealCharacter) or "none"
 
         if Objects.Tool.Text ~= ToolName then Objects.Tool.Text = ToolName end
         local ToolColor = Options["esp/tool/color"].Value
