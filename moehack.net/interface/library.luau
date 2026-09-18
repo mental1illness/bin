@@ -73,6 +73,7 @@ local Library = {
 	Font = Enum.Font.Code, --// For text bounds size n shit
 
 	AllowRiskyFeatures = false,
+	IsOpen = false,
 
 	OpenedFrames = {},
 	DependencyBoxes = {},
@@ -3988,6 +3989,7 @@ function Library:CreateWindow(...)
 
 		Toggled = not Toggled
 		ModalElement.Modal = Toggled
+		Library.IsOpen = Toggled
 
 		if Toggled then
 			Outer.Visible = true

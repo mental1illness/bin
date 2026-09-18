@@ -50,10 +50,6 @@ LoadModule = function(Path)
     return Result
 end
 
-local function ExpSmoothing(Rate, DeltaTime)
-    return 1 - math.exp(-Rate * DeltaTime)
-end
-
 --# Variables
 
 local Utility = LoadModule("moehack.net/modules/utility.luau", true)
@@ -235,6 +231,9 @@ function Combat.GetTarget(FOV: number, NearestHitbox: boolean)
 end
 
 function Combat.Tick(Delta)
+
+    if Library.IsOpen then return end
+    
     if Toggles["combat/aimassist"].Value and Options["combat/aimassist/key"]:GetState() then
         
         local FOV = Options["combat/aimassist/fov"].Value

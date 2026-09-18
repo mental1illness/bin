@@ -61,7 +61,7 @@ LoadModule("moehack.net/modules/bypass.luau")
 
 --# UI Library
 local Library, SaveManager, ThemeManager = LoadModule("moehack.net/interface/library.luau", true), LoadModule("moehack.net/interface/addons/SaveManager.lua", true), LoadModule("moehack.net/interface/addons/ThemeManager.lua", true) do
-    local Window = Library:CreateWindow({ Title = 'moehack.net', Center = true, AutoShow = true, TabPadding = 1, MenuFadeTime = 0.2, BackgroundImage = "https://cats-cure-depression.vercel.app/images/izumi.png", BackgroundImageTransparency = 0.9, BackgroundImageScaleType = Enum.ScaleType.Fit })
+    local Window = Library:CreateWindow({ Title = 'moehack.net', Center = true, AutoShow = false, TabPadding = 1, MenuFadeTime = 0.2, BackgroundImage = "https://cats-cure-depression.vercel.app/images/izumi.png", BackgroundImageTransparency = 0.9, BackgroundImageScaleType = Enum.ScaleType.Fit })
     
     local Tabs = {}
 
@@ -513,6 +513,8 @@ Library:GiveSignal(
         Misc.Tick(Delta)
     end)
 )
+
+Spawn(Library.Toggle)
 
 do -- Notification
     Spawn(function()
