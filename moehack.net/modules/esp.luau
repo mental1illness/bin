@@ -762,7 +762,7 @@ function ESP.Render(Entity: {})
         return
     end
 
-    local TargetRoot = RealCharacter.PrimaryPart
+    local TargetRoot = RealCharacter.PrimaryPart or Character.PrimaryPart
     if TargetRoot then
         Distance = (CurrentCamera.CFrame.Position - TargetRoot.Position).Magnitude
     end
@@ -947,8 +947,6 @@ function ESP.Render(Entity: {})
         if not Objects.Distance.Visible then
             Objects.Distance.Visible = true
         end
-
-        local TargetRoot = RealCharacter:IsA("Model") and RealCharacter.PrimaryPart or (RealCharacter:IsA("BasePart") and RealCharacter or nil)
 
         if ClientRoot and TargetRoot then
             local DistanceText = tostring(Floor(Distance)) .. "st"
