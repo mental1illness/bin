@@ -129,6 +129,10 @@ function Combat.GetCharacter(Player)
     return Player.Character
 end
 
+function Combat.IsTeammate(Player1, Player2)
+    return Player1.Team == Player2.Team
+end
+
 function Combat.GetTarget(FOV: number, NearestHitbox: boolean)
     local ViewportSize = Camera.ViewportSize
     local Center = NewVector(ViewportSize.X * 0.5, ViewportSize.Y * 0.5)
@@ -188,6 +192,9 @@ function Combat.GetTarget(FOV: number, NearestHitbox: boolean)
 
     for _, Player in PlayersCache do
         if Player ~= LocalPlayer then
+            if Combat.IsTeammate(Player, LocalPlayer) and not Toggles["combat/settings/targetteammates"].Value then
+                return
+            end
             local Character = Combat.GetCharacter(Player)
 
             if Character then

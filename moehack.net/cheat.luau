@@ -79,7 +79,7 @@ local Library, SaveManager, ThemeManager = LoadModule("moehack.net/interface/lib
 
         if Tabs.Combat then
             do -- Combat
-                local AimAssist, TriggerBot, RCS, BulletRedirection = Tabs.Combat:AddGroupbox({ Side = 1, Name = "Aim Assistance" }), Tabs.Combat:AddGroupbox({ Side = 1, Name = "Trigger Bot" }), Tabs.Combat:AddGroupbox({ Side = 2, Name = "Recoil Control System" }), Tabs.Combat:AddGroupbox({ Side = 2, Name = "Bullet Redirection" })
+                local AimAssist, TriggerBot, RCS, BulletRedirection, Settings = Tabs.Combat:AddGroupbox({ Side = 1, Name = "Aim Assistance" }), Tabs.Combat:AddGroupbox({ Side = 1, Name = "Trigger Bot" }), Tabs.Combat:AddGroupbox({ Side = 2, Name = "Recoil Control System" }), Tabs.Combat:AddGroupbox({ Side = 2, Name = "Bullet Redirection" }), Tabs.Combat:AddGroupbox({ Side = 2, Name = "Settings" })
             
                 do -- Aim Assist
                     AimAssist:AddToggle("combat/aimassist", { Text = "Enabled", Default = false }):AddKeyPicker("combat/aimassist/key", { Text = "Aim Assist Key", SyncToggleState = false, Mode = "Hold", Default = "MB2" })
@@ -128,6 +128,10 @@ local Library, SaveManager, ThemeManager = LoadModule("moehack.net/interface/lib
                     BulletRedirection:AddToggle("combat/bulletredirection/usenearhitbox", { Text = "Use Nearest Hitbox", Default = false })
                     BulletRedirection:AddToggle("combat/bulletredirection/ignorebehindwalls", { Text = "Ignore Behind Walls", Default = false })
                     BulletRedirection:AddToggle("combat/bulletredirection/magicbullet", { Text = "Magic Bullet", Default = false })
+                end
+
+                do -- Settings
+                    Settings:AddToggle("combat/settings/targetteammates", { Text = "Target Teammates", Default = false })
                 end
             end
         end
