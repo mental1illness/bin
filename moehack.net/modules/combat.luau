@@ -248,7 +248,7 @@ function Combat.Tick(Delta)
         local Hitbox
 
         if StickyAim and Combat.AimAssistTarget then
-            local Character = Combat.AimAssistTarget
+            local Character = IsA(Combat.AimAssistTarget, "Model") and Combat.AimAssistTarget or Combat.AimAssistTarget.Character
             local Humanoid = Character and FindFirstChild(Character, "Humanoid")
 
             if Humanoid and Humanoid.Health > 0 then
