@@ -503,8 +503,11 @@ Visuals.Players = {} do
 
         local Color = Options["visuals/player/breadcrumbs/color"].Value
         local GlowFactor = Options["visuals/player/breadcrumbs/glowfac"].Value
+        local Lifetime = Options["visuals/player/breadcrumbs/lifetime"].Value
+        local FadeTime = Options["visuals/player/breadcrumbs/fadetime"].Value
 
         local GlowTypeSh = Create("BoxHandleAdornment")
+
         GlowTypeSh.AlwaysOnTop = true
         GlowTypeSh.Shading = Enum.AdornShading.XRayShaded
         GlowTypeSh.Size = Part.Size
@@ -519,19 +522,25 @@ Visuals.Players = {} do
         GlowTypeSh.Adornee = Part
         GlowTypeSh.Parent = HiddenFolder
 
-        task.delay(Options["visuals/player/breadcrumbs/lifetime"].Value, function()
+        task.delay(Lifetime, function()
             if not GlowTypeSh.Parent then
                 return
             end
 
-            TweenService:Create(GlowTypeSh, TweenInfo.new(Options["visuals/player/breadcrumbs/fadetime"].Value, Enum.EasingStyle.Cubic), { Transparency = 1} ):Play()
+            TweenService:Create(
+                GlowTypeSh,
+                TweenInfo.new(FadeTime, Enum.EasingStyle.Cubic),
+                {
+                    Transparency = 1
+                }
+            ):Play()
 
-            task.delay(Options["visuals/player/breadcrumbs/fadetime"].Value, function()
-                if GlowTypeSh then
+            task.delay(FadeTime, function()
+                if GlowTypeSh.Parent then
                     GlowTypeSh:Destroy()
                 end
-                
-                if Part then
+
+                if Part.Parent then
                     Part:Destroy()
                 end
             end)
@@ -604,7 +613,7 @@ Visuals.Players = {} do
                 Visuals.Players.ChineseHat.Color3 = LastColorThatShouldBeBroImSoScaredMeSOSALYOU
             end
 
-            local Character = Visuals.GetClientCharacter()
+            local Character = Utility.GetCharacter(LocalPlayer)
             if Character then
                 local Head = FindFirstChild(Character, "Head")
                 if Head then
@@ -632,12 +641,12 @@ Visuals.Players = {} do
         end
 
         if Toggles["visuals/player/breadcrumbs"].Value then
-            local Character = Utility.GetCharacter()
+            local Character = Utility.GetCharacter(LocalPlayer)
             if Character then
                 local PrimaryPart = Character.PrimaryPart
                 if PrimaryPart and PrimaryPart.Position ~= LastPosition then
                     LastPosition = PrimaryPart.Position -- Thx
-                    Visuals.Players.MakeBreadcrumbs(PrimaryPart.Position, Character)
+                    Visuals.Players.MakeBreadcrumbs(PrimaryPart.Position, PrimaryPart)
                 end
             end
         end
