@@ -20,6 +20,7 @@ local RunService         = GetService(Game, "RunService")
 local Stats              = GetService(Game, "Stats")
 local Players            = GetService(Game, "Players")
 local Lighting           = GetService(Game, "Lighting")
+local TweenService       = GetService(Game, "TweenService")
 local LocalPlayer        = Players.LocalPlayer
 
 --# Helper Funcs (USELESS)
@@ -44,75 +45,11 @@ LoadModule = function(Path)
     return Result
 end
 
+--# Modules
+
+local Utility = LoadModule("moehack.net/modules/utility.luau")
+
 --# Variables
-local FakeLibrary = {} do
-    function FakeLibrary:GiveSignal() end
-end
-
-local Flags = {
-    ["visuals/world/ambient"] = {Value = true},
-    ["visuals/world/ambient/outdoorcolor"] = {Value = Color3.fromRGB(200, 100, 60)},
-    ["visuals/world/ambient/color"] = {Value = Color3.fromRGB(200, 100, 60)},
-    ["visuals/world/brightness"] = {Value = true},
-    ["visuals/world/brightness/level"] = {Value = 1.6},
-    ["visuals/world/brightness/envdiffscale"] = {Value = 1},
-    ["visuals/world/brightness/envspecscale"] = {Value = 0.9},
-    ["visuals/world/brightness/exposure"] = {Value = 0.15},
-    ["visuals/world/fog"] = {Value = true},
-    ["visuals/world/fog/color"] = {Value = Color3.fromRGB(200, 100, 60)},
-    ["visuals/world/fog/near"] = {Value = 0},
-    ["visuals/world/fog/far"] = {Value = 100000},
-    ["visuals/world/shadow"] = {Value = true},
-    ["visuals/world/shadow/color"] = {Value = Color3.fromRGB(200, 100, 60)},
-    ["visuals/world/shadow/softness"] = {Value = 0.5},
-    ["visuals/world/shadow/globalshadows"] = {Value = true},
-    ["visuals/world/lighting"] = {Value = true},
-    ["visuals/world/lighting/time"] = {Value = 14},
-    ["visuals/world/lighting/latitude"] = {Value = 0},
-    ["visuals/world/lighting/colorshiftbottom"] = {Value = Color3.fromRGB(200, 100, 60)},
-    ["visuals/world/lighting/colorshifttop"] = {Value = Color3.fromRGB(200, 100, 60)},
-    ["visuals/world/lighting/colorgrading"] = {Value = true},
-    ["visuals/world/lighting/colorgrading/tonemap"] = {Value = "Retro"},
-    ["visuals/world/lighting/cc"] = {Value = false},
-    ["visuals/world/lighting/cc/saturation"] = {Value = 0.5},
-    ["visuals/world/lighting/cc/contrast"] = {Value = 0.5},
-    ["visuals/world/lighting/cc/brightness"] = {Value = 0},
-    ["visuals/world/lighting/cc/tint"] = {Value = Color3.fromRGB(255, 255, 255)},
-    ["visuals/world/lighting/bloom"] = {Value = true},
-    ["visuals/world/lighting/bloom/intensity"] = {Value = 1},
-    ["visuals/world/lighting/bloom/size"] = {Value = 56},
-    ["visuals/world/lighting/bloom/threshold"] = {Value = 0.5},
-    ["visuals/world/lighting/technology"] = {Value = "Future"},
-    ["visuals/world/sunrays"] = {Value = false},
-    ["visuals/world/sunrays/intensity"] = {Value = 0.1},
-    ["visuals/world/sunrays/spread"] = {Value = 0.5},
-    ["visuals/world/atmosphere"] = {Value = false},
-    ["visuals/world/atmosphere/density"] = {Value = 0.3},
-    ["visuals/world/atmosphere/offset"] = {Value = 0},
-    ["visuals/world/atmosphere/color"] = {Value = Color3.fromRGB(199, 170, 107)},
-    ["visuals/world/atmosphere/decay"] = {Value = Color3.fromRGB(106, 112, 125)},
-    ["visuals/world/atmosphere/glare"] = {Value = 0},
-    ["visuals/world/atmosphere/haze"] = {Value = 0},
-    ["visuals/world/dof"] = {Value = true},
-    ["visuals/world/dof/farintens"] = {Value = 0},
-    ["visuals/world/dof/nearintens"] = {Value = 0.7},
-    ["visuals/world/dof/focusdist"] = {Value = 20},
-    ["visuals/world/dof/focusinradius"] = {Value = 20},
-
-    ["visuals/world/weather"] = {Value=true},
-    ["visuals/world/weather/type"] = {Value = "Snow"},
-    ["visuals/world/snow/rate"] = {Value = 1000},
-
-    ["visuals/player/chinesehat"] = {Value=true},
-    ["visuals/player/chinesehat/glowfac"] = {Value = 5},
-    ["visuals/player/chinesehat/radius"] = {Value = 1.5},
-    ["visuals/player/chinesehat/height"] = {Value = 1},
-    ["visuals/player/chinesehat/alwaysontop"] = {Value=true},
-    ['visuals/player/chinesehat/color'] = {Value = Color3.fromRGB(255, 255, 255)},
-
-    ['visuals/player/appearance'] = {Value = true},
-    ['visuals/player/appearance/id'] = {Value = 4907511905} -- bitch
-}
 
 local HiddenFolder = Create("Folder", gethui and gethui() or GetService(Game, "CoreGui"))
 local Library = getgenv().Library or FakeLibrary
@@ -156,11 +93,13 @@ Rain:SetIntensityRatio(0.55)
 Rain:SetLightEmission(0.05)
 Rain:SetLightInfluence(0.85)
 Rain:SetVolume(0.35)
-Rain:SetDirection(Vector3.new(0.15, -1, 0.05))
+Rain:SetDirection(NewVector3(0.15, -1, 0.05))
 
 const SNOW_OFFSET  = NewCFrame(0, 10, 0) -- why do ppl think this is ai
+const BREADCRUMBS_SIZE = NewVector3(0.2, 0.2, 0.2)
 
 local OldAppearanceId, OldAppearanceCharacter = 0, nil
+local LastPosition = NewVector3()
 
 --# Main
 local Visuals = {}
@@ -446,10 +385,6 @@ Visuals.World = {} do
     end
 end
 
-function Visuals.GetClientCharacter()
-    return LocalPlayer.Character or nil
-end
-
 Visuals.Players = {} do
 
     function Visuals.Players.ChangeAvatar(id: number) -- i used ai for this btw
@@ -552,11 +487,61 @@ Visuals.Players = {} do
         return true
     end
 
+    function Visuals.Players.MakeBreadcrumbs(pos, parent)
+        local Part = Create("Part")
+
+        Part.Size = BREADCRUMBS_SIZE
+        Part.Position = pos
+        Part.Anchored = true
+        Part.CanCollide = false
+        Part.CanTouch = false
+        Part.CanQuery = false
+        Part.CastShadow = false
+        Part.Transparency = 1
+        Part.Name = "\0"
+        Part.Parent = parent
+
+        local Color = Options["visuals/player/breadcrumbs/color"].Value
+        local GlowFactor = Options["visuals/player/breadcrumbs/glowfac"].Value
+
+        local GlowTypeSh = Create("BoxHandleAdornment")
+        GlowTypeSh.AlwaysOnTop = true
+        GlowTypeSh.Shading = Enum.AdornShading.XRayShaded
+        GlowTypeSh.Size = Part.Size
+        GlowTypeSh.Transparency = -1
+        GlowTypeSh.Color3 = Color3.new(
+            Color.R * GlowFactor,
+            Color.G * GlowFactor,
+            Color.B * GlowFactor
+        )
+        GlowTypeSh.AdornCullingMode = Enum.AdornCullingMode.Never
+        GlowTypeSh.ZIndex = 9e9
+        GlowTypeSh.Adornee = Part
+        GlowTypeSh.Parent = HiddenFolder
+
+        task.delay(Options["visuals/player/breadcrumbs/lifetime"].Value, function()
+            if not GlowTypeSh.Parent then
+                return
+            end
+
+            TweenService:Create(GlowTypeSh, TweenInfo.new(Options["visuals/player/breadcrumbs/fadetime"].Value, Enum.EasingStyle.Cubic), { Transparency = 1} ):Play()
+
+            task.delay(Options["visuals/player/breadcrumbs/fadetime"].Value, function()
+                if GlowTypeSh then
+                    GlowTypeSh:Destroy()
+                end
+                
+                if Part then
+                    Part:Destroy()
+                end
+            end)
+        end)
+    end
 
     function Visuals.Players.Tick()
 
         if Toggles["visuals/player/appearance"].Value then
-            local Character = Visuals.GetClientCharacter()
+            local Character = Utility.GetCharacter()
             local AppearanceId = tonumber(Options["visuals/player/appearance/id"].Value)
 
             if Character and AppearanceId then
@@ -581,6 +566,7 @@ Visuals.Players = {} do
                 Visuals.Players.ChineseHat = Create("ConeHandleAdornment")
                 Visuals.Players.ChineseHat.Shading = Enum.AdornShading.Shaded
                 Visuals.Players.ChineseHat.Radius = 1.5
+                Visuals.Players.ChineseHat.Transparency = -1
                 Visuals.Players.ChineseHat.CFrame = NewCFrame(0, 0.25, 0) * CFrame.Angles(Rad(90), 0, 0)
                 Visuals.Players.ChineseHat.Color3 = Color3.fromRGB(255, 255, 255)
                 Visuals.Players.ChineseHat.Hollow = true
@@ -642,6 +628,17 @@ Visuals.Players = {} do
             if Visuals.Players.ChineseHat and Visuals.Players.ChineseHat.Visible then
                 Visuals.Players.ChineseHat.Visible = false
                 Visuals.Players.ChineseHat.Adornee = nil
+            end
+        end
+
+        if Toggles["visuals/player/breadcrumbs"].Value then
+            local Character = Utility.GetCharacter()
+            if Character then
+                local PrimaryPart = Character.PrimaryPart
+                if PrimaryPart and PrimaryPart.Position ~= LastPosition then
+                    LastPosition = PrimaryPart.Position -- Thx
+                    Visuals.Players.MakeBreadcrumbs(PrimaryPart.Position, Character)
+                end
             end
         end
         
