@@ -96,10 +96,11 @@ Rain:SetVolume(0.35)
 Rain:SetDirection(NewVector3(0.15, -1, 0.05))
 
 const SNOW_OFFSET  = NewCFrame(0, 10, 0) -- why do ppl think this is ai
-const BREADCRUMBS_SIZE = NewVector3(0.2, 0.2, 0.2)
+const BREADCRUMBS_SIZE = NewVector3(0.05, 0.05, 0.05)
 
 local OldAppearanceId, OldAppearanceCharacter = 0, nil
 local LastPosition = NewVector3()
+local LastBreadcrumbPosition
 
 --# Main
 local Visuals = {}
@@ -488,10 +489,11 @@ Visuals.Players = {} do
     end
 
     function Visuals.Players.MakeBreadcrumbs(pos, parent)
+        local PreviousPosition = LastBreadcrumbPosition
+        LastBreadcrumbPosition = pos
+
         local Part = Create("Part")
 
-        Part.Size = BREADCRUMBS_SIZE
-        Part.Position = pos
         Part.Anchored = true
         Part.CanCollide = false
         Part.CanTouch = false
@@ -499,6 +501,24 @@ Visuals.Players = {} do
         Part.CastShadow = false
         Part.Transparency = 1
         Part.Name = "\0"
+
+        if PreviousPosition then
+            local Direction = pos - PreviousPosition
+            local Distance = Direction.Magnitude
+            local Center = (PreviousPosition + pos) * 0.5
+
+            Part.Size = Vector3.new(
+                BREADCRUMBS_SIZE.X,
+                BREADCRUMBS_SIZE.Y,
+                Distance
+            )
+
+            Part.CFrame = CFrame.lookAt(Center, pos)
+        else
+            Part.Size = BREADCRUMBS_SIZE
+            Part.Position = pos
+        end
+
         Part.Parent = parent
 
         local Color = Options["visuals/player/breadcrumbs/color"].Value
