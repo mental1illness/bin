@@ -84,13 +84,9 @@ local Combat = {
 }
 
 function Combat.IsBehindWalls(Target, Hitbox)
-    local Character = Target
+    local Character = IsA(Target, "Model") and Target or Target.Character
 
-    if moehack.data.game_name ~= "Operation One" then
-        Character = Target and Target.Character
-    end
-
-    if not Character or not Hitbox or not Hitbox:IsDescendantOf(Character) then
+    if not Character or not Hitbox or not IsDescendantOf(Hitbox, Character) then
         return true
     end
 
