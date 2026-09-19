@@ -545,7 +545,7 @@ Library:GiveSignal(
 )
 
 Spawn(Library.Toggle)
-Intro:FadeOut(1)
+Intro:FadeOut(3)
 
 do -- Notification
     Spawn(function()
