@@ -171,11 +171,37 @@ Misc.Movement = {} do
 
         if Toggles["misc/movement/speed"].Value then
             local Speed = Options["misc/movement/speed/value"].Value
+            local Method = Options["misc/movement/speed/method"].Value
 
-            if MoveDir.Magnitude > 0 then
-                if RootPart then
+            if RootPart then
+                local MoveDir = Vector3.zero
+
+                if Method == "MoveDir" then
+                    MoveDir = Humanoid.MoveDirection
+                elseif Method == "Directional" then
+                    local LookVector = Camera.CFrame.LookVector
+                    local RightVector = Camera.CFrame.RightVector
+
+                    if IsKeyDown(InputService, "W") then
+                        MoveDir += Vector3.new(LookVector.X, 0, LookVector.Z)
+                    end
+
+                    if IsKeyDown(InputService, "S") then
+                        MoveDir -= Vector3.new(LookVector.X, 0, LookVector.Z)
+                    end
+
+                    if IsKeyDown(InputService, "D") then
+                        MoveDir += Vector3.new(RightVector.X, 0, RightVector.Z)
+                    end
+
+                    if IsKeyDown(InputService, "A") then
+                        MoveDir -= Vector3.new(RightVector.X, 0, RightVector.Z)
+                    end
+                end
+
+                if MoveDir.Magnitude > 0 then
                     local CurrentY = RootPart.AssemblyLinearVelocity.Y
-                    RootPart.AssemblyLinearVelocity = NewVector3(MoveDir.X, 0, MoveDir.Z).Unit * Speed + NewVector3(0, CurrentY, 0)
+                    RootPart.AssemblyLinearVelocity = MoveDir.Unit * Speed + Vector3.new(0, CurrentY, 0)
                 end
             end
         end
@@ -209,6 +235,10 @@ Misc.Movement = {} do
 
                     local Velocity = RootPart.AssemblyLinearVelocity
                     RootPart.AssemblyLinearVelocity = NewVector3(Velocity.X, JumpVelocity, Velocity.Z)
+                end
+            elseif Method == "States" then
+                if Humanoid.FloorMaterial ~= Enum.Material.Air and Humanoid:GetState() ~= Enum.HumanoidStateType.Jumping then
+                    Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
                 end
             end
         end

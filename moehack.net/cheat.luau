@@ -374,11 +374,12 @@ local Library, SaveManager, ThemeManager = LoadModule("moehack.net/interface/lib
                 do -- Movement
                     Movement:AddToggle("misc/movement/speed", { Text = "Speed Hack", Default = false })
                     Movement:AddSlider("misc/movement/speed/value", {Text = "Speed Hack Value", Min = 1, Max = 500, Rounding = 0, Default = 30})
+                    Movement:AddDropdown("misc/movement/speed/method", { Text = "Speed Hack Method", Default = 1, Values = {"Directional", "MoveDir"} })
 
                     Movement:AddToggle("misc/movement/moonwalk", { Text = "Moon Walk", Default = false }):AddKeyPicker("misc/movement/moonwalk/key", { Text = "Moon Walk Key",  SyncToggleState = false, Mode = "Hold", Default = "T" })
 
                     Movement:AddToggle("misc/movement/autojump", { Text = "Auto Jump", Default = false })
-                    Movement:AddDropdown("misc/movement/autojump/method", { Text = "Auto Jump Method", Default = 1, Values = {"Humanoid", "Velocity"} })
+                    Movement:AddDropdown("misc/movement/autojump/method", { Text = "Auto Jump Method", Default = 1, Values = {"Humanoid", "Velocity", "State"} })
 
                     Movement:AddToggle("misc/movement/fly", { Text = "Fly", Default = false }):AddKeyPicker("misc/movement/fly/key", { Text = "Fly Key",  SyncToggleState = false, Mode = "Hold", Default = "T" })
                     Movement:AddSlider("misc/movement/flyspeed/value", {Text = "Fly Speed", Min = 1, Max = 500, Rounding = 0, Default = 30})
