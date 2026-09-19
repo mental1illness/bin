@@ -237,7 +237,7 @@ local Library, SaveManager, ThemeManager = LoadModule("moehack.net/interface/lib
                         })
                     end
 
-                    local ColorGrading = World:AddToggle("visuals/world/lighting/colorgrading", { Text = "Color Grading", Default = false }) do
+                    World:AddToggle("visuals/world/lighting/colorgrading", { Text = "Color Grading", Default = false }) do
                         local DepBox = World:AddDependencyBox()
                         local TonemapOptions = {}
                         for _, EnumItem in Enum.TonemapperPreset:GetEnumItems() do
@@ -261,7 +261,7 @@ local Library, SaveManager, ThemeManager = LoadModule("moehack.net/interface/lib
                         })
                     end
 
-                    local Bloom = World:AddToggle("visuals/world/lighting/bloom", { Text = "Bloom", Default = false }) do
+                    World:AddToggle("visuals/world/lighting/bloom", { Text = "Bloom", Default = false }) do
                         local DepBox = World:AddDependencyBox()
                         DepBox:AddSlider("visuals/world/lighting/bloom/intensity", { Text = "Intensity", Min = 0, Max = 1, Rounding = 2, Default = 0.5 })
                         DepBox:AddSlider("visuals/world/lighting/bloom/size", { Text = "Size", Min = 0, Max = 56, Rounding = 2, Default = 0.5 })
@@ -271,7 +271,7 @@ local Library, SaveManager, ThemeManager = LoadModule("moehack.net/interface/lib
                         })
                     end
 
-                    local SunRays = World:AddToggle("visuals/world/sunrays", { Text = "Sun Rays", Default = false }) do
+                    World:AddToggle("visuals/world/sunrays", { Text = "Sun Rays", Default = false }) do
                         local DepBox = World:AddDependencyBox()
                         DepBox:AddSlider("visuals/world/sunrays/intensity", { Text = "Intensity", Min = 0, Max = 1, Rounding = 2, Default = 0.1 })
                         DepBox:AddSlider("visuals/world/sunrays/spread", { Text = "Spread", Min = 0, Max = 1, Rounding = 2, Default = 0.5 })
@@ -280,7 +280,7 @@ local Library, SaveManager, ThemeManager = LoadModule("moehack.net/interface/lib
                         })
                     end
 
-                    local Atmosphere = World:AddToggle("visuals/world/atmosphere", { Text = "Atmosphere", Default = false }) do
+                    World:AddToggle("visuals/world/atmosphere", { Text = "Atmosphere", Default = false }) do
                         local DepBox = World:AddDependencyBox()
                         DepBox:AddSlider("visuals/world/atmosphere/density", { Text = "Density", Min = 0, Max = 1, Rounding = 2, Default = 0.3 })
                         DepBox:AddSlider("visuals/world/atmosphere/offset", { Text = "Offset", Min = -1, Max = 1, Rounding = 2, Default = 0 })
@@ -293,7 +293,7 @@ local Library, SaveManager, ThemeManager = LoadModule("moehack.net/interface/lib
                         })
                     end
 
-                    local DepthOfField = World:AddToggle("visuals/world/dof", { Text = "Depth of Field", Default = false }) do
+                    World:AddToggle("visuals/world/dof", { Text = "Depth of Field", Default = false }) do
                         local DepBox = World:AddDependencyBox()
                         DepBox:AddSlider("visuals/world/dof/farintens", { Text = "Far Intensity", Min = 0, Max = 1, Rounding = 2, Default = 0.28 })
                         DepBox:AddSlider("visuals/world/dof/nearintens", { Text = "Near Intensity", Min = 0, Max = 1, Rounding = 2, Default = 0.7 })
@@ -304,12 +304,22 @@ local Library, SaveManager, ThemeManager = LoadModule("moehack.net/interface/lib
                         })
                     end
 
-                    local Weather = World:AddToggle("visuals/world/weather", { Text = "Weather", Default = false }) do
+                    World:AddToggle("visuals/world/weather", { Text = "Weather", Default = false }) do
                         local DepBox = World:AddDependencyBox()
                         DepBox:AddDropdown("visuals/world/weather/type", { Text = "Type", Default = 1, Values = {"Rain", "Snow"} })
                         DepBox:AddSlider("visuals/world/snow/rate", { Text = "Snow Rate", Min = 1, Max = 2000, Rounding = 0, Default = 1000 })
                         DepBox:SetupDependencies({
                             { Toggles["visuals/world/weather"], true }
+                        })
+                    end
+
+                    World:AddToggle("visuals/world/customskybox", { Text = "Custom Sky Box", Default = false }) do
+                        local DepBox = World:AddDependencyBox()
+
+                        DepBox:AddDropdown("visuals/world/customskybox/type", { Text = "Type", Default = 1, Values = LoadModule("moehack.net/modules/skyboxes.luau") }) -- now its in cache
+
+                        DepBox:SetupDependencies({
+                            { Toggles["visuals/world/customskybox"], true }
                         })
                     end
 

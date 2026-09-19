@@ -48,6 +48,7 @@ end
 --# Modules
 
 local Utility = LoadModule("moehack.net/modules/utility.luau")
+local Skyboxes = LoadModule("moehack.net/modules/skyboxes.luau")
 
 --# Variables
 
@@ -189,24 +190,28 @@ Visuals.World = {} do
             Visuals.World.ColorCorrection.Name = "\0"
             Visuals.World.ColorCorrection.Parent = Lighting
         end
+
         if not Visuals.World.Bloom then
             Visuals.World.Bloom = Create("BloomEffect")
             Visuals.World.Bloom.Enabled = false
             Visuals.World.Bloom.Name = "\0"
             Visuals.World.Bloom.Parent = Lighting
         end
+
         if not Visuals.World.DepthOfField then
             Visuals.World.DepthOfField = Create("DepthOfFieldEffect")
             Visuals.World.DepthOfField.Enabled = false
             Visuals.World.DepthOfField.Name = "\0"
             Visuals.World.DepthOfField.Parent = Lighting
         end
+
         if not Visuals.World.ColorGrading then
             Visuals.World.ColorGrading = Create("ColorGradingEffect")
             Visuals.World.ColorGrading.Enabled = false
             Visuals.World.ColorGrading.Name = "\0"
             Visuals.World.ColorGrading.Parent = Lighting
         end
+
         if not Visuals.World.SunRays then
             Visuals.World.SunRays = Create("SunRaysEffect")
             Visuals.World.SunRays.Enabled = false
@@ -218,6 +223,12 @@ Visuals.World = {} do
             Visuals.World.Atmosphere = Lighting:FindFirstChildOfClass("Atmosphere") or Create("Atmosphere")
             Visuals.World.Atmosphere.Name = "\0"
             Visuals.World.Atmosphere.Parent = Lighting
+        end
+
+        if not Visuals.World.Sky then
+            Visuals.World.Sky = Create("Sky")
+            Visuals.World.Sky.Name = "\0"
+            Visuals.World.Sky.Parent = nil
         end
 
         local Ambient = Options["visuals/world/ambient/color"].Value
@@ -249,6 +260,23 @@ Visuals.World = {} do
             if Lighting.EnvironmentSpecularScale ~= DefaultLighting.EnvironmentSpecularScale then Lighting.EnvironmentSpecularScale = DefaultLighting.EnvironmentSpecularScale end
             if Lighting.ExposureCompensation ~= DefaultLighting.ExposureCompensation then Lighting.ExposureCompensation = DefaultLighting.ExposureCompensation end
             if Lighting.Technology ~= DefaultLighting.Technology then Lighting.Technology = DefaultLighting.Technology end
+        end
+
+        if Toggles["visuals/world/customskybox"].Value then
+            local Type = Options["visuals/world/customskybox/type"].Value
+            local SkyData = Skyboxes.Skies[Type]
+            if Visuals.World.Sky.Parent ~= Lighting then
+                Visuals.World.Sky.Parent = Lighting
+            end
+            if SkyData then
+                for Key, Value in SkyData do
+                    if Visuals.World.Sky[Key] ~= Value then Visuals.World.Sky[Key] = Value end
+                end
+            end
+        else
+            if Visuals.World.Sky.Parent ~= nil then
+                Visuals.World.Sky.Parent = nil
+            end
         end
 
         if Toggles["visuals/world/fog"].Value then
