@@ -189,7 +189,7 @@ function Combat.GetTarget(FOV: number, NearestHitbox: boolean)
                 local RootPart = Character.PrimaryPart
                 local MaxHealth, Health = Utility.GetHealth(Player, Character)
 
-                if  RootPart and Health and Health <= 0 then
+                if  RootPart and Health > 0 then
                     if NearestHitbox then
                         for _, Hitbox in QueryDescendants(Character, "BasePart") do
                             local Position, OnScreen = WorldToViewportPoint(Camera, Hitbox.Position)
@@ -246,7 +246,7 @@ function Combat.Tick(Delta)
         if StickyAim and Combat.AimAssistTarget then
             local Character = IsA(Combat.AimAssistTarget, "Model") and Combat.AimAssistTarget or Combat.AimAssistTarget.Character
             local MaxHealth, Health = Utility.GetHealth(Player, Character)
-            if Health and Health > 0 then
+            if Health > 0 then
                 if UseNearestHitbox then
                     local BestDistance = FOV
                     local ViewportSize = Camera.ViewportSize
