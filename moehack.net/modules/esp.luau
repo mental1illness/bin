@@ -392,7 +392,7 @@ function ESP.CreateElements(Entity: table)
     Objects.NameHolder = Create("CanvasGroup")
     Objects.NameHolder.Parent = Objects.Holder
     Objects.NameHolder.BackgroundTransparency = 1
-    Objects.NameHolder.Size = FromOffset(500, 14)
+    Objects.NameHolder.Size = FromOffset(500, 15)
     Objects.NameHolder.AnchorPoint = Vector2.new(0.5, 1)
     Objects.NameHolder.Position = UDim2New(0.5, 0, 0, -3)
     Objects.NameHolder.GroupTransparency = 0
