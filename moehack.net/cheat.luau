@@ -425,7 +425,7 @@ local Library, SaveManager, ThemeManager = LoadModule("moehack.net/interface/lib
                         DepBox:AddSlider("misc/desync/offset/z", { Text = "Z", Min = -360, Max = 360, Rounding = 0, Default = 0 })
 
                         DepBox:SetupDependencies({
-                            { Toggles["misc/desync/randompos"], true } 
+                            { Toggles["misc/desync/offset"], true } 
                         });
                     end
 
