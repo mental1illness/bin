@@ -17,9 +17,8 @@ local Client = { -- this is us ;w; looks unnecessary but i dont wanna do a thous
     Root = nil; -- same goes for the rootpart
     RootPos = EmptyVector3;
 }
-local Frames = 0;
 
-setfflag('S2PhysicsSenderRate', '240');
+local BroPleaseWork = Instance.new("Part")
 
 setmetatable(Client, {
     __index = function(Self, Index)
@@ -121,9 +120,10 @@ local Desync = {
             Root.CFrame = Desync.Fake.CFrame
             Root.Velocity = Desync.Fake.Velocity
             Root.RotVelocity = Desync.Fake.RotVelocity
+            BroPleaseWork.CFrame = Root.CFrame
 
             sethiddenproperty(Root, "NetworkIsSleeping", true)
-            sethiddenproperty(Root, 'PhysicsRepRootPart', (Frames % (3 + 1) == 0 and Root) or nil);
+            sethiddenproperty(Root, 'PhysicsRepRootPart', (Frames % (3 + 1) == 0 and BroPleaseWork) or nil);
         end
     end)
 end
