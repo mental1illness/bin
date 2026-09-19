@@ -119,6 +119,29 @@ Utility.EasingStylesKey = {
     "Bounce",
 }
 
+Utility.EasingDirection = {
+    In = function(EasingFunction, t)
+        return EasingFunction(t)
+    end,
+
+    Out = function(EasingFunction, t)
+        return 1 - EasingFunction(1 - t)
+    end,
+
+    InOut = function(EasingFunction, t)
+        if t < 0.5 then
+            return EasingFunction(t * 2) * 0.5
+        end
+        return 1 - EasingFunction((1 - t) * 2) * 0.5
+    end,
+}
+
+Utility.EasingDirectionsKey = {
+    "In",
+    "Out",
+    "InOut",
+}
+
 function Utility.GetCharacter(Player)
     if moehack.data.game_name == "Operation One" then
         if not StateObject then

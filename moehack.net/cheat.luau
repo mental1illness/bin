@@ -428,6 +428,29 @@ local Library, SaveManager, ThemeManager = LoadModule("moehack.net/interface/lib
                             { Toggles["misc/desync/offset"], true } 
                         });
                     end
+
+                    Desync:AddToggle("misc/desync/jitter", { Text = "Jitter", Default = false }) do
+                        local DepBox = Desync:AddDependencyBox()
+                        DepBox:AddSlider("misc/desync/jitter/x", { Text = "X", Min = -360, Max = 360, Rounding = 0, Default = 0 })
+                        DepBox:AddSlider("misc/desync/jitter/y", { Text = "Y", Min = -360, Max = 360, Rounding = 0, Default = 0 })
+                        DepBox:AddSlider("misc/desync/jitter/z", { Text = "Z", Min = -360, Max = 360, Rounding = 0, Default = 0 })
+                        DepBox:AddSlider("misc/desync/jitter/speed", { Text = "Speed", Min = 1, Max = 60, Rounding = 0, Default = 10 })
+                        DepBox:SetupDependencies({
+                            { Toggles["misc/desync/jitter"], true }
+                        });
+                    end
+
+                    Desync:AddToggle("misc/desync/rotation", { Text = "Rotation Offset", Default = false }) do
+                        local DepBox = Desync:AddDependencyBox()
+                        DepBox:AddSlider("misc/desync/rotation/x", { Text = "Pitch", Min = -180, Max = 180, Rounding = 0, Default = 0 })
+                        DepBox:AddSlider("misc/desync/rotation/y", { Text = "Yaw", Min = -180, Max = 180, Rounding = 0, Default = 0 })
+                        DepBox:AddSlider("misc/desync/rotation/z", { Text = "Roll", Min = -180, Max = 180, Rounding = 0, Default = 0 })
+                        DepBox:SetupDependencies({
+                            { Toggles["misc/desync/rotation"], true }
+                        });
+                    end
+
+                    Desync:AddSlider("misc/desync/speed", { Text = "Speed", Min = 0, Max = 100, Rounding = 1, Default = 1 })
                     Desync:AddToggle("misc/desync/useeasingstyle", { Text = "Use Easing Style", Default = false })
                     Desync:AddDropdown("misc/desync/easingstyle", { Text = "Easing Style", Default = 1, Values = {
                         "Sine",
@@ -444,7 +467,11 @@ local Library, SaveManager, ThemeManager = LoadModule("moehack.net/interface/lib
                         "Elastic",
                         "Bounce",
                     } })
-
+                    Desync:AddDropdown("misc/desync/easingdirection", { Text = "Easing Direction", Default = 3, Values = {
+                        "In",
+                        "Out",
+                        "InOut",
+                    } })
                 end
             end
         end

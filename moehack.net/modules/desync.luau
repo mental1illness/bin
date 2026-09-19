@@ -78,7 +78,9 @@ function Desync.Tick(DeltaTime)
         end
 
         local EasingStyle = Options["misc/desync/easingstyle"].Value
+        local EasingDirection = Options["misc/desync/easingdirection"].Value
         local EasingStyleFunction = Utility.EasingStyle[EasingStyle]
+        local EasingDirectionFunction = Utility.EasingDirection[EasingDirection]
         local CurrentCFrame = Character.PrimaryPart.CFrame
 
         if Toggles["misc/desync/freezepos"].Value and Options["misc/desync/freezepos/key"]:GetState() then
@@ -101,9 +103,38 @@ function Desync.Tick(DeltaTime)
             CurrentCFrame *= NewCFrame(X, Y, Z)
         end
 
-        if EasingStyleFunction and Toggles["misc/desync/useeasingstyle"].Value then
-            local Alpha = Clamp(DeltaTime * 10, 0, 1)
-            Alpha = EasingStyleFunction(Alpha)
+        if Toggles["misc/desync/jitter"].Value then
+            local X = Options["misc/desync/jitter/x"].Value
+            local Y = Options["misc/desync/jitter/y"].Value
+            local Z = Options["misc/desync/jitter/z"].Value
+            local Speed = Options["misc/desync/jitter/speed"].Value
+
+            local Time = os.clock() * Speed
+
+            CurrentCFrame *= NewCFrame(
+                math.sin(Time) * X,
+                math.sin(Time * 1.17) * Y,
+                math.sin(Time * 0.83) * Z
+            )
+        end
+
+        if Toggles["misc/desync/rotation"].Value then
+            local Pitch = Options["misc/desync/rotation/x"].Value
+            local Yaw = Options["misc/desync/rotation/y"].Value
+            local Roll = Options["misc/desync/rotation/z"].Value
+
+            CurrentCFrame *= CFrame.Angles(
+                Rad(Pitch),
+                Rad(Yaw),
+                Rad(Roll)
+            )
+        end
+
+        if EasingStyleFunction and EasingDirectionFunction and Toggles["misc/desync/useeasingstyle"].Value then
+            local Speed = Options["misc/desync/speed"].Value
+            local Alpha = Clamp(DeltaTime * Speed, 0, 1)
+
+            Alpha = EasingDirectionFunction(EasingStyleFunction, Alpha)
 
             TargetCFrame = TargetCFrame:Lerp(CurrentCFrame, Alpha)
             CurrentCFrame = TargetCFrame
