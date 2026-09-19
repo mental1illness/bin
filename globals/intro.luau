@@ -5,6 +5,11 @@
 
 local FromOffset, FromScale, UDim2New = UDim2.fromOffset, UDim2.fromScale, UDim2.new
 local Create, IsA = Instance.new, workspace.IsA
+local GetService = game.GetService
+
+--# GetService
+
+local RunService = GetService(Game, "RunService")
 
 --# Helper
 
