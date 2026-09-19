@@ -403,7 +403,7 @@ local Library, SaveManager, ThemeManager = LoadModule("moehack.net/interface/lib
                 end
             
                 do -- Desync
-                    Desync:AddToggle("misc/desync", { Text = "Enable", Default = false }):AddKeyPicker("misc/desync/key", { Text = "Desync Key",  SyncToggleState = false, Mode = "Toggle", Default = "E" })
+                    Desync:AddToggle("misc/desync", { Text = "Enable", Default = false })
                     Desync:AddToggle("misc/desync/freezepos", { Text = "Freeze Position", Default = false }):AddKeyPicker("misc/desync/freezepos/key", { Text = "Freeze Pos Key",  SyncToggleState = false, Mode = "Hold", Default = "E" })
                     Desync:AddToggle("misc/desync/randompos", { Text = "Random Position", Default = false }):AddKeyPicker("misc/desync/randompos/key", { Text = "Random Pos Key",  SyncToggleState = false, Mode = "Toggle", Default = "F" }) do
                         local DepBox = Desync:AddDependencyBox()
