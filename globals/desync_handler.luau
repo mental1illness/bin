@@ -125,10 +125,6 @@ local Desync = {
             BroPleaseWork.CFrame = Desync.Fake.CFrame
 
             sethiddenproperty(Root, "NetworkIsSleeping", true)
-
-            if Humanoid then
-                Humanoid:MoveTo(Desync.Fake.CFrame.Position + Vector3.new(1, 0, 0))
-            end
         end
     end)
 end

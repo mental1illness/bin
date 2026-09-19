@@ -51,6 +51,9 @@ end
 local LastPositionCFrame = NewCFrame()
 local TargetCFrame = NewCFrame()
 
+local RotationThingly = Rad(0.001)
+local RotationFlip = false
+
 --# Modules
 
 local Utility = LoadModule("moehack.net/modules/utility.luau")
@@ -109,6 +112,9 @@ function Desync.Tick(DeltaTime)
         end
 
         Handler.ChangePosition(CurrentCFrame)
+        RotationFlip = not RotationFlip
+
+        Character.PrimaryPart.CFrame *= CFrame.Angles(0, RotationFlip and RotationThingly or -RotationThingly, 0)
         return
     end
 
