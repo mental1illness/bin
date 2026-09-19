@@ -326,7 +326,6 @@ Visuals.World = {} do
         local ColorCorrection = Visuals.World.ColorCorrection
         local ColorCorrectionEnabled = Toggles["visuals/world/lighting/cc"].Value
 
-        ColorCorrection.Parent = Lighting
         if ColorCorrection.Enabled ~= ColorCorrectionEnabled then
             ColorCorrection.Enabled = ColorCorrectionEnabled
         end
