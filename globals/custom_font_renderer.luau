@@ -535,7 +535,6 @@ function SourceFont.CreateText(Parent, TextValue: string, Options)
         Y = Floor((Parent.AbsoluteSize.Y - FontObject.height) / 2) + (Options.Y or 0)
     end
 
-
     local SetOptions = {
         x = X,
         y = Y,
