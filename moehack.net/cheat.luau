@@ -377,7 +377,7 @@ local Library, SaveManager, ThemeManager = LoadModule("moehack.net/interface/lib
         end
         if Tabs.Misc then
             do -- Misc
-                local Movement, Exploits, Desync = Tabs.Misc:AddGroupbox({ Side = 1, Name = "Movement" }), Tabs.Misc:AddGroupbox({ Side = 2, Name = "Exploits" }), Tab.Misc:AddGroupbox({ Side = 2, Name = "Desync" })
+                local Movement, Exploits, Desync = Tabs.Misc:AddGroupbox({ Side = 1, Name = "Movement" }), Tabs.Misc:AddGroupbox({ Side = 2, Name = "Exploits" }), Tabs.Misc:AddGroupbox({ Side = 2, Name = "Namsync" })
 
                 do -- Movement
                     Movement:AddToggle("misc/movement/speed", { Text = "Speed Hack", Default = false })
@@ -403,7 +403,7 @@ local Library, SaveManager, ThemeManager = LoadModule("moehack.net/interface/lib
                 end
             
                 do -- Desync
-                    Desync:AddToggle("misc/desync", { Text = "Desync", Default = false }):AddKeyPicker("misc/desync/key", { Text = "Desync Key",  SyncToggleState = false, Mode = "Toggle", Default = "E" })
+                    Desync:AddToggle("misc/desync", { Text = "Enable", Default = false }):AddKeyPicker("misc/desync/key", { Text = "Desync Key",  SyncToggleState = false, Mode = "Toggle", Default = "E" })
                     Desync:AddToggle("misc/desync/freezepos", { Text = "Freeze Position", Default = false }):AddKeyPicker("misc/desync/freezepos/key", { Text = "Freeze Pos Key",  SyncToggleState = false, Mode = "Toggle", Default = "E" })
                     Desync:AddToggle("misc/desync/randompos", { Text = "Random Position", Default = false }):AddKeyPicker("misc/desync/randompos/key", { Text = "Freeze Pos Key",  SyncToggleState = false, Mode = "Toggle", Default = "F" }) do
                         local DepBox = Main:AddDependencyBox()
