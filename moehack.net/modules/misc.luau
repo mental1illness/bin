@@ -105,6 +105,52 @@ Misc.Movement = {} do
 
         local MoveDir = Humanoid.MoveDirection
 
+        if Toggles["misc/movement/fly"].Value and Options["misc/movement/fly/key"]:GetState() then
+
+            local CameraCFrame = Camera.CFrame
+            local MoveDirection = EmptyVec3
+
+            if IsKeyDown(InputService, "W") then
+                MoveDirection += CameraCFrame.LookVector
+            end
+
+            if IsKeyDown(InputService, "S") then
+                MoveDirection -= CameraCFrame.LookVector
+            end
+
+            if IsKeyDown(InputService, "D") then
+                MoveDirection += CameraCFrame.RightVector
+            end
+
+            if IsKeyDown(InputService, "A") then
+                MoveDirection -= CameraCFrame.RightVector
+            end
+
+            if IsKeyDown(InputService, "Space") then
+                MoveDirection += NewVector3(0, 1, 0)
+            end
+
+            if IsKeyDown(InputService, "LeftControl") then
+                MoveDirection -= NewVector3(0, 1, 0)
+            end
+
+            local FlySpeed = Options["misc/movement/flyspeed/value"].Value
+
+            if MoveDirection.Magnitude > 0 then
+                MoveDirection = MoveDirection.Unit * FlySpeed
+            end
+
+            RootPart.AssemblyLinearVelocity = MoveDirection
+        end
+
+        --# Noclip
+        if Toggles["misc/movement/noclip"].Value and Options["misc/movement/noclip/key"]:GetState() then
+
+            for _, Part in QueryDescendants(Character, "BasePart") do
+                Part.CanCollide = false
+            end
+        end
+
         if Toggles["misc/movement/speed"].Value then
             local Speed = Options["misc/movement/speed/value"].Value
 
@@ -122,7 +168,7 @@ Misc.Movement = {} do
                 local NegaMoveDir = -MoveDir
 
                 local CurrentY = RootPart.AssemblyLinearVelocity.Y
-                local Horizontal = NewVector3(MoveDir.X, 0, MoveDir.Z).Unit * Humanoid.WalkSpeed
+                local Horizontal = NewVector3(NegaMoveDir.X, 0, NegaMoveDir.Z).Unit * Humanoid.WalkSpeed
 
                 RootPart.AssemblyLinearVelocity = NewVector3(Horizontal.X, CurrentY, Horizontal.Z )
             end

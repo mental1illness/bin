@@ -371,12 +371,17 @@ local Library, SaveManager, ThemeManager = LoadModule("moehack.net/interface/lib
 
                 do -- Movement
                     Movement:AddToggle("misc/movement/speed", { Text = "Speed Hack", Default = false })
-                    Movement:AddSlider("misc/movement/speed/value", {Text = "Speed Hack Value", Min = 1, Max = 500, Rounding = 0, Default = 12})
+                    Movement:AddSlider("misc/movement/speed/value", {Text = "Speed Hack Value", Min = 1, Max = 500, Rounding = 0, Default = 30})
 
                     Movement:AddToggle("misc/movement/moonwalk", { Text = "Moon Walk", Default = false }):AddKeyPicker("misc/movement/moonwalk/key", { Text = "Moon Walk Key",  SyncToggleState = false, Mode = "Hold", Default = "T" })
 
                     Movement:AddToggle("misc/movement/autojump", { Text = "Auto Jump", Default = false })
                     Movement:AddDropdown("misc/movement/autojump/method", { Text = "Auto Jump Method", Default = 1, Values = {"Humanoid", "Velocity"} })
+
+                    Movement:AddToggle("misc/movement/fly", { Text = "Fly", Default = false }):AddKeyPicker("misc/movement/fly/key", { Text = "Fly Key",  SyncToggleState = false, Mode = "Hold", Default = "T" })
+                    Movement:AddSlider("misc/movement/flyspeed/value", {Text = "Fly Speed", Min = 1, Max = 500, Rounding = 0, Default = 30})
+
+                    Movement:AddToggle("misc/movement/noclip", { Text = "noclip", Default = false }):AddKeyPicker("misc/movement/noclip/key", { Text = "Fly Key",  SyncToggleState = false, Mode = "Hold", Default = "T" })
 
                     Movement:AddToggle("misc/movement/pixelsurf", { Text = "Pixel Surf", Default = false }):AddKeyPicker("misc/movement/pixelsurf/key", { Text = "Pixel Surf Key",  SyncToggleState = false, Mode = "Hold", Default = "F" })
                     
