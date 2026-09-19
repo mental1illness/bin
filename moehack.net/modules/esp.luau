@@ -673,7 +673,7 @@ function ESP.Render(Entity: {})
         return
     end
 
-    if Health <= 0 then
+    if Health and Health <= 0 then
         Objects.Holder.Visible = false
         return
     end

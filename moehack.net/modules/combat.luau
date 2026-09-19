@@ -189,7 +189,7 @@ function Combat.GetTarget(FOV: number, NearestHitbox: boolean)
                 local RootPart = Character.PrimaryPart
                 local MaxHealth, Health = Utility.GetHealth(Player, Character)
 
-                if  RootPart and Health and Health > 0 then
+                if  RootPart and Health and Health <= 0 then
                     if NearestHitbox then
                         for _, Hitbox in QueryDescendants(Character, "BasePart") do
                             local Position, OnScreen = WorldToViewportPoint(Camera, Hitbox.Position)
