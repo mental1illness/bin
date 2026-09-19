@@ -61,12 +61,11 @@ local Handler = LoadModule("globals/desync_handler.luau")
 local Desync = {}
 
 function Desync.Tick(DeltaTime)
-
+    local Character = Utility.GetCharacter(LocalPlayer)
+    
     if Toggles["misc/desync"].Value then
         if not Handler.IsDesyncing then
             Handler.Activate()
-
-            local Character = Utility.GetCharacter(LocalPlayer)
 
             if Character then
                 LastPositionCFrame = Character.PrimaryPart.CFrame
@@ -77,7 +76,7 @@ function Desync.Tick(DeltaTime)
 
         local EasingStyle = Options["misc/desync/easingstyle"].Value
         local EasingStyleFunction = Utility.EasingStyle[EasingStyle]
-        local CurrentCFrame = Handler.Real.CFrame
+        local CurrentCFrame = Character.PrimaryPart.CFrame
 
         if Toggles["misc/desync/freezepos"].Value and Options["misc/desync/freezepos/key"]:GetState() then
             CurrentCFrame = LastPositionCFrame
