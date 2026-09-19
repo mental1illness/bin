@@ -50,6 +50,7 @@ end
 
 local LastPositionCFrame = NewCFrame()
 local TargetCFrame = NewCFrame()
+local RotationTime = 0
 
 local RotationThingly = Rad(0.005)
 local RotationFlip = false
@@ -122,12 +123,45 @@ function Desync.Tick(DeltaTime)
             local Pitch = Options["misc/desync/rotation/x"].Value
             local Yaw = Options["misc/desync/rotation/y"].Value
             local Roll = Options["misc/desync/rotation/z"].Value
+            local Speed = Options["misc/desync/rotation/speed"].Value
+            local Animation = Options["misc/desync/rotation/animation"].Value
+
+            RotationTime += DeltaTime * Speed
+
+            local Alpha = 0
+
+            if Animation == "Sine" then
+                Alpha = math.sin(RotationTime)
+
+            elseif Animation == "Cosine" then
+                Alpha = math.cos(RotationTime)
+
+            elseif Animation == "Triangle" then
+                Alpha = (2 / Pi) * math.asin(math.sin(RotationTime))
+
+            elseif Animation == "Square" then
+                Alpha = math.sin(RotationTime) >= 0 and 1 or -1
+
+            elseif Animation == "Sawtooth" then
+                Alpha = 2 * (RotationTime / (2 * Pi) % 1) - 1
+
+            elseif Animation == "SmoothStep" then
+                local Wave = (math.sin(RotationTime) + 1) * 0.5
+                Alpha = Wave * Wave * (3 - 2 * Wave)
+
+                Alpha = Alpha * 2 - 1
+
+            else
+                Alpha = 1
+            end
 
             CurrentCFrame *= CFrame.Angles(
-                Rad(Pitch),
-                Rad(Yaw),
-                Rad(Roll)
+                Rad(Pitch) * Alpha,
+                Rad(Yaw) * Alpha,
+                Rad(Roll) * Alpha
             )
+        else
+            RotationTime = 0
         end
 
         if EasingStyleFunction and EasingDirectionFunction and Toggles["misc/desync/useeasingstyle"].Value then
