@@ -77,6 +77,9 @@ function Utility.GetCharacter(Player)
 end
 
 function Utility.IsTeammate(Player1, Player2)
+    if moehack.data.game_name == "Blox Strike" then
+        return Player1:GetAttribute("Team") == Player2:GetAttribute("Team")
+    end
     return Player1.Team == Player2.Team
 end
 
