@@ -52,6 +52,10 @@ local LastPositionCFrame = NewCFrame()
 local TargetCFrame = NewCFrame()
 local RotationTime = 0
 
+local RandomRotation = Vector3.zero
+local RandomTarget = Vector3.zero
+local RandomTime = 0
+
 local RotationThingly = Rad(0.005)
 local RotationFlip = false
 
@@ -143,17 +147,31 @@ function Desync.Tick(DeltaTime)
                 Alpha = Alpha * 2 - 1
             end
             if Toggles["misc/desync/rotation/randomize"].Value then
-                Pitch *= math.random(-100, 100) / 100
-                Yaw *= math.random(-100, 100) / 100
-                Roll *= math.random(-100, 100) / 100
+                RandomTime += DeltaTime
+                if RandomTime >= 0.25 then
+                    RandomTime = 0
+                    RandomTarget = Vector3.new(
+                        math.random(-100, 100) / 100,
+                        math.random(-100, 100) / 100,
+                        math.random(-100, 100) / 100
+                    )
+                end
+                RandomRotation = RandomRotation:Lerp(RandomTarget, Clamp(DeltaTime * 5, 0, 1))
+            else
+                RandomRotation = Vector3.zero
+                RandomTarget = Vector3.zero
+                RandomTime = 0
             end
             CurrentCFrame *= CFrame.Angles(
-                Rad(Pitch) * Alpha,
-                Rad(Yaw) * Alpha,
-                Rad(Roll) * Alpha
+                Rad(Pitch + Pitch * RandomRotation.X) * Alpha,
+                Rad(Yaw + Yaw * RandomRotation.Y) * Alpha,
+                Rad(Roll + Roll * RandomRotation.Z) * Alpha
             )
         else
             RotationTime = 0
+            RandomTime = 0
+            RandomRotation = Vector3.zero
+            RandomTarget = Vector3.zero
         end
 
         if EasingStyleFunction and EasingDirectionFunction and Toggles["misc/desync/useeasingstyle"].Value then
