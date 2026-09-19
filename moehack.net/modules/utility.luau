@@ -29,6 +29,10 @@ local LocalPlayer        = Players.LocalPlayer
 local Utility = {}
 
 Utility.EasingStyle = {
+    Linear = function(t)
+        return t
+    end,
+
     Sine = function(t)
         return 1 - math.cos(t * math.pi * 0.5)
     end,
@@ -57,9 +61,62 @@ Utility.EasingStyle = {
         return 1 - math.sqrt(1 - t * t)
     end,
 
-    Linear = function(t)
-        return t
+    SmoothStep = function(t)
+        return t * t * (3 - 2 * t)
     end,
+
+    SmootherStep = function(t)
+        return t * t * t * (t * (t * 6 - 15) + 10)
+    end,
+
+    Back = function(t)
+        local s = 1.70158
+        return t * t * ((s + 1) * t - s)
+    end,
+
+    Elastic = function(t)
+        if t == 0 or t == 1 then
+            return t
+        end
+
+        local c4 = (2 * math.pi) / 3
+        return -(2 ^ (10 * t - 10))
+            * math.sin((t * 10 - 10.75) * c4)
+    end,
+
+    Bounce = function(t)
+        local n1 = 7.5625
+        local d1 = 2.75
+
+        if t < 1 / d1 then
+            return n1 * t * t
+        elseif t < 2 / d1 then
+            t = t - 1.5 / d1
+            return n1 * t * t + 0.75
+        elseif t < 2.5 / d1 then
+            t = t - 2.25 / d1
+            return n1 * t * t + 0.9375
+        else
+            t = t - 2.625 / d1
+            return n1 * t * t + 0.984375
+        end
+    end,
+}
+
+Utility.EasingStylesKey = {
+    "Sine",
+    "Quad",
+    "Cubic",
+    "Quart",
+    "Quint",
+    "Exponential",
+    "Circular",
+    "Linear",
+    "SmoothStep",
+    "SmootherStep",
+    "Back",
+    "Elastic",
+    "Bounce",
 }
 
 function Utility.GetCharacter(Player)

@@ -96,6 +96,11 @@ local Library, SaveManager, ThemeManager = LoadModule("moehack.net/interface/lib
                         "Exponential",
                         "Circular",
                         "Linear",
+                        "SmoothStep",
+                        "SmootherStep",
+                        "Back",
+                        "Elastic",
+                        "Bounce",
                     } })
                     AimAssist:AddToggle("combat/aimassist/usenearhitbox", { Text = "Use Nearest Hitbox", Default = false })
                     AimAssist:AddToggle("combat/aimassist/stickyaim", { Text = "Sticky Aim", Default = false })
@@ -398,8 +403,48 @@ local Library, SaveManager, ThemeManager = LoadModule("moehack.net/interface/lib
                 end
             
                 do -- Desync
-                    Desync:AddToggle("misc/desync", { Text = "Desync", Default = false })
-                    
+                    Desync:AddToggle("misc/desync", { Text = "Desync", Default = false }):AddKeyPicker("misc/desync/key", { Text = "Desync Key",  SyncToggleState = false, Mode = "Toggle", Default = "E" })
+                    Desync:AddToggle("misc/desync/freezepos", { Text = "Freeze Position", Default = false }):AddKeyPicker("misc/desync/freezepos/key", { Text = "Freeze Pos Key",  SyncToggleState = false, Mode = "Toggle", Default = "E" })
+                    Desync:AddToggle("misc/desync/randompos", { Text = "Random Position", Default = false }):AddKeyPicker("misc/desync/randompos/key", { Text = "Freeze Pos Key",  SyncToggleState = false, Mode = "Toggle", Default = "F" }) do
+                        local DepBox = Main:AddDependencyBox()
+
+                        DepBox:AddSlider("misc/desync/randompos/x", { Text = "X", Min = -360, Max = 360, Rounding = 0, Default = 0 })
+                        DepBox:AddSlider("misc/desync/randompos/y", { Text = "Y", Min = -360, Max = 360, Rounding = 0, Default = 0 })
+                        DepBox:AddSlider("misc/desync/randompos/z", { Text = "Z", Min = -360, Max = 360, Rounding = 0, Default = 0 })
+
+                        DepBox:SetupDependencies({
+                            { Toggles["misc/desync/randompos"], true } 
+                        });
+                    end
+
+                    Desync:AddToggle("misc/desync/offset", { Text = "Offset", Default = false }) do
+                        local DepBox = Main:AddDependencyBox()
+
+                        DepBox:AddSlider("misc/desync/offset/x", { Text = "X", Min = -360, Max = 360, Rounding = 0, Default = 0 })
+                        DepBox:AddSlider("misc/desync/offset/y", { Text = "Y", Min = -360, Max = 360, Rounding = 0, Default = 0 })
+                        DepBox:AddSlider("misc/desync/offset/z", { Text = "Z", Min = -360, Max = 360, Rounding = 0, Default = 0 })
+
+                        DepBox:SetupDependencies({
+                            { Toggles["misc/desync/randompos"], true } 
+                        });
+                    end
+
+                    Desync:AddDropdown("misc/desync/easingstyle", { Text = "Easing Style", Default = 1, Values = {
+                        "Sine",
+                        "Quad",
+                        "Cubic",
+                        "Quart",
+                        "Quint",
+                        "Exponential",
+                        "Circular",
+                        "Linear",
+                        "SmoothStep",
+                        "SmootherStep",
+                        "Back",
+                        "Elastic",
+                        "Bounce",
+                    } })
+
                 end
             end
         end
@@ -458,21 +503,23 @@ local ESP
 local Visuals
 local Combat
 local Misc
+local Desync
 
 if not TableFind(moehack.data.tab_to_remove   or {}, "esp") then
-    ESP = LoadModule("moehack.net/modules/esp.luau", true)
+    ESP = LoadModule("moehack.net/modules/esp.luau")
 end
 
 if not TableFind(moehack.data.tab_to_remove   or {}, "visuals") then
-    Visuals = LoadModule("moehack.net/modules/visuals.luau", true)
+    Visuals = LoadModule("moehack.net/modules/visuals.luau")
 end
 
 if not TableFind(moehack.data.tab_to_remove   or {}, "combat") then
-    Combat = LoadModule("moehack.net/modules/combat.luau", true)
+    Combat = LoadModule("moehack.net/modules/combat.luau")
 end
 
 if not TableFind(moehack.data.tab_to_remove   or {}, "misc") then
-    Misc = LoadModule("moehack.net/modules/misc.luau", true)
+    Misc = LoadModule("moehack.net/modules/misc.luau")
+    Desync = LoadModule("moehack.net/modules/desync.luau")
 end
 
 LoadModule("moehack.net/modules/hooks.luau", true)
@@ -546,6 +593,7 @@ Library:GiveSignal(
         Combat.Tick(Delta)
         ESP.Update(Delta)
         Misc.Tick(Delta)
+        Desync.Tick(Delta)
     end)
 )
 
