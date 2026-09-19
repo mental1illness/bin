@@ -297,7 +297,6 @@ Visuals.World = {} do
 
         local ColorCorrection = Visuals.World.ColorCorrection
         local ColorCorrectionEnabled = Toggles["visuals/world/lighting/cc"].Value
-            and Toggles["visuals/world/lighting"].Value
 
         ColorCorrection.Parent = Lighting
         if ColorCorrection.Enabled ~= ColorCorrectionEnabled then
@@ -316,7 +315,7 @@ Visuals.World = {} do
         end
 
         local Bloom = Visuals.World.Bloom
-        local BloomEnabled = Toggles["visuals/world/lighting/bloom"].Value and Toggles["visuals/world/lighting"].Value
+        local BloomEnabled = Toggles["visuals/world/lighting/bloom"].Value
         if Bloom.Enabled ~= BloomEnabled then Bloom.Enabled = BloomEnabled end
         if BloomEnabled then
             local Intensity = Options["visuals/world/lighting/bloom/intensity"].Value
@@ -342,7 +341,7 @@ Visuals.World = {} do
         end
 
         local ColorGrading = Visuals.World.ColorGrading
-        local ColorGradingEnabled = Toggles["visuals/world/lighting/colorgrading"].Value and Toggles["visuals/world/lighting"].Value
+        local ColorGradingEnabled = Toggles["visuals/world/lighting/colorgrading"].Value
         if ColorGrading.Enabled ~= ColorGradingEnabled then ColorGrading.Enabled = ColorGradingEnabled end
         if ColorGradingEnabled then
             local TonemapperPreset = Enum.TonemapperPreset[Options["visuals/world/lighting/colorgrading/tonemap"].Value]
@@ -353,7 +352,6 @@ Visuals.World = {} do
 
         local SunRays = Visuals.World.SunRays
         local SunRaysEnabled = Toggles["visuals/world/sunrays"].Value
-            and Toggles["visuals/world/lighting"].Value
         if SunRays.Enabled ~= SunRaysEnabled then SunRays.Enabled = SunRaysEnabled end
         if SunRaysEnabled then
             local Intensity = Options["visuals/world/sunrays/intensity"].Value
@@ -364,7 +362,6 @@ Visuals.World = {} do
 
         local Atmosphere = Visuals.World.Atmosphere
         local AtmosphereEnabled = Toggles["visuals/world/atmosphere"].Value
-            and Toggles["visuals/world/lighting"].Value
         Atmosphere.Density = AtmosphereEnabled
             and Options["visuals/world/atmosphere/density"].Value
             or DefaultLighting.AtmosphereDensity
