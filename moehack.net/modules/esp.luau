@@ -418,6 +418,7 @@ function ESP.CreateElements(Entity: table)
             Color = Options["esp/name/color"].Value,
             Center = true,
             Shadow = true,
+            Y      = 1,
             ShadowColor = Color3.fromRGB(0, 0, 0),
             ShadowX = 1,
             ShadowY = 1,
