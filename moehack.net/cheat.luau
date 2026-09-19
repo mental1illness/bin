@@ -372,7 +372,7 @@ local Library, SaveManager, ThemeManager = LoadModule("moehack.net/interface/lib
         end
         if Tabs.Misc then
             do -- Misc
-                local Movement, Exploits = Tabs.Misc:AddGroupbox({ Side = 1, Name = "Movement" }), Tabs.Misc:AddGroupbox({ Side = 1, Name = "Exploits" })
+                local Movement, Exploits, Desync = Tabs.Misc:AddGroupbox({ Side = 1, Name = "Movement" }), Tabs.Misc:AddGroupbox({ Side = 2, Name = "Exploits" }), Tab.Misc:AddGroupbox({ Side = 2, Name = "Desync" })
 
                 do -- Movement
                     Movement:AddToggle("misc/movement/speed", { Text = "Speed Hack", Default = false })
@@ -395,6 +395,11 @@ local Library, SaveManager, ThemeManager = LoadModule("moehack.net/interface/lib
 
                 do -- Exploits
                     Exploits:AddToggle("misc/exploits/antifling", { Text = "Anti Fling", Default = false })
+                end
+            
+                do -- Desync
+                    Desync:AddToggle("misc/desync", { Text = "Desync", Default = false })
+                    
                 end
             end
         end
