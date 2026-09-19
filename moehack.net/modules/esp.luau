@@ -50,7 +50,7 @@ end
 
 local Fonts = LoadModule("globals/fonts.luau", true)
 local Utility = LoadModule("moehack.net/modules/utility.luau", true)
-local CustomFontRenderer = LoadModule("moehack.net/modules/custom_font_renderer.luau", true)
+local CustomFontRenderer = LoadModule("globals/custom_font_renderer.luau", true)
 
 --# Variables
 
