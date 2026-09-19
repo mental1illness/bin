@@ -54,6 +54,9 @@ local makeKebabPls = function(name)
     return s
 end
 
+local Intro = LoadModule("globals/Intro.luau").Create()
+Intro:FadeIn(0.5)
+
 --# Variables
 
 local FrameRate, Ping = 0, 0
@@ -542,6 +545,7 @@ Library:GiveSignal(
 )
 
 Spawn(Library.Toggle)
+Intro:FadeOut(1)
 
 do -- Notification
     Spawn(function()

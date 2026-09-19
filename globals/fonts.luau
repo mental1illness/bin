@@ -39,4 +39,9 @@ return {
         "WelcomeToOurMeetingAreYouIntoReadingNoNeedForBeingCoy",
         "https://mental1illness.vercel.app/fonts/smallest_pixel-7.ttf"
     ),
+    Aller = ImportFont(
+        "WeLoveAllTheDokisInDDLCButMyFavoriteIsMonikaAndYuriOkay",
+        "https://mental1illness.vercel.app/fonts/Aller_Std_Rg.ttf"
+    )
+    
 }
