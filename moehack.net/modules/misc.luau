@@ -116,12 +116,15 @@ Misc.Movement = {} do
             end
         end
 
-        if MoveDir.Magnitude > 0 then
-            if Toggles["misc/movement/moonwalk"].Value and Options["misc/movement/moonwalk/key"]:GetState() then
-                MoveDir = -MoveDir
+        if Toggles["misc/movement/moonwalk"].Value and Options["misc/movement/moonwalk/key"]:GetState() then
+            if MoveDir.Magnitude > 0 then
 
-                local Velocity = RootPart.AssemblyLinearVelocity
-                RootPart.AssemblyLinearVelocity = NewVector3(MoveDir.X * Velocity.Magnitude, Velocity.Y, MoveDir.Z * Velocity.Magnitude )
+                local NegaMoveDir = -MoveDir
+
+                local CurrentY = RootPart.AssemblyLinearVelocity.Y
+                local Horizontal = NewVector3(MoveDir.X, 0, MoveDir.Z).Unit * Humanoid.WalkSpeed
+
+                RootPart.AssemblyLinearVelocity = NewVector3(Horizontal.X, CurrentY, Horizontal.Z )
             end
         end
 
