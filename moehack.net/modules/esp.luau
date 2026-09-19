@@ -406,22 +406,23 @@ function ESP.CreateElements(Entity: table)
     Objects.Name.Text = "Player"
     Objects.Name.TextColor3 = Options["esp/name/color"].Value
     Objects.Name.TextSize = 12
+    Objects.Name.Visible = false
     Objects.Name.TextXAlignment = Enum.TextXAlignment.Center
     Objects.Name.TextYAlignment = Enum.TextYAlignment.Center
     Objects.Name.FontFace = Fonts.Tahoma
     Objects.Name.ZIndex = 6
 
-    CustomFontRenderer.CreateText(Objects.NameHolder, Entity.Player and Entity.Player.Name or Entity.Name, {
-        Font = "HudDefault",
-        Size = 12,
-        Color = Color3.fromRGB(255, 255, 255),
-        Center = true,
-        Shadow = true,
-        ShadowColor = Color3.fromRGB(0, 0, 0),
-        ShadowX = 1,
-        ShadowY = 1,
-        ZIndex = 10,
-    }
+    Objects.RealName = CustomFontRenderer.CreateText(Objects.NameHolder, Entity.Player and Entity.Player.Name or Entity.Name, {
+            Font = "HudDefault",
+            Size = 12,
+            Color = Options["esp/name/color"].Value,
+            Center = true,
+            Shadow = true,
+            ShadowColor = Color3.fromRGB(0, 0, 0),
+            ShadowX = 1,
+            ShadowY = 1,
+            ZIndex = 10,
+        }
     )
 
     local NameStroke = Create("UIStroke")
@@ -802,6 +803,7 @@ function ESP.Render(Entity: {})
         local NameColor = Options["esp/name/color"].Value
         if Objects.Name.TextColor3 ~= NameColor then
             Objects.Name.TextColor3 = NameColor
+            Objects.RealName:SetColor(NameColor)
         end
     elseif Objects.NameHolder.Visible then
         Objects.NameHolder.Visible = false
