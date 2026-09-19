@@ -103,9 +103,10 @@ Misc.Movement = {} do
         local RootPart = Character.PrimaryPart
         if not RootPart then return end
 
+        local MoveDir = Humanoid.MoveDirection
+
         if Toggles["misc/movement/speed"].Value then
             local Speed = Options["misc/movement/speed/value"].Value
-            local MoveDir = Humanoid.MoveDirection
 
             if MoveDir.Magnitude > 0 then
                 if RootPart then
@@ -115,14 +116,13 @@ Misc.Movement = {} do
             end
         end
 
-        if Toggles["misc/movement/moonwalk"].Value and Options["misc/movement/moonwalk/key"]:GetState() then
-            local Velocity = RootPart.AssemblyLinearVelocity
+        if MoveDir.Magnitude > 0 then
+            if Toggles["misc/movement/moonwalk"].Value and Options["misc/movement/moonwalk/key"]:GetState() then
+                MoveDir = -MoveDir
 
-            RootPart.AssemblyLinearVelocity = NewVector3(
-                -Velocity.X,
-                Velocity.Y,
-                -Velocity.Z
-            )
+                local Velocity = RootPart.AssemblyLinearVelocity
+                RootPart.AssemblyLinearVelocity = NewVector3(MoveDir.X * Velocity.Magnitude, Velocity.Y, MoveDir.Z * Velocity.Magnitude )
+            end
         end
 
         if Toggles["misc/movement/autojump"].Value and IsKeyDown(InputService, "Space") then
