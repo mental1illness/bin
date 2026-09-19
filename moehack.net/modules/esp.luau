@@ -661,6 +661,11 @@ function ESP.Render(Entity: {})
     local Humanoid = Utility.GetHumanoid(Entity)
     local IsTeammate = Utility.IsTeammate(Player, LocalPlayer)
 
+    if Humanoid and moehack.data.game_name == "Blox Strike" then
+        Objects.Holder.Visible = false
+        return
+    end
+
     if Entity.IsCustom then
         if Humanoid then
             MaxHealth = Humanoid.MaxHealth
@@ -802,7 +807,7 @@ function ESP.Render(Entity: {})
         if Objects.Tool.Visible then Objects.Tool.Visible = false end
     end
 
-    if Toggles["esp/healthbar"].Value and Humanoid then
+    if Toggles["esp/healthbar"].Value and (not Entity.IsCustom or Humanoid) then
         if not Objects.HealthBar.Visible then
             Objects.HealthBar.Visible = true
         end
