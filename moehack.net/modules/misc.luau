@@ -115,6 +115,23 @@ Misc.Movement = {} do
             end
         end
 
+        if Toggles["misc/movement/moonwalk"].Value and Options["misc/movement/moonwalk/key"]:GetState() then
+            local MoveDir = Humanoid.MoveDirection
+
+            if MoveDir.Magnitude > 0 then
+                MoveDir = -MoveDir
+
+                local CurrentY = RootPart.AssemblyLinearVelocity.Y
+                local Horizontal = NewVector3(MoveDir.X, 0, MoveDir.Z).Unit * Humanoid.WalkSpeed
+
+                RootPart.AssemblyLinearVelocity = NewVector3(
+                    Horizontal.X,
+                    CurrentY,
+                    Horizontal.Z
+                )
+            end
+        end
+
         if Toggles["misc/movement/autojump"].Value and IsKeyDown(InputService, "Space") then
             local Method = Options["misc/movement/autojump/method"].Value
 
