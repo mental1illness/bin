@@ -530,9 +530,11 @@ function SourceFont.CreateText(Parent, TextValue: string, Options)
     local Y = Options.Y or 0
 
     if Options.Center then
-        X = Floor((Parent.AbsoluteSize.X - SourceFont.Width(FontObject, TextValue)) / 2)
-        Y = Floor((Parent.AbsoluteSize.Y - FontObject.height) / 2)
+        X = Floor((Parent.AbsoluteSize.X - SourceFont.Width(FontObject, TextValue)) / 2) + (Options.X or 0)
+
+        Y = Floor((Parent.AbsoluteSize.Y - FontObject.height) / 2) + (Options.Y or 0)
     end
+
 
     local SetOptions = {
         x = X,
