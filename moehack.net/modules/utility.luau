@@ -84,6 +84,11 @@ function Utility.IsTeammate(Player1, Player2)
 end
 
 function Utility.GetHealth(Player, Character)
+
+    if moehack.data.game_name == "Blox Strike" then
+        return Character:GetAttribute("MaxHealth"), Character:GetAttribute("Health")
+    end
+
     local MaxHealth, Health = 0, 0
     local Humanoid = FindFirstChildOfClass(Character, "Humanoid")
     if Humanoid then
