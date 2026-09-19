@@ -46,6 +46,10 @@ end))
 local EmptyVec3 = NewVector3()
 local EmptyPhysicProp = PhysicalProperties.new(0,0,0,0,0)
 
+local OriginalCollisions = {
+
+}
+
 --# Main
 
 local Misc = {}
@@ -143,11 +147,25 @@ Misc.Movement = {} do
             RootPart.AssemblyLinearVelocity = MoveDirection
         end
 
-        --# Noclip
         if Toggles["misc/movement/noclip"].Value and Options["misc/movement/noclip/key"]:GetState() then
 
             for _, Part in QueryDescendants(Character, "BasePart") do
-                Part.CanCollide = false
+                if OriginalCollisions[Part] == nil then
+                    OriginalCollisions[Part] = Part.CanCollide
+                end
+
+                if Part.CanCollide then
+                    Part.CanCollide = false
+                end
+            end
+
+        else
+            for Part, CanCollide in OriginalCollisions do
+                if Part.Parent then
+                    Part.CanCollide = CanCollide
+                end
+
+                OriginalCollisions[Part] = nil
             end
         end
 

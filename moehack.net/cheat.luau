@@ -381,7 +381,7 @@ local Library, SaveManager, ThemeManager = LoadModule("moehack.net/interface/lib
                     Movement:AddToggle("misc/movement/fly", { Text = "Fly", Default = false }):AddKeyPicker("misc/movement/fly/key", { Text = "Fly Key",  SyncToggleState = false, Mode = "Hold", Default = "T" })
                     Movement:AddSlider("misc/movement/flyspeed/value", {Text = "Fly Speed", Min = 1, Max = 500, Rounding = 0, Default = 30})
 
-                    Movement:AddToggle("misc/movement/noclip", { Text = "noclip", Default = false }):AddKeyPicker("misc/movement/noclip/key", { Text = "Fly Key",  SyncToggleState = false, Mode = "Hold", Default = "T" })
+                    Movement:AddToggle("misc/movement/noclip", { Text = "No Collisions", Default = false }):AddKeyPicker("misc/movement/noclip/key", { Text = "Fly Key",  SyncToggleState = false, Mode = "Hold", Default = "T" })
 
                     Movement:AddToggle("misc/movement/pixelsurf", { Text = "Pixel Surf", Default = false }):AddKeyPicker("misc/movement/pixelsurf/key", { Text = "Pixel Surf Key",  SyncToggleState = false, Mode = "Hold", Default = "F" })
                     
