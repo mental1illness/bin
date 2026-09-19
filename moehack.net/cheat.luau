@@ -428,7 +428,7 @@ local Library, SaveManager, ThemeManager = LoadModule("moehack.net/interface/lib
                             { Toggles["misc/desync/offset"], true } 
                         });
                     end
-
+                    Desync:AddToggle("misc/desync/useeasingstyle", { Text = "Use Easing Style", Default = false })
                     Desync:AddDropdown("misc/desync/easingstyle", { Text = "Easing Style", Default = 1, Values = {
                         "Sine",
                         "Quad",

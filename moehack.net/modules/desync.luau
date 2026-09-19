@@ -98,7 +98,7 @@ function Desync.Tick(DeltaTime)
             CurrentCFrame *= NewCFrame(X, Y, Z)
         end
 
-        if EasingStyleFunction then
+        if EasingStyleFunction and Toggles["misc/desync/useeasingstyle"].Value then
             local Alpha = Clamp(DeltaTime * 10, 0, 1)
             Alpha = EasingStyleFunction(Alpha)
 

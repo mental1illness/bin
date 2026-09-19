@@ -17,6 +17,9 @@ local Client = { -- this is us ;w; looks unnecessary but i dont wanna do a thous
     Root = nil; -- same goes for the rootpart
     RootPos = EmptyVector3;
 }
+local Frames = 0;
+
+setfflag('S2PhysicsSenderRate', '240');
 
 setmetatable(Client, {
     __index = function(Self, Index)
@@ -101,6 +104,7 @@ local Desync = {
     )
 
     RunService.Heartbeat:Connect(function()
+        Frames += 1
         local Root = Client.Root
 
         if Root == "doesn't exist" then
@@ -119,6 +123,7 @@ local Desync = {
             Root.RotVelocity = Desync.Fake.RotVelocity
 
             sethiddenproperty(Root, "NetworkIsSleeping", true)
+            sethiddenproperty(Root, 'PhysicsRepRootPart', (Frames % (3 + 1) == 0 and Root) or nil);
         end
     end)
 end
