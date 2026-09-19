@@ -51,7 +51,7 @@ end
 local LastPositionCFrame = NewCFrame()
 local TargetCFrame = NewCFrame()
 
-local RotationThingly = Rad(0.001)
+local RotationThingly = Rad(0.005)
 local RotationFlip = false
 
 --# Modules
