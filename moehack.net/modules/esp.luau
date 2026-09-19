@@ -394,7 +394,7 @@ function ESP.CreateElements(Entity: table)
     Objects.NameHolder.BackgroundTransparency = 1
     Objects.NameHolder.Size = FromOffset(500, 15)
     Objects.NameHolder.AnchorPoint = Vector2.new(0.5, 1)
-    Objects.NameHolder.Position = UDim2New(0.5, 0, 0, -3)
+    Objects.NameHolder.Position = UDim2New(0.5, 0, 0, -2)
     Objects.NameHolder.GroupTransparency = 0
     Objects.NameHolder.Visible = false
     Objects.NameHolder.ZIndex = 6
