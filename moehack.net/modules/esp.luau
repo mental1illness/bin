@@ -50,6 +50,7 @@ end
 
 local Fonts = LoadModule("globals/fonts.luau", true)
 local Utility = LoadModule("moehack.net/modules/utility.luau", true)
+local CustomFontRenderer = LoadModule("moehack.net/modules/custom_font_renderer.luau", true)
 
 --# Variables
 
@@ -90,7 +91,7 @@ Library:GiveSignal( Players.PlayerRemoving:Connect(function(Player)
     PlayersCache[Player] = nil
 end) )
 
-function ESP.CreateElements()
+function ESP.CreateElements(Entity: table)
     local Objects = {}
 
     Objects.Holder = Create("Frame")
@@ -410,6 +411,19 @@ function ESP.CreateElements()
     Objects.Name.FontFace = Fonts.Tahoma
     Objects.Name.ZIndex = 6
 
+    CustomFontRenderer.CreateText(Objects.NameHolder, Entity.Player and Entity.Player.Name or Entity.Name, {
+        Font = "HudDefault",
+        Size = 12,
+        Color = Color3.fromRGB(255, 255, 255),
+        Center = true,
+        Shadow = true,
+        ShadowColor = Color3.fromRGB(0, 0, 0),
+        ShadowX = 1,
+        ShadowY = 1,
+        ZIndex = 10,
+    }
+    )
+
     local NameStroke = Create("UIStroke")
     NameStroke.Parent = Objects.Name
     NameStroke.LineJoinMode = Enum.LineJoinMode.Miter
@@ -535,7 +549,6 @@ function ESP.AddTarget(Target, Settings)
     end
 
     local Entity = {
-        Objects = ESP.CreateElements(),
         Target = Target,
         Player = Settings.Player,
         Name = Settings.Name or Target.Name,
@@ -544,6 +557,8 @@ function ESP.AddTarget(Target, Settings)
         TargetConnections = {},
         IsCustom = true,
     }
+
+    Entity["Objects"] = ESP.CreateElements(Entity)
 
     ESP.Entities[Target] = Entity
 
@@ -583,12 +598,11 @@ function ESP.ApplyAllPlayer()
 		end
 
         local Entity = {
-            Objects = ESP.CreateElements(),
             Player = Player,
             Humanoid = nil,
             BodyParts = {},
         }
-
+        Entity["Objects"] = ESP.CreateElements(Entity)
 		ESP.Entities[Player] = Entity
 
 		local Character = Player.Character
