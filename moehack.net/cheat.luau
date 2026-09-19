@@ -406,7 +406,7 @@ local Library, SaveManager, ThemeManager = LoadModule("moehack.net/interface/lib
                     Desync:AddToggle("misc/desync", { Text = "Enable", Default = false }):AddKeyPicker("misc/desync/key", { Text = "Desync Key",  SyncToggleState = false, Mode = "Toggle", Default = "E" })
                     Desync:AddToggle("misc/desync/freezepos", { Text = "Freeze Position", Default = false }):AddKeyPicker("misc/desync/freezepos/key", { Text = "Freeze Pos Key",  SyncToggleState = false, Mode = "Toggle", Default = "E" })
                     Desync:AddToggle("misc/desync/randompos", { Text = "Random Position", Default = false }):AddKeyPicker("misc/desync/randompos/key", { Text = "Freeze Pos Key",  SyncToggleState = false, Mode = "Toggle", Default = "F" }) do
-                        local DepBox = Main:AddDependencyBox()
+                        local DepBox = Desync:AddDependencyBox()
 
                         DepBox:AddSlider("misc/desync/randompos/x", { Text = "X", Min = -360, Max = 360, Rounding = 0, Default = 0 })
                         DepBox:AddSlider("misc/desync/randompos/y", { Text = "Y", Min = -360, Max = 360, Rounding = 0, Default = 0 })
