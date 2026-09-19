@@ -445,11 +445,8 @@ local Library, SaveManager, ThemeManager = LoadModule("moehack.net/interface/lib
                         DepBox:AddSlider("misc/desync/rotation/x", { Text = "Pitch", Min = -180, Max = 180, Rounding = 0, Default = 0 })
                         DepBox:AddSlider("misc/desync/rotation/y", { Text = "Yaw", Min = -180, Max = 180, Rounding = 0, Default = 0 })
                         DepBox:AddSlider("misc/desync/rotation/z", { Text = "Roll", Min = -180, Max = 180, Rounding = 0, Default = 0 })
-                        DepBox:AddToggle("misc/desync/rotation/randomize", {
-                            Text = "Randomize Rotation",
-                            Default = false
-                        })
-                        DepBox:AddSlider("misc/desync/rotation/speed", {Text = "Animation Speed", Min = 0, Max = 100, Rounding = 1, Default = 10})
+                        DepBox:AddToggle("misc/desync/rotation/randomize", { Text = "Randomize Rotation", Default = false })
+                        DepBox:AddSlider("misc/desync/rotation/speed", { Text = "Animation Speed", Min = 0, Max = 100, Rounding = 1, Default = 10 })
                         DepBox:AddDropdown("misc/desync/rotation/animation", {
                             Text = "Animation",
                             Default = 1,
@@ -463,25 +460,11 @@ local Library, SaveManager, ThemeManager = LoadModule("moehack.net/interface/lib
                                 "SmoothStep",
                             }
                         })
-                        DepBox:AddDropdown("misc/desync/rotation/animation", {
-                            Text = "Animation",
-                            Default = 1,
-                            Values = {
-                                "None",
-                                "Sine",
-                                "Cosine",
-                                "Triangle",
-                                "Square",
-                                "Sawtooth",
-                                "SmoothStep",
-                            }
-                        })
-                        DepBox:AddSlider("misc/desync/rotation/speed", {Text = "Animation Speed", Min = 0, Max = 100, Rounding = 1, Default = 10})
                         DepBox:SetupDependencies({
                             { Toggles["misc/desync/rotation"], true }
                         });
                     end
-
+                    
                     Desync:AddSlider("misc/desync/speed", { Text = "Speed", Min = 0, Max = 100, Rounding = 1, Default = 1 })
                     Desync:AddToggle("misc/desync/useeasingstyle", { Text = "Use Easing Style", Default = false })
                     Desync:AddDropdown("misc/desync/easingstyle", { Text = "Easing Style", Default = 1, Values = {
