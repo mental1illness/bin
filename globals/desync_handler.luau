@@ -103,7 +103,6 @@ local Desync = {
     )
 
     RunService.Heartbeat:Connect(function()
-        Frames += 1
         local Root = Client.Root
 
         if Root == "doesn't exist" then
@@ -123,7 +122,7 @@ local Desync = {
             BroPleaseWork.CFrame = Root.CFrame
 
             sethiddenproperty(Root, "NetworkIsSleeping", true)
-            sethiddenproperty(Root, 'PhysicsRepRootPart', (Frames % (3 + 1) == 0 and BroPleaseWork) or nil);
+            sethiddenproperty(Root, 'PhysicsRepRootPart', BroPleaseWork);
         end
     end)
 end
