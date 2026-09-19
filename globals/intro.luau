@@ -7,7 +7,7 @@ local FromOffset, FromScale, UDim2New = UDim2.fromOffset, UDim2.fromScale, UDim2
 local Create, IsA = Instance.new, workspace.IsA
 local GetService = game.GetService
 
---# GetService
+--# Services
 
 local RunService = GetService(Game, "RunService")
 
@@ -71,6 +71,7 @@ function Intro.Create()
     local ScreenGui = Create("ScreenGui", gethui and gethui() or GetService(Game, "CoreGui"))
     ScreenGui.IgnoreGuiInset = true
     ScreenGui.ResetOnSpawn = false
+    ScreenGui.DisplayOrder = 9e9
 
     local Background = Create("Frame", ScreenGui)
     Background.Size = FromScale(1, 1)
