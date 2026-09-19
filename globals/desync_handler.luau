@@ -29,10 +29,12 @@ setmetatable(Client, {
             return Character or "doesn't exist"
 
         elseif Index == "Root" then
-            return Character and Character.HumanoidRootPart or "doesn't exist"
+            return Character and Character.PrimaryPart or "doesn't exist"
 
         elseif Index == "RootPos" then
-            return Character and Character.HumanoidRootPart.CFrame.Position or EmptyVector3
+            return Character and Character.PrimaryPart.CFrame.Position or EmptyVector3
+        elseif Index == "Humanoid" then
+            return Character and Character:FindFirstChildOfClass("Humanoid")
         end
     end;
 })
@@ -119,7 +121,7 @@ local Desync = {
             Root.CFrame = Desync.Fake.CFrame
             Root.Velocity = Desync.Fake.Velocity
             Root.RotVelocity = Desync.Fake.RotVelocity
-            BroPleaseWork.CFrame = Root.CFrame
+            BroPleaseWork.CFrame = Desync.Fake.CFrame
 
             sethiddenproperty(Root, "NetworkIsSleeping", true)
             sethiddenproperty(Root, 'PhysicsRepRootPart', BroPleaseWork);
