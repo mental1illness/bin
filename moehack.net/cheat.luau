@@ -316,7 +316,7 @@ local Library, SaveManager, ThemeManager = LoadModule("moehack.net/interface/lib
                     World:AddToggle("visuals/world/customskybox", { Text = "Custom Sky Box", Default = false }) do
                         local DepBox = World:AddDependencyBox()
 
-                        DepBox:AddDropdown("visuals/world/customskybox/type", { Text = "Type", Default = 1, Values = LoadModule("moehack.net/modules/skyboxes.luau") }) -- now its in cache
+                        DepBox:AddDropdown("visuals/world/customskybox/type", { Text = "Type", Default = 1, Values = LoadModule("moehack.net/modules/skyboxes.luau").SkiesKeys }) -- now its in cache
 
                         DepBox:SetupDependencies({
                             { Toggles["visuals/world/customskybox"], true }

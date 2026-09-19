@@ -8,7 +8,7 @@ local Skies = {
         SkyboxLf = "rbxassetid://162001904",
         SkyboxRt = "rbxassetid://162001919",
     },
-    Blue Space = {
+    ["Blue Space"] = {
         StarCount = 0, SunAngularSize = 21, MoonAngularSize = 11,
         SkyboxUp = "rbxassetid://367149078",
         SkyboxDn = "rbxassetid://367147970",
@@ -17,7 +17,7 @@ local Skies = {
         SkyboxLf = "rbxassetid://366731613",
         SkyboxRt = "rbxassetid://366731514",
     },
-    Classic Roblox = {
+    ["Classic Roblox"] = {
         StarCount = 3000, SunAngularSize = 21, MoonAngularSize = 11,
         SkyboxUp = "rbxassetid://11138465883",
         SkyboxDn = "rbxassetid://11138453351",
@@ -54,7 +54,7 @@ local Skies = {
         SkyboxLf = "rbxassetid://323480786",
         SkyboxRt = "rbxassetid://323480131",
     },
-    Dark Skies = {   
+    ["Dark Skies"] = {   
         StarCount = 3000, SunAngularSize = 21, MoonAngularSize = 11,
         SkyboxUp = "rbxassetid://149397702",
         SkyboxDn = "rbxassetid://149397686",
@@ -99,7 +99,7 @@ local Skies = {
         SkyboxLf = "rbxassetid://7951697216",
         SkyboxRt = "rbxassetid://7951700251",
     },
-    Horizontal Milky Way = {
+    ["Horizontal Milky Way"] = {
         StarCount = 0, SunAngularSize = 21, MoonAngularSize = 11,
         SkyboxUp = "rbxassetid://714276621",
         SkyboxDn = "rbxassetid://714276541",
@@ -144,7 +144,7 @@ local Skies = {
         SkyboxLf = "rbxassetid://12063984",
         SkyboxRt = "rbxassetid://12064115",
     },
-    Night Light = {
+    ["Night Light"] = {
         StarCount = 3000, SunAngularSize = 21, MoonAngularSize = 11,
         SkyboxUp = "rbxassetid://171447068",
         SkyboxDn = "rbxassetid://171447094",
@@ -153,7 +153,7 @@ local Skies = {
         SkyboxLf = "rbxassetid://171447128",
         SkyboxRt = "rbxassetid://171447111",
     },
-    Ocean Sky = {
+    ["Ocean Sky"] = {
         StarCount = 3000, SunAngularSize = 1, MoonAngularSize = 0,
         SkyboxUp = "rbxassetid://11854708161",
         SkyboxDn = "rbxassetid://11854687121",
@@ -164,7 +164,7 @@ local Skies = {
         SunTextureId = "rbxassetid://4774583925",
         MoonTextureId = "rbxassetid://4774580371",
     },
-    Pink Clouds = {
+    ["Pink Clouds"] = {
         StarCount = 1334, SunAngularSize = 21, MoonAngularSize = 11,
         SkyboxUp = "rbxassetid://271077958",
         SkyboxDn = "rbxassetid://271077243",
@@ -173,7 +173,7 @@ local Skies = {
         SkyboxLf = "rbxassetid://271042310",
         SkyboxRt = "rbxassetid://271042467",
     },
-    Red Dusk = {
+    ["Red Dusk"] = {
         StarCount = 3000, SunAngularSize = 21, MoonAngularSize = 11,
         SkyboxUp = "rbxassetid://136208328681929",
         SkyboxDn = "rbxassetid://123407860042117",
@@ -219,7 +219,7 @@ local Skies = {
         SkyboxLf = "rbxassetid://171410766",
         SkyboxRt = "rbxassetid://171410755",
     },
-    Solid Black = {
+    ["Solid Black"] = {
         StarCount = 0, SunAngularSize = 21, MoonAngularSize = 11,
         SkyboxUp = "rbxassetid://2013298",
         SkyboxDn = "rbxassetid://2013298",
@@ -264,7 +264,7 @@ local Skies = {
         SkyboxLf = "rbxassetid://171561065",
         SkyboxRt = "rbxassetid://171561026",
     },
-    Vertical Milky Way = {
+    ["Vertical Milky Way"] = {
         StarCount = 3000, SunAngularSize = 1.440000057220459, MoonAngularSize = 0.5699999928474426,
         SkyboxUp = "rbxassetid://5559302033",
         SkyboxDn = "rbxassetid://5559290893",
