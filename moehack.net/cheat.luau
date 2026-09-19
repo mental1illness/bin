@@ -418,7 +418,7 @@ local Library, SaveManager, ThemeManager = LoadModule("moehack.net/interface/lib
                     end
 
                     Desync:AddToggle("misc/desync/offset", { Text = "Offset", Default = false }) do
-                        local DepBox = Main:AddDependencyBox()
+                        local DepBox = Desync:AddDependencyBox()
 
                         DepBox:AddSlider("misc/desync/offset/x", { Text = "X", Min = -360, Max = 360, Rounding = 0, Default = 0 })
                         DepBox:AddSlider("misc/desync/offset/y", { Text = "Y", Min = -360, Max = 360, Rounding = 0, Default = 0 })
