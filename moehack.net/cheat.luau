@@ -54,7 +54,7 @@ local makeKebabPls = function(name)
     return s
 end
 
-local Intro = LoadModule("globals/Intro.luau").Create()
+local Intro = LoadModule("globals/intro.luau").Create()
 Intro:FadeIn(0.5)
 
 --# Variables
