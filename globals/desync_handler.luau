@@ -127,7 +127,7 @@ local Desync = {
             sethiddenproperty(Root, "NetworkIsSleeping", true)
 
             if Humanoid then
-                Humanoid:MoveTo(Desync.Fake.CFrame)
+                Humanoid:MoveTo(Desync.Fake.CFrame + NewVector3(0.01, 0, 0))
             end
         end
     end)
