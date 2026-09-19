@@ -106,6 +106,7 @@ local Desync = {
 
     RunService.Heartbeat:Connect(function()
         local Root = Client.Root
+        local Humanoid = Client.Humanoid
 
         if Root == "doesn't exist" then
             return
@@ -124,7 +125,10 @@ local Desync = {
             BroPleaseWork.CFrame = Desync.Fake.CFrame
 
             sethiddenproperty(Root, "NetworkIsSleeping", true)
-            sethiddenproperty(Root, 'PhysicsRepRootPart', BroPleaseWork);
+
+            if Humanoid then
+                Humanoid:MoveTo(Desync.Fake.CFrame)
+            end
         end
     end)
 end
