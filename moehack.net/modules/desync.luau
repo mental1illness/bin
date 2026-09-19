@@ -126,6 +126,41 @@ function Desync.Tick(DeltaTime)
             local Speed = Options["misc/desync/rotation/speed"].Value
             local Animation = Options["misc/desync/rotation/animation"].Value
 
+            local Speed = Options["misc/desync/rotation/speed"].Value
+            local Animation = Options["misc/desync/rotation/animation"].Value
+
+            RotationTime += DeltaTime * Speed
+
+            local Alpha = 1
+
+            if Animation == "Sine" then
+                Alpha = math.sin(RotationTime)
+
+            elseif Animation == "Cosine" then
+                Alpha = math.cos(RotationTime)
+
+            elseif Animation == "Triangle" then
+                Alpha = (2 / Pi) * math.asin(math.sin(RotationTime))
+
+            elseif Animation == "Square" then
+                Alpha = math.sin(RotationTime) >= 0 and 1 or -1
+
+            elseif Animation == "Sawtooth" then
+                Alpha = 2 * (RotationTime / (2 * Pi) % 1) - 1
+
+            elseif Animation == "SmoothStep" then
+                local Wave = (math.sin(RotationTime) + 1) * 0.5
+
+                Alpha = Wave * Wave * (3 - 2 * Wave)
+                Alpha = Alpha * 2 - 1
+            end
+
+            if Toggles["misc/desync/rotation/randomize"].Value then
+                Pitch *= math.random(-100, 100) / 100
+                Yaw *= math.random(-100, 100) / 100
+                Roll *= math.random(-100, 100) / 100
+            end
+
             RotationTime += DeltaTime * Speed
 
             local Alpha = 0
