@@ -51,8 +51,8 @@ end
 local LastPositionCFrame = NewCFrame()
 local TargetCFrame = NewCFrame()
 
-local RotationThingly = Rad(0.005)
-local RotationFlip = false
+local PosThingly = Rad(0.0005)
+local FlipWhen = false
 
 --# Modules
 
@@ -247,9 +247,9 @@ function Desync.Tick(DeltaTime)
         end
 
         Handler.ChangePosition(CurrentCFrame)
-        RotationFlip = not RotationFlip
+        FlipWhen = not FlipWhen
 
-        -- Character.PrimaryPart.CFrame *= CFrame.new(0, math.rad(0.001), 0)
+        Character.PrimaryPart.CFrame *= CFrame.new(0, FlipWhen and PosThingly or -PosThingly, 0)
         return
     end
 
