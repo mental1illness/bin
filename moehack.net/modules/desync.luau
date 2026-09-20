@@ -249,7 +249,7 @@ function Desync.Tick(DeltaTime)
         Handler.ChangePosition(CurrentCFrame)
         RotationFlip = not RotationFlip
 
-        Character.PrimaryPart.CFrame *= CFrame.new(0, math.rad(0.001), 0)
+        -- Character.PrimaryPart.CFrame *= CFrame.new(0, math.rad(0.001), 0)
         return
     end
 
