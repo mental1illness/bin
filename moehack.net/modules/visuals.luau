@@ -442,6 +442,7 @@ Visuals.Camera = {} do
 
                 if FileData.Extension == "png" then
                     local ImageLabel = Create("ImageLabel")
+                    ImageLabel.Parent = ScreenGui
                     ImageLabel.BackgroundTransparency = 1
                     ImageLabel.Position = FromOffset(Options["visuals/camera/waifu/x"].Value, Options["visuals/camera/waifu/y"].Value)
                     LastLinkData.CurrentImageLabel = ImageLabel
@@ -771,6 +772,7 @@ end
 function Visuals.Tick()
     Visuals.Players.Tick()
     Visuals.World.Tick()
+    Visuals.Camera.Tick()
 end
 
 return Visuals
