@@ -501,7 +501,7 @@ Visuals.Camera = {} do
                             )
 
                             LastLinkData.Resolution = {
-                                Width = DecodedGif.Width
+                                Width = DecodedGif.Width,
                                 Height = DecodedGif.Height
                             }
                         end
