@@ -338,7 +338,6 @@ if moehack.data.use_custom_silent_aim and moehack.data.game_name == "Operation O
     Debug.setupvalue(Gun.send_shoot, 1, setmetatable({}, {
         __index = function(_, Key: string)
             if Key == "validate_position" then
-                print("sup bro")
                 return ValidatePosition
             end
 
