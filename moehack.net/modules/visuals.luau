@@ -424,11 +424,13 @@ end
 Visuals.Camera = {} do
     
     function Visuals.Camera.Tick()
-        if Toggles["visuals/camera/waifu"].Value then -- this is too advanced
+        if Toggles["visuals/camera/waifu"].Value then
             local Link = Options["visuals/camera/waifu/link"].Value
-            local ImageLabel = LastLinkData.CurrentImageLabel
 
-            if Link and LastLinkData.Link ~= Link and string.match(Link, "^https://") then
+            if Link and Link ~= "" and LastLinkData.Link ~= Link and not LastLinkData.Loading and string.match(Link, "^https://") then
+                LastLinkData.Link = Link
+                LastLinkData.Loading = true
+
                 if LastLinkData.CurrentImageLabel then
                     LastLinkData.CurrentImageLabel:Destroy()
                     LastLinkData.CurrentImageLabel = nil
@@ -439,26 +441,26 @@ Visuals.Camera = {} do
                     LastLinkData.GifHandler = nil
                 end
 
-                local Success, Bytes = pcall(Game.HttpGet, Game, Link)
+                Spawn(function()
+                    local Success, Bytes = pcall(Game.HttpGet, Game, Link)
 
-                if Success and Bytes then
+                    if not Success or not Bytes or LastLinkData.Link ~= Link then
+                        LastLinkData.Loading = false
+                        return
+                    end
+
                     local FileData = Utility.DetectFileType(Bytes)
-
-                    LastLinkData.Link = Link
-                    LastLinkData.Extension = FileData.Extension
 
                     if FileData.Extension == "png" then
                         writefile("temp.png", Bytes)
 
+                        local ResolutionData = Utility.GetImageResolution(Bytes)
                         local NewImageLabel = Create("ImageLabel")
+
                         NewImageLabel.Parent = ScreenGui
                         NewImageLabel.BackgroundTransparency = 1
-                        NewImageLabel.Position = FromOffset(
-                            Options["visuals/camera/waifu/x"].Value,
-                            Options["visuals/camera/waifu/y"].Value
-                        )
-
-                        local ResolutionData = Utility.GetImageResolution(Bytes)
+                        NewImageLabel.ImageTransparency = Options["visuals/camera/waifu/transparency"].Value
+                        NewImageLabel.Image = getcustomasset("temp.png")
 
                         if ResolutionData.Width and ResolutionData.Height then
                             NewImageLabel.Size = FromOffset(
@@ -469,13 +471,16 @@ Visuals.Camera = {} do
                             LastLinkData.Resolution = ResolutionData
                         end
 
-                        NewImageLabel.Image = getcustomasset("temp.png")
+                        LastLinkData.Extension = FileData.Extension
                         LastLinkData.CurrentImageLabel = NewImageLabel
                     end
-                end
+
+                    LastLinkData.Loading = false
+                end)
             end
 
             local ImageLabel = LastLinkData.CurrentImageLabel
+
             if ImageLabel then
                 local X = Options["visuals/camera/waifu/x"].Value
                 local Y = Options["visuals/camera/waifu/y"].Value
@@ -486,13 +491,9 @@ Visuals.Camera = {} do
                 ImageLabel.ImageTransparency = Transparency
 
                 if LastLinkData.Resolution then
-                    local Width = LastLinkData.Resolution.Width
-                    local Height = LastLinkData.Resolution.Height
-                    local ScaleMultiplier = Scale
-
                     ImageLabel.Size = FromOffset(
-                        Width * ScaleMultiplier,
-                        Height * ScaleMultiplier
+                        LastLinkData.Resolution.Width * Scale,
+                        LastLinkData.Resolution.Height * Scale
                     )
                 end
             end
@@ -510,6 +511,7 @@ Visuals.Camera = {} do
             LastLinkData.Link = nil
             LastLinkData.Extension = nil
             LastLinkData.Resolution = nil
+            LastLinkData.Loading = false
         end
     end
 
