@@ -186,7 +186,7 @@ local Library, SaveManager, ThemeManager = LoadModule("moehack.net/interface/lib
 
         if Tabs.Visuals then
             do -- Visuals
-                local World, Player = Tabs.Visuals:AddGroupbox({ Side = 1, Name = "World" }), Tabs.Visuals:AddGroupbox({ Side = 2, Name = "Player" }) 
+                local World, Player, Camera = Tabs.Visuals:AddGroupbox({ Side = 1, Name = "World" }), Tabs.Visuals:AddGroupbox({ Side = 2, Name = "Player" }) , Tabs.Visuals:AddGroupbox({ Side = 2, Name = "Camera" })
 
                 do -- World
                     local Ambient = World:AddToggle("visuals/world/ambient", { Text = "Ambient", Default = false }) do
@@ -372,9 +372,23 @@ local Library, SaveManager, ThemeManager = LoadModule("moehack.net/interface/lib
                 end
 
                 
+                do -- Camera
+                    Camera:AddToggle("visuals/camera/waifu", { Text = "Waifu", Default = false }) do
+                        local DepBox = Camera:AddDependencyBox()
 
+                        DepBox:AddInput("visuals/camera/waifu/link", { Text = "Image / GIF URL", Min = 10, Max = 20, Rounding = 0, Default = 10 })
+                        DepBox:AddSlider("visuals/camera/waifu/x", { Text = "X", Min = -1920, Max = 1920, Rounding = 0, Default = 0 })
+                        DepBox:AddSlider("visuals/camera/waifu/y", { Text = "Y", Min = -1080, Max = 1080, Rounding = 0, Default = 0 })
+
+
+                        DepBox:SetupDependencies({
+                            { Toggles["visuals/camera/waifu"], true } 
+                        });
+                    end
+                end
             end
         end
+
         if Tabs.Misc then
             do -- Misc
                 local Movement, Exploits, Desync = Tabs.Misc:AddGroupbox({ Side = 1, Name = "Movement" }), Tabs.Misc:AddGroupbox({ Side = 2, Name = "Exploits" }), Tabs.Misc:AddGroupbox({ Side = 2, Name = "Namsync" })

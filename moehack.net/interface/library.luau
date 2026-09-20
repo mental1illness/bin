@@ -45,7 +45,7 @@ ProtectGui(ScreenGui)
 
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Global
 ScreenGui.Parent = GetHui()
-ScreenGui.DisplayOrder = 1e1
+ScreenGui.DisplayOrder = 50
 
 local Toggles = {}
 local Options = {}

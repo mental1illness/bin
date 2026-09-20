@@ -26,6 +26,121 @@ local LocalPlayer        = Players.LocalPlayer
 
 --# Main
 
+local function StartsWithBytes(Data: string, Bytes: {number}): boolean
+	if #Data < #Bytes then
+		return false
+	end
+
+	for Index, ExpectedByte in ipairs(Bytes) do
+		if string.byte(Data, Index) ~= ExpectedByte then
+			return false
+		end
+	end
+
+	return true
+end
+
+local function ReadUInt16BE(Data: string, Position: number): number
+	local A, B = string.byte(Data, Position, Position + 1)
+	return A * 256 + B
+end
+
+local function ReadUInt16LE(Data: string, Position: number): number
+	local A, B = string.byte(Data, Position, Position + 1)
+	return A + B * 256
+end
+
+local function ReadUInt32LE(Data: string, Position: number): number
+	local A, B, C, D = string.byte(Data, Position, Position + 3)
+
+	return A
+		+ B * 256
+		+ C * 65536
+		+ D * 16777216
+end
+
+local function ReadUInt24LE(Data: string, Position: number): number
+	local A, B, C = string.byte(Data, Position, Position + 2)
+
+	return A
+		+ B * 256
+		+ C * 65536
+end
+
+local function IsPng(Data: string): boolean
+	return string.sub(Data, 1, 8) == "\137PNG\r\n\26\n"
+end
+
+local function IsJpeg(Data: string): boolean
+	local A, B = string.byte(Data, 1, 2)
+	return A == 0xFF and B == 0xD8
+end
+
+local function IsGif(Data: string): boolean
+	local Header = string.sub(Data, 1, 6)
+	return Header == "GIF87a" or Header == "GIF89a"
+end
+
+local function IsBmp(Data: string): boolean
+	return string.sub(Data, 1, 2) == "BM"
+end
+
+local function IsWebp(Data: string): boolean
+	return string.sub(Data, 1, 4) == "RIFF"
+		and string.sub(Data, 9, 12) == "WEBP"
+end
+
+local function GetJpegResolution(Data: string)
+	local Position = 3
+	local DataLength = #Data
+
+	while Position <= DataLength do
+		while Position <= DataLength and string.byte(Data, Position) ~= 0xFF do
+			Position += 1
+		end
+
+		while Position <= DataLength and string.byte(Data, Position) == 0xFF do
+			Position += 1
+		end
+
+		if Position > DataLength then
+			break
+		end
+
+		local Marker = string.byte(Data, Position)
+		Position += 1
+
+		if Marker == 0xD9 or Marker == 0xDA then
+			break
+		end
+
+		if Marker ~= 0x01 and not (Marker >= 0xD0 and Marker <= 0xD7) then
+			if Position + 1 > DataLength then
+				break
+			end
+
+			local SegmentLength = ReadUInt16BE(Data, Position)
+
+			local IsStartOfFrame =
+				(Marker >= 0xC0 and Marker <= 0xC3)
+				or (Marker >= 0xC5 and Marker <= 0xC7)
+				or (Marker >= 0xC9 and Marker <= 0xCB)
+				or (Marker >= 0xCD and Marker <= 0xCF)
+
+			if IsStartOfFrame then
+				local Height = ReadUInt16BE(Data, Position + 3)
+				local Width = ReadUInt16BE(Data, Position + 5)
+
+				return Width, Height
+			end
+
+			Position += SegmentLength
+		end
+	end
+
+	return nil, nil
+end
+
 local Utility = {}
 
 Utility.EasingStyle = {
@@ -193,6 +308,115 @@ function Utility.GetTool(Player, Character)
     local Tool = FindFirstChildOfClass(Character, "Tool")
     if Tool then return Tool.Name end
     return "none"
+end
+
+function Utility.GetImageResolution(Data: string)
+	if IsPng(Data) then
+		return {
+			Width = ReadUInt32LE(string.sub(Data, 17, 20):reverse(), 1),
+			Height = ReadUInt32LE(string.sub(Data, 21, 24):reverse(), 1),
+		}
+	end
+
+	if IsGif(Data) then
+		return {
+			Width = ReadUInt16LE(Data, 7),
+			Height = ReadUInt16LE(Data, 9),
+		}
+	end
+
+	if IsBmp(Data) then
+		return {
+			Width = ReadUInt32LE(Data, 19),
+			Height = ReadUInt32LE(Data, 23),
+		}
+	end
+
+	if IsJpeg(Data) then
+		local Width, Height = GetJpegResolution(Data)
+
+		if Width and Height then
+			return {
+				Width = Width,
+				Height = Height,
+			}
+		end
+	end
+
+	if IsWebp(Data) and string.sub(Data, 13, 16) == "VP8X" then
+		local Width = ReadUInt24LE(Data, 25) + 1
+		local Height = ReadUInt24LE(Data, 28) + 1
+
+		return {
+			Width = Width,
+			Height = Height,
+		}
+	end
+
+	return nil
+end
+
+
+function Utility.DetectFileType(Data: string)
+	if StartsWithBytes(Data, {
+		0x89, 0x50, 0x4E, 0x47,
+		0x0D, 0x0A, 0x1A, 0x0A,
+	}) then
+		return {
+			Extension = "png",
+			Mime = "image/png",
+		}
+	end
+
+	if StartsWithBytes(Data, { 0xFF, 0xD8, 0xFF }) then
+		return {
+			Extension = "jpg",
+			Mime = "image/jpeg",
+		}
+	end
+
+	local Header = string.sub(Data, 1, 6)
+
+	if Header == "GIF87a" or Header == "GIF89a" then
+		return {
+			Extension = "gif",
+			Mime = "image/gif",
+		}
+	end
+
+	if string.sub(Data, 1, 4) == "RIFF"
+		and string.sub(Data, 9, 12) == "WEBP" then
+		return {
+			Extension = "webp",
+			Mime = "image/webp",
+		}
+	end
+
+	if string.sub(Data, 1, 2) == "BM" then
+		return {
+			Extension = "bmp",
+			Mime = "image/bmp",
+		}
+	end
+
+	if string.sub(Data, 1, 4) == "%PDF" then
+		return {
+			Extension = "pdf",
+			Mime = "application/pdf",
+		}
+	end
+
+	if StartsWithBytes(Data, { 0x50, 0x4B, 0x03, 0x04 }) then
+		return {
+			Extension = "zip",
+			Mime = "application/zip",
+		}
+	end
+
+	return {
+		Extension = nil,
+		Mime = "application/octet-stream",
+	}
 end
 
 
