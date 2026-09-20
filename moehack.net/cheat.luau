@@ -439,6 +439,22 @@ local Library, SaveManager, ThemeManager = LoadModule("moehack.net/interface/lib
                         DepBox:AddSlider("misc/desync/offset/x", { Text = "X", Min = -360, Max = 360, Rounding = 0, Default = 0 })
                         DepBox:AddSlider("misc/desync/offset/y", { Text = "Y", Min = -360, Max = 360, Rounding = 0, Default = 0 })
                         DepBox:AddSlider("misc/desync/offset/z", { Text = "Z", Min = -360, Max = 360, Rounding = 0, Default = 0 })
+                        DepBox:AddDropdown("misc/desync/offset/animation", {
+                            Text = "Animation",
+                            Default = 1,
+                            Values = {
+                                "None",
+                                "Sine",
+                                "Cosine",
+                                "Triangle",
+                                "Square",
+                                "Sawtooth",
+                                "SmoothStep",
+                                "Circle",
+                                "Figure8",
+                                "Spiral",
+                            }
+                        })
 
                         DepBox:SetupDependencies({
                             { Toggles["misc/desync/offset"], true } 
