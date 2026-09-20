@@ -439,6 +439,7 @@ local Library, SaveManager, ThemeManager = LoadModule("moehack.net/interface/lib
                         DepBox:AddSlider("misc/desync/offset/x", { Text = "X", Min = -360, Max = 360, Rounding = 0, Default = 0 })
                         DepBox:AddSlider("misc/desync/offset/y", { Text = "Y", Min = -360, Max = 360, Rounding = 0, Default = 0 })
                         DepBox:AddSlider("misc/desync/offset/z", { Text = "Z", Min = -360, Max = 360, Rounding = 0, Default = 0 })
+                        DepBox:AddSlider("misc/desync/offset/speed", { Text = "Animation Speed", Min = 0, Max = 100, Rounding = 1, Default = 10 })
                         DepBox:AddDropdown("misc/desync/offset/animation", {
                             Text = "Animation",
                             Default = 1,
@@ -459,6 +460,7 @@ local Library, SaveManager, ThemeManager = LoadModule("moehack.net/interface/lib
                         DepBox:SetupDependencies({
                             { Toggles["misc/desync/offset"], true } 
                         });
+                        DepBox:AddDivider()
                     end
 
                     Desync:AddToggle("misc/desync/jitter", { Text = "Jitter", Default = false }) do
@@ -470,6 +472,7 @@ local Library, SaveManager, ThemeManager = LoadModule("moehack.net/interface/lib
                         DepBox:SetupDependencies({
                             { Toggles["misc/desync/jitter"], true }
                         });
+                        DepBox:AddDivider()
                     end
 
                     Desync:AddToggle("misc/desync/rotation", { Text = "Rotation Offset", Default = false }) do
@@ -495,6 +498,8 @@ local Library, SaveManager, ThemeManager = LoadModule("moehack.net/interface/lib
                         DepBox:SetupDependencies({
                             { Toggles["misc/desync/rotation"], true }
                         });
+
+                        DepBox:AddDivider()
                     end
                     
                     Desync:AddSlider("misc/desync/speed", { Text = "Speed", Min = 0, Max = 100, Rounding = 1, Default = 1 })
