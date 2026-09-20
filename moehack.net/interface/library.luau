@@ -1889,22 +1889,24 @@ do
 			else
 				-- we are focused and don't fit, so adjust position
 				local cursor = Box.CursorPosition
-				if cursor ~= -1 then
-					-- calculate pixel width of text from start to cursor
-					local subtext = string.sub(Box.Text, 1, cursor - 1)
-					local width =
-						TextService:GetTextSize(subtext, Box.TextSize, Box.Font, Vector2.new(math.huge, math.huge)).X
+				pcall(function()
+					if cursor ~= -1 then
+						-- calculate pixel width of text from start to cursor
+						local subtext = string.sub(Box.Text, 1, cursor - 1)
+						local width =
+							TextService:GetTextSize(subtext, Box.TextSize, Box.Font, Vector2.new(math.huge, math.huge)).X
 
-					-- check if we're inside the box with the cursor
-					local currentCursorPos = Box.Position.X.Offset + width
+						-- check if we're inside the box with the cursor
+						local currentCursorPos = Box.Position.X.Offset + width
 
-					-- adjust if necessary
-					if currentCursorPos < PADDING then
-						Box.Position = UDim2.fromOffset(PADDING - width, 0)
-					elseif currentCursorPos > reveal - PADDING - 1 then
-						Box.Position = UDim2.fromOffset(reveal - width - PADDING - 1, 0)
+						-- adjust if necessary
+						if currentCursorPos < PADDING then
+							Box.Position = UDim2.fromOffset(PADDING - width, 0)
+						elseif currentCursorPos > reveal - PADDING - 1 then
+							Box.Position = UDim2.fromOffset(reveal - width - PADDING - 1, 0)
+						end
 					end
-				end
+				end)
 			end
 		end
 

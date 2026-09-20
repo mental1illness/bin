@@ -426,44 +426,75 @@ Visuals.Camera = {} do
     function Visuals.Camera.Tick()
         if Toggles["visuals/camera/waifu"].Value then -- this is too advanced
             local Link = Options["visuals/camera/waifu/link"].Value
-            
-            if Link and LastLinkData.Link ~= Link and string.match(Link, "^https://") then
+            local ImageLabel = LastLinkData.CurrentImageLabel
 
-                if LastLinkData.CurrentImageLabel and LastLinkData.Extension == "png" then 
-                    LastLinkData.CurrentImageLabel:Destroy() 
-                elseif LastLinkData.Extension == "gif" then
-                    LastLinkData.GifHandler:Destroy()
+            if Link and LastLinkData.Link ~= Link and string.match(Link, "^https://") then
+                if LastLinkData.CurrentImageLabel then
+                    LastLinkData.CurrentImageLabel:Destroy()
+                    LastLinkData.CurrentImageLabel = nil
                 end
 
-                local Bytes = Game:HttpGet(Link)
-                local FileData = Utility.DetectFileType(Bytes)
-                LastLinkData.Link = Link
-                LastLinkData.Extension = FileData.Extension
+                if LastLinkData.GifHandler then
+                    LastLinkData.GifHandler:Destroy()
+                    LastLinkData.GifHandler = nil
+                end
 
-                if FileData.Extension == "png" then
-                    local ImageLabel = Create("ImageLabel")
-                    ImageLabel.Parent = ScreenGui
-                    ImageLabel.BackgroundTransparency = 1
-                    ImageLabel.Position = FromOffset(Options["visuals/camera/waifu/x"].Value, Options["visuals/camera/waifu/y"].Value)
-                    LastLinkData.CurrentImageLabel = ImageLabel
-                    writefile("temp." .. FileData.Extension, Bytes)
+                local Success, Bytes = pcall(Game.HttpGet, Game, Link)
 
-                    local ResolutionData = Utility.GetImageResolution(Bytes)
-                    if ResolutionData.Width and ResolutionData.Height then
-                        ImageLabel.Size = FromOffset(ResolutionData.Width, ResolutionData.Height)
-                        LastLinkData.Resolution = ResolutionData
+                if Success and Bytes then
+                    local FileData = Utility.DetectFileType(Bytes)
+
+                    LastLinkData.Link = Link
+                    LastLinkData.Extension = FileData.Extension
+
+                    if FileData.Extension == "png" then
+                        writefile("temp.png", Bytes)
+
+                        local NewImageLabel = Create("ImageLabel")
+                        NewImageLabel.Parent = ScreenGui
+                        NewImageLabel.BackgroundTransparency = 1
+                        NewImageLabel.Position = FromOffset(
+                            Options["visuals/camera/waifu/x"].Value,
+                            Options["visuals/camera/waifu/y"].Value
+                        )
+
+                        local ResolutionData = Utility.GetImageResolution(Bytes)
+
+                        if ResolutionData.Width and ResolutionData.Height then
+                            NewImageLabel.Size = FromOffset(
+                                ResolutionData.Width,
+                                ResolutionData.Height
+                            )
+
+                            LastLinkData.Resolution = ResolutionData
+                        end
+
+                        NewImageLabel.Image = getcustomasset("temp.png")
+                        LastLinkData.CurrentImageLabel = NewImageLabel
                     end
-
-                    ImageLabel.Image = getcustomasset("temp.png")
                 end
             end
 
             local ImageLabel = LastLinkData.CurrentImageLabel
             if ImageLabel then
-                local x = Options["visuals/camera/waifu/x"].Value
-                local y = Options["visuals/camera/waifu/y"].Value
+                local X = Options["visuals/camera/waifu/x"].Value
+                local Y = Options["visuals/camera/waifu/y"].Value
+                local Transparency = Options["visuals/camera/waifu/transparency"].Value
+                local Scale = Options["visuals/camera/waifu/scale"].Value
 
-                ImageLabel.Position = FromOffset(x, y)
+                ImageLabel.Position = FromOffset(X, Y)
+                ImageLabel.ImageTransparency = Transparency
+
+                if LastLinkData.Resolution then
+                    local Width = LastLinkData.Resolution.Width
+                    local Height = LastLinkData.Resolution.Height
+                    local ScaleMultiplier = Scale
+
+                    ImageLabel.Size = FromOffset(
+                        Width * ScaleMultiplier,
+                        Height * ScaleMultiplier
+                    )
+                end
             end
         else
             if LastLinkData.CurrentImageLabel then
@@ -471,8 +502,14 @@ Visuals.Camera = {} do
                 LastLinkData.CurrentImageLabel = nil
             end
 
+            if LastLinkData.GifHandler then
+                LastLinkData.GifHandler:Destroy()
+                LastLinkData.GifHandler = nil
+            end
+
             LastLinkData.Link = nil
             LastLinkData.Extension = nil
+            LastLinkData.Resolution = nil
         end
     end
 
