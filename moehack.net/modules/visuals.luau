@@ -436,7 +436,7 @@ Visuals.Camera = {} do
                 end
 
                 local Bytes = Game:HttpGet(Link)
-                local FileData = DetectFileType(Bytes)
+                local FileData = Utility.DetectFileType(Bytes)
                 LastLinkData.Link = Link
                 LastLinkData.Extension = FileData.Extension
 
