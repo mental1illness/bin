@@ -50,11 +50,6 @@ end
 
 local LastPositionCFrame = NewCFrame()
 local TargetCFrame = NewCFrame()
-local RotationTime = 0
-
-local RandomRotation = Vector3.zero
-local RandomTarget = Vector3.zero
-local RandomTime = 0
 
 local RotationThingly = Rad(0.005)
 local RotationFlip = false
@@ -103,9 +98,85 @@ function Desync.Tick(DeltaTime)
         end
 
         if Toggles["misc/desync/offset"].Value then
-            local X, Y, Z = Options["misc/desync/offset/x"].Value, Options["misc/desync/offset/y"].Value, Options["misc/desync/offset/z"].Value
+            local X = Options["misc/desync/offset/x"].Value
+            local Y = Options["misc/desync/offset/y"].Value
+            local Z = Options["misc/desync/offset/z"].Value
+            local Speed = Options["misc/desync/offset/speed"].Value
+            local Animation = Options["misc/desync/offset/animation"].Value
 
-            CurrentCFrame *= NewCFrame(X, Y, Z)
+            local Time = os.clock() * Speed
+            local OffsetX, OffsetY, OffsetZ = X, Y, Z
+
+            if Animation == "Sine" then
+                OffsetX = math.sin(Time) * X
+                OffsetY = math.sin(Time * 1.17) * Y
+                OffsetZ = math.sin(Time * 0.83) * Z
+
+            elseif Animation == "Cosine" then
+                OffsetX = math.cos(Time) * X
+                OffsetY = math.cos(Time * 1.17) * Y
+                OffsetZ = math.cos(Time * 0.83) * Z
+
+            elseif Animation == "Triangle" then
+                local Function = function(Value)
+                    return 2 * math.abs(2 * (Value - math.floor(Value + 0.5))) - 1
+                end
+
+                OffsetX = Function(Time / (2 * Pi)) * X
+                OffsetY = Function(Time / (2 * Pi) + 0.17) * Y
+                OffsetZ = Function(Time / (2 * Pi) + 0.33) * Z
+
+            elseif Animation == "Square" then
+                local Function = function(Value)
+                    return math.sin(Value) >= 0 and 1 or -1
+                end
+
+                OffsetX = Function(Time) * X
+                OffsetY = Function(Time * 1.17) * Y
+                OffsetZ = Function(Time * 0.83) * Z
+
+            elseif Animation == "Sawtooth" then
+                local Function = function(Value)
+                    return (Value % (2 * Pi)) / Pi - 1
+                end
+
+                OffsetX = Function(Time) * X
+                OffsetY = Function(Time * 1.17) * Y
+                OffsetZ = Function(Time * 0.83) * Z
+
+            elseif Animation == "SmoothStep" then
+                local Function = function(Value)
+                    local Alpha = (math.sin(Value) + 1) * 0.5
+                    return Alpha * Alpha * (3 - 2 * Alpha) * 2 - 1
+                end
+
+                OffsetX = Function(Time) * X
+                OffsetY = Function(Time * 1.17) * Y
+                OffsetZ = Function(Time * 0.83) * Z
+
+            elseif Animation == "Circle" then
+                OffsetX = math.cos(Time) * X
+                OffsetY = math.sin(Time) * Y
+                OffsetZ = math.cos(Time) * Z
+
+            elseif Animation == "Figure8" then
+                OffsetX = math.sin(Time) * X
+                OffsetY = math.sin(Time * 2) * Y
+                OffsetZ = math.cos(Time) * Z
+
+            elseif Animation == "Spiral" then
+                local Radius = (math.sin(Time) + 1) * 0.5
+
+                OffsetX = math.cos(Time) * X * Radius
+                OffsetY = math.sin(Time * 2) * Y * Radius
+                OffsetZ = math.sin(Time) * Z * Radius
+            end
+
+            CurrentCFrame *= NewCFrame(
+                OffsetX,
+                OffsetY,
+                OffsetZ
+            )
         end
 
         if Toggles["misc/desync/jitter"].Value then
@@ -129,49 +200,38 @@ function Desync.Tick(DeltaTime)
             local Roll = Options["misc/desync/rotation/z"].Value
             local Speed = Options["misc/desync/rotation/speed"].Value
             local Animation = Options["misc/desync/rotation/animation"].Value
-            RotationTime += DeltaTime * Speed
-            local Alpha = 1
+            local Time = os.clock() * Speed
+
+            local Multiplier = 1
+
             if Animation == "Sine" then
-                Alpha = math.sin(RotationTime)
+                Multiplier = math.sin(Time)
+
             elseif Animation == "Cosine" then
-                Alpha = math.cos(RotationTime)
+                Multiplier = math.cos(Time)
+
             elseif Animation == "Triangle" then
-                Alpha = (2 / Pi) * math.asin(math.sin(RotationTime))
+                Multiplier = 2 * math.abs(2 * ((Time / (2 * Pi)) - math.floor((Time / (2 * Pi)) + 0.5))) - 1
+
             elseif Animation == "Square" then
-                Alpha = math.sin(RotationTime) >= 0 and 1 or -1
+                Multiplier = math.sin(Time) >= 0 and 1 or -1
+
             elseif Animation == "Sawtooth" then
-                Alpha = 2 * (RotationTime / (2 * Pi) % 1) - 1
+                Multiplier = ((Time % (2 * Pi)) / Pi) - 1
+
             elseif Animation == "SmoothStep" then
-                local Wave = (math.sin(RotationTime) + 1) * 0.5
-                Alpha = Wave * Wave * (3 - 2 * Wave)
-                Alpha = Alpha * 2 - 1
+                local Alpha = (math.sin(Time) + 1) * 0.5
+                Multiplier = Alpha * Alpha * (3 - 2 * Alpha) * 2 - 1
+
+            elseif Animation == "None" then
+                Multiplier = 1
             end
-            if Toggles["misc/desync/rotation/randomize"].Value then
-                RandomTime += DeltaTime
-                if RandomTime >= 0.25 then
-                    RandomTime = 0
-                    RandomTarget = Vector3.new(
-                        math.random(-100, 100) / 100,
-                        math.random(-100, 100) / 100,
-                        math.random(-100, 100) / 100
-                    )
-                end
-                RandomRotation = RandomRotation:Lerp(RandomTarget, Clamp(DeltaTime * 5, 0, 1))
-            else
-                RandomRotation = Vector3.zero
-                RandomTarget = Vector3.zero
-                RandomTime = 0
-            end
+
             CurrentCFrame *= CFrame.Angles(
-                Rad(Pitch + Pitch * RandomRotation.X) * Alpha,
-                Rad(Yaw + Yaw * RandomRotation.Y) * Alpha,
-                Rad(Roll + Roll * RandomRotation.Z) * Alpha
+                Rad(Pitch) * Multiplier,
+                Rad(Yaw) * Multiplier,
+                Rad(Roll) * Multiplier
             )
-        else
-            RotationTime = 0
-            RandomTime = 0
-            RandomRotation = Vector3.zero
-            RandomTarget = Vector3.zero
         end
 
         if EasingStyleFunction and EasingDirectionFunction and Toggles["misc/desync/useeasingstyle"].Value then
