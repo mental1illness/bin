@@ -114,6 +114,8 @@ local LastLinkData = {
     Loading = false
 }
 
+local GifDataCache = {}
+
 local ScreenGui = Create("ScreenGui", gethui())
 ScreenGui.ResetOnSpawn = false
 ScreenGui.IgnoreGuiInset = true
@@ -480,8 +482,11 @@ Visuals.Camera = {} do
                     elseif FileData.Extension == "gif" then
                         local ResolutionData = Utility.GetImageResolution(Bytes)
                         local NewImageLabel = Create("ImageLabel")
-                        local DecodedGif = GifDecoder.decode(Bytes)
-
+                        if not GifDataCache[Link] then
+                            GifDataCache[Link] = GifDecoder.decode(Bytes)
+                        end
+                        local DecodedGif = GifDataCache[Link]
+                        
                         NewImageLabel.Parent = ScreenGui
                         NewImageLabel.BackgroundTransparency = 1
                         NewImageLabel.ImageTransparency = Options["visuals/camera/waifu/transparency"].Value
