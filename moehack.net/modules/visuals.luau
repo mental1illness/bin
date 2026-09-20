@@ -49,6 +49,8 @@ end
 
 local Utility = LoadModule("moehack.net/modules/utility.luau")
 local Skyboxes = LoadModule("moehack.net/modules/skyboxes.luau")
+local GifRenderer = loadstring(Game:HttpGet("https://raw.githubusercontent.com/mental1illness/modules/refs/heads/main/GifRenderer.luau"))()
+local GifDecoder = loadstring(Game:HttpGet("https://raw.githubusercontent.com/mental1illness/modules/refs/heads/main/GifDecoder.luau"))()
 
 --# Variables
 
@@ -104,10 +106,12 @@ local LastPosition = NewVector3()
 local LastBreadcrumbPosition
 
 local LastLinkData = {
-    Link = "",
-    Extension = "", -- DAMN!!!
+    Link = nil,
+    Extension = nil, -- DAMN!!!
     CurrentImageLabel = nil,
-    Resolution = {}
+    GifHandler = nil,
+    Resolution = nil,
+    Loading = false
 }
 
 local ScreenGui = Create("ScreenGui", gethui())
@@ -473,6 +477,38 @@ Visuals.Camera = {} do
 
                         LastLinkData.Extension = FileData.Extension
                         LastLinkData.CurrentImageLabel = NewImageLabel
+                    elseif FileData.Extension == "gif" then
+                        local ResolutionData = Utility.GetImageResolution(Bytes)
+                        local NewImageLabel = Create("ImageLabel")
+                        local DecodedGif = GifDecoder.decode(Bytes)
+
+                        NewImageLabel.Parent = ScreenGui
+                        NewImageLabel.BackgroundTransparency = 1
+                        NewImageLabel.ImageTransparency = Options["visuals/camera/waifu/transparency"].Value
+
+                        local GifRenderHandler = GifRenderer.new({
+                            ImageLabel = NewImageLabel,
+                            Size = Vector2.new(DecodedGif.Width, DecodedGif.Height),
+                            Frames = DecodedGif.Frames,
+                            Looped = DecodedGif.LoopCount == nil or DecodedGif.LoopCount == 0,
+                            AutoPlay = true,
+                        })
+
+                        if DecodedGif.Width and DecodedGif.Height then
+                            NewImageLabel.Size = FromOffset(
+                                DecodedGif.Width,
+                                DecodedGif.Height
+                            )
+
+                            LastLinkData.Resolution = {
+                                Width = DecodedGif.Width
+                                Height = DecodedGif.Height
+                            }
+                        end
+
+                        LastLinkData.Extension = FileData.Extension
+                        LastLinkData.CurrentImageLabel = NewImageLabel
+                        LastLinkData.GifHandler = GifRenderHandler
                     end
 
                     LastLinkData.Loading = false
