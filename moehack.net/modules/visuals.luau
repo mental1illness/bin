@@ -742,7 +742,7 @@ Visuals.Players = {} do
     function Visuals.Players.Tick()
 
         if Toggles["visuals/player/appearance"].Value then
-            local Character = Utility.GetCharacter()
+            local Character = Utility.GetCharacter(LocalPlayer)
             local AppearanceId = tonumber(Options["visuals/player/appearance/id"].Value)
 
             if Character and AppearanceId then
