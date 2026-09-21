@@ -50,6 +50,25 @@ local CBUtility = {}
 
 CBUtility.Client     = getsenv(LocalPlayer.PlayerGui)
 CBUtility.ClientData = filtergc("table", { Keys = { "DISABLED", "crouched", "ammocount2", "equipment2stored" } }, true)
+CBUtility.Hitboxes = {
+    "HeadHB",
+	"Head",
+	"UpperTorso",
+	"LowerTorso",
+	"LeftUpperArm",
+	"LeftLowerArm",
+	"LeftHand",
+	"RightUpperArm",
+	"RightLowerArm",
+	"RightHand",
+	"LeftUpperLeg",
+	"LeftLowerLeg",
+	"LeftFoot",
+	"RightUpperLeg",
+	"RightLowerLeg",
+	"RightFoot",
+	"HumanoidRootPart"
+}
 
 function CBUtility.Wallbang(Origin, Direction, IgnoreList)
 	local PenetrationUsed = 0
