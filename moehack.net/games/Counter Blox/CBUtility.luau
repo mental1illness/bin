@@ -31,9 +31,9 @@ local Camera    = workspace.CurrentCamera
 
 local PlayerGui = LocalPlayer.PlayerGui
 
-local RaycastParams = RaycastParams.new()
-RaycastParams.FilterType = Enum.RaycastFilterType.Exclude
-RaycastParams.IgnoreWater = true
+local NormalParam = RaycastParams.new()
+NormalParam.FilterType = Enum.RaycastFilterType.Exclude
+NormalParam.IgnoreWater = true
 
 local ThicknessParams = RaycastParams.new()
 ThicknessParams.FilterType = Enum.RaycastFilterType.Include
@@ -48,7 +48,7 @@ SmokeParams.IgnoreWater = false
 
 local CBUtility = {}
 
-CBUtility.Client     = getsenv(LocalPlayer.PlayerGui)
+CBUtility.Client     = getsenv(LocalPlayer.PlayerGui.Client)
 CBUtility.ClientData = filtergc("table", { Keys = { "DISABLED", "crouched", "ammocount2", "equipment2stored" } }, true)
 CBUtility.Hitboxes = {
     "HeadHB",
@@ -79,9 +79,9 @@ function CBUtility.Wallbang(Origin, Direction, IgnoreList)
 	IgnoreList = IgnoreList or {}
 
 	for _ = 1, 10 do
-		RaycastParams.FilterDescendantsInstances = IgnoreList
+		NormalParam.FilterDescendantsInstances = IgnoreList
 
-		local Result = Raycast(workspace, Origin, Direction, RaycastParams)
+		local Result = Raycast(workspace, Origin, Direction, NormalParam)
 
 		if not Result then
 			return false, 1, HitPart, HitPosition, HitNormal
