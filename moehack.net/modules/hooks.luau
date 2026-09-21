@@ -8,12 +8,11 @@ local GetService = Game.GetService
 local LookAt = CFrame.lookAt
 local Lower = string.lower
 
-
---# Services
+*--# Services*
 
 local Players = GetService(Game, "Players")
 
---# Vars
+*--# Vars*
 
 local Params = RaycastParams.new()
 Params.FilterType = Enum.RaycastFilterType.Exclude
@@ -23,10 +22,9 @@ ParamsWhitelist.FilterType = Enum.RaycastFilterType.Include
 
 local Camera = workspace.CurrentCamera
 local MagicBulletOffset = NewVector3(0, 0, -3)
-
 local LocalPlayer = Players.LocalPlayer
 
---# Helper Funcs
+*--# Helper Funcs*
 
 LoadModule = function(Path)
     local FuckYouCacheBitch = getgenv().FuckYouCacheBitch
@@ -54,34 +52,23 @@ function IsBehindWalls(Hitbox)
 
     local Origin = Camera.CFrame.Position
     local Direction = Hitbox.Position - Origin
-
-    local IgnoreList = {
-        LocalPlayer.Character
-    }
+    local IgnoreList = {LocalPlayer.Character}
 
     for _ = 1, 20 do
         Params.FilterDescendantsInstances = IgnoreList
 
-        local Result = Raycast(
-            workspace,
-            Origin,
-            Direction,
-            Params
-        )
-
+        local Result = Raycast(workspace, Origin, Direction, Params)
         if not Result then
             return true
         end
 
         local Part = Result.Instance
-
         if Part == Hitbox then
             return false
         end
 
         if Part.Transparency >= 1 or not Part.CanCollide then
             table.insert(IgnoreList, Part)
-
             Origin = Result.Position + Direction.Unit * 0.01
             Direction = Hitbox.Position - Origin
         else
@@ -92,7 +79,7 @@ function IsBehindWalls(Hitbox)
     return true
 end
 
---# Modules
+*--# Modules*
 
 local Combat = LoadModule("moehack.net/modules/combat.luau", true)
 local Hooks = {}
@@ -104,7 +91,6 @@ local SilentAimHook = {
         end
 
         local Target, Hitbox = Combat.GetTarget(Options["combat/bulletredirection/fov"].Value, Toggles["combat/bulletredirection/usenearhitbox"].Value)
-
         if not Target or not Hitbox then
             return
         end
@@ -114,7 +100,6 @@ local SilentAimHook = {
         end
 
         local MagicBullet = Toggles["combat/bulletredirection/magicbullet"].Value
-
         if MagicBullet then
             ParamsWhitelist.FilterDescendantsInstances = {Hitbox}
         end
@@ -128,7 +113,6 @@ local SilentAimHook = {
         end
 
         local Target, Hitbox = Combat.GetTarget(Options["combat/bulletredirection/fov"].Value, Toggles["combat/bulletredirection/usenearhitbox"].Value)
-
         if not Target or not Hitbox then
             return
         end
@@ -138,7 +122,6 @@ local SilentAimHook = {
         end
 
         local MagicBullet = Toggles["combat/bulletredirection/magicbullet"].Value
-
         if MagicBullet then
             ParamsWhitelist.FilterDescendantsInstances = {Hitbox}
         end
@@ -152,7 +135,6 @@ local SilentAimHook = {
         end
 
         local Target, Hitbox = Combat.GetTarget(Options["combat/bulletredirection/fov"].Value, Toggles["combat/bulletredirection/usenearhitbox"].Value)
-
         if not Target or not Hitbox then
             return
         end
@@ -162,7 +144,6 @@ local SilentAimHook = {
         end
 
         local MagicBullet = Toggles["combat/bulletredirection/magicbullet"].Value
-
         if MagicBullet then
             ParamsWhitelist.FilterDescendantsInstances = {Hitbox}
         end
@@ -176,7 +157,6 @@ local SilentAimHook = {
         end
 
         local Target, Hitbox = Combat.GetTarget(Options["combat/bulletredirection/fov"].Value, Toggles["combat/bulletredirection/usenearhitbox"].Value)
-
         if not Target or not Hitbox then
             return
         end
@@ -186,7 +166,6 @@ local SilentAimHook = {
         end
 
         local MagicBullet = Toggles["combat/bulletredirection/magicbullet"].Value
-
         if MagicBullet then
             return {
                 NewRay(Camera.CFrame.Position, LookAt(Camera.CFrame.Position, Hitbox.Position).LookVector)
@@ -207,7 +186,6 @@ local SilentAimHook = {
         end
 
         local Target, Hitbox = Combat.GetTarget(Options["combat/bulletredirection/fov"].Value, Toggles["combat/bulletredirection/usenearhitbox"].Value)
-
         if not Target or not Hitbox then
             return
         end
@@ -217,7 +195,6 @@ local SilentAimHook = {
         end
 
         local MagicBullet = Toggles["combat/bulletredirection/magicbullet"].Value
-
         if MagicBullet then
             local Origin = Camera.CFrame.Position
             local Direction = LookAt(Origin, Hitbox.Position).LookVector
@@ -238,7 +215,6 @@ local SilentAimHook = {
         end
 
         local Target, Hitbox = Combat.GetTarget(Options["combat/bulletredirection/fov"].Value, Toggles["combat/bulletredirection/usenearhitbox"].Value)
-
         if not Target or not Hitbox then
             return
         end
@@ -248,7 +224,6 @@ local SilentAimHook = {
         end
 
         local MagicBullet = Toggles["combat/bulletredirection/magicbullet"].Value
-
         if MagicBullet then
             ParamsWhitelist.FilterDescendantsInstances = {Hitbox}
             Args[3] = ParamsWhitelist
@@ -258,7 +233,7 @@ local SilentAimHook = {
     end,
 }
 
-local __Namecall = newcclosure(function(self, ...)
+local __Namecall = newcclosure(function(Self, ...)
     if not Hooks.__Namecall then
         return
     end
@@ -272,14 +247,14 @@ local __Namecall = newcclosure(function(self, ...)
             local Data = Handler(Args)
 
             if Data then
-                return Hooks.__Namecall(self, Unpack(Data, 1, Data.n or #Data))
+                return Hooks.__Namecall(Self, Unpack(Data, 1, Data.n or #Data))
             end
 
-            return Hooks.__Namecall(self, Unpack(Args, 1, Args.n))
+            return Hooks.__Namecall(Self, Unpack(Args, 1, Args.n))
         end
     end
 
-    return Hooks.__Namecall(self, ...)
+    return Hooks.__Namecall(Self, ...)
 end)
 
 if setstackhidden then
@@ -317,7 +292,6 @@ if moehack.data.use_custom_silent_aim and moehack.data.game_name == "Operation O
         end
 
         local TargetPlayer, Hitbox = Combat.GetTarget(Options["combat/bulletredirection/fov"].Value, Toggles["combat/bulletredirection/usenearhitbox"].Value)
-        print(Hitbox)
         if not TargetPlayer or not Hitbox then
             return Original.validate_position(Origin, Target, RaycastParameters)
         end
@@ -327,8 +301,7 @@ if moehack.data.use_custom_silent_aim and moehack.data.game_name == "Operation O
         end
 
         local CFrameValue = Debug.getstack(2, 3)
-
-        if typeof(CFrameValue) == "CFrame" then
+        if Typeof(CFrameValue) == "CFrame" then
             Debug.setstack(2, 5, LookAt(CFrameValue.Position, Hitbox.Position))
         end
 
@@ -344,6 +317,46 @@ if moehack.data.use_custom_silent_aim and moehack.data.game_name == "Operation O
             return Original[Key]
         end,
     }))
+end
+
+if moehack.data.use_custom_silent_aim and moehack.data.game_name == "Arsenal" then
+    for Index, Func in getgc() do
+        if Func and Typeof(Func) == "function" then
+            local Info = Debug.getinfo(Func)
+
+            if Info and Info.name and Lower(Info.name) == "raycast" then
+                local Old
+                Old = hookfunction(Func, function(Self, ...)
+                    local Args = {...}
+                    local _, ClosestHitbox = Combat.GetTarget(Options["combat/bulletredirection/fov"].Value, Toggles["combat/bulletredirection/usenearhitbox"].Value)
+
+                    if ClosestHitbox and Toggles["combat/bulletredirection"].Value and Typeof(Args[1]) == "Vector3" and Typeof(Args[2]) == "Vector3" then
+                        Args[2] = (ClosestHitbox.Position - Args[1]).Unit * Args[2].Magnitude
+                    end
+
+                    return Old(Self, Unpack(Args, 1, #Args))
+                end)
+            end
+
+            if Info and Info.name and Lower(Info.name) == "createprojectile" then
+                local Old
+                Old = hookfunction(Func, function(...)
+                    local Args = {...}
+                    local _, ClosestHitbox = Combat.GetTarget(Options["combat/bulletredirection/fov"].Value, Toggles["combat/bulletredirection/usenearhitbox"].Value)
+
+                    if ClosestHitbox and Args[1] == LocalPlayer.Name and Toggles["combat/bulletredirection"].Value then
+                        local Origin = Args[5]
+
+                        if Typeof(Origin) == "Vector3" then
+                            Args[4] = ClosestHitbox.Position
+                        end
+                    end
+
+                    return Old(Unpack(Args, 1, #Args))
+                end)
+            end
+        end
+    end
 end
 
 return Hooks

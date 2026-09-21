@@ -7,12 +7,12 @@
     },
     "game_name": "Operation One"
   },
-  "114234929420007": {
+  "286090429": {
     "use_custom_silent_aim": true,
-    "run_on_actor": false,
+    "run_on_actor": true,
     "tab_to_remove": {
         
     },
-    "game_name": "Blox Strike"
+    "game_name": "Arsenal"
   }
 }
