@@ -327,11 +327,15 @@ if moehack.data.use_custom_silent_aim and moehack.data.game_name == "Arsenal" th
         local Position = TargetPart.Position
         local Velocity = TargetPart.AssemblyLinearVelocity
 
-        for _ = 1, 4 do
+        if ProjectileSpeed <= 0 then
+            return Position
+        end
+
+        for _ = 1, 3 do
             local Distance = (Position - Origin).Magnitude
             local Time = Distance / ProjectileSpeed
 
-            Position = TargetPart.Position + Velocity * Time + 0.5 * Gravity * Time * Time
+            Position = TargetPart.Position + Velocity * Time
         end
 
         return Position
