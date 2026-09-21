@@ -31,6 +31,19 @@ local Camera    = workspace.CurrentCamera
 
 local PlayerGui = LocalPlayer.PlayerGui
 
+local RaycastParams = RaycastParams.new()
+RaycastParams.FilterType = Enum.RaycastFilterType.Exclude
+RaycastParams.IgnoreWater = true
+
+local ThicknessParams = RaycastParams.new()
+ThicknessParams.FilterType = Enum.RaycastFilterType.Include
+ThicknessParams.IgnoreWater = true
+
+local SmokeParams = RaycastParams.new()
+SmokeParams.FilterType = Enum.RaycastFilterType.Include
+SmokeParams.FilterDescendantsInstances = { workspace.Ray_Ignore.Smokes }
+SmokeParams.IgnoreWater = false
+
 --# Main
 
 local CBUtility = {}
@@ -38,10 +51,93 @@ local CBUtility = {}
 CBUtility.Client     = getsenv(LocalPlayer.PlayerGui)
 CBUtility.ClientData = filtergc("table", { Keys = { "DISABLED", "crouched", "ammocount2", "equipment2stored" } }, true)
 
-function CBUtility.Wallbang()
+function CBUtility.Wallbang(Origin, Direction, IgnoreList)
+	local PenetrationUsed = 0
+	local Penetration = CBUtility.Client.fgun.Penetration.Value * 0.01
+	local HitPart, HitPosition, HitNormal
+	local UnitDirection = Direction.Unit
 
+	IgnoreList = IgnoreList or {}
+
+	for _ = 1, 10 do
+		RaycastParams.FilterDescendantsInstances = IgnoreList
+
+		local Result = Raycast(workspace, Origin, Direction, RaycastParams)
+
+		if not Result then
+			return false, 1, HitPart, HitPosition, HitNormal
+		end
+
+		HitPart = Result.Instance
+		HitPosition = Result.Position
+		HitNormal = Result.Normal
+
+		local Modifier = 1
+
+		if HitPart.Material == Enum.Material.DiamondPlate then
+			Modifier = 3
+		elseif HitPart.Material == Enum.Material.CorrodedMetal
+			or HitPart.Material == Enum.Material.Metal
+			or HitPart.Material == Enum.Material.Concrete
+			or HitPart.Material == Enum.Material.Brick
+		then
+			Modifier = 2
+		elseif HitPart.Name == "Grate"
+			or HitPart.Material == Enum.Material.Wood
+			or HitPart.Material == Enum.Material.WoodPlanks
+			or (HitPart.Parent and FindFirstChildOfClass(HitPart.Parent, "Humanoid"))
+		then
+			Modifier = 0.1
+		elseif HitPart.Transparency == 1
+			or not HitPart.CanCollide
+			or HitPart.Name == "Glass"
+			or HitPart.Name == "Cardboard"
+			or HitPart:IsDescendantOf(workspace.Ray_Ignore)
+			or HitPart:IsDescendantOf(workspace.Debris)
+			or (HitPart.Parent and HitPart.Parent.Name == "Hitboxes")
+		then
+			Modifier = 0
+		end
+
+		if HitPart.Name == "nowallbang" then
+			Modifier = 100
+		end
+
+		local PartModifier = FindFirstChild(HitPart, "PartModifier")
+
+		if PartModifier then
+			Modifier = PartModifier.Value
+		end
+
+		ThicknessParams.FilterDescendantsInstances = { HitPart }
+
+		local ExitStart = HitPosition + UnitDirection
+		local ExitDirection = UnitDirection * -2
+		local ExitResult = Raycast(workspace, ExitStart, ExitDirection, ThicknessParams)
+		local ExitPosition = ExitResult and ExitResult.Position or ExitStart + ExitDirection
+
+		local Thickness = (ExitPosition - HitPosition).Magnitude
+		PenetrationUsed += Thickness * Modifier
+
+		local DamageModifier = Clamp(1 - PenetrationUsed / Penetration, 0, 1)
+
+		if PenetrationUsed >= Penetration then
+			return false, DamageModifier, HitPart, HitPosition, HitNormal
+		end
+
+		Insert(IgnoreList, HitPart)
+		Origin = ExitPosition + UnitDirection * 0.01
+	end
+
+	return false, Clamp(1 - PenetrationUsed / Penetration, 0, 1), HitPart, HitPosition, HitNormal
 end
 
+function CBUtility.IsInSmoke()
+    local Direction = Camera.CFrame.LookVector * 1000
+    local SmokeHit = Raycast(workspace, Camera.CFrame.Position, Direction, SmokeParams)
+
+    return (SmokeHit and SmokeHit.Instance:GetAttribute("Enabled") == true) or PlayerGui.SmokeGUI.SmokeScreen.BackgroundTransparency < 0.1
+end
 
 function CBUtility.HitPart(Data)
 
@@ -72,7 +168,7 @@ function CBUtility.HitPart(Data)
         EmptyVec3,
         PlayerGui.Blnd.Blind.BackgroundTransparency < 0.4 or Data.IsBlind,
         PlayerGui.GUI.Crosshairs.Scope.Visible or Data.IsScoped,
-        false or Data.InSmoke,
+        CBUtility.IsInSmoke() or Data.InSmoke,
         Humanoid:GetState() == Enum.HumanoidStateType.Freefall or Data.IsFreefall,
         true,
         nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil
