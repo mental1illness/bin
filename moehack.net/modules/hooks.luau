@@ -320,6 +320,23 @@ if moehack.data.use_custom_silent_aim and moehack.data.game_name == "Operation O
 end
 
 if moehack.data.use_custom_silent_aim and moehack.data.game_name == "Arsenal" then
+
+    local Gravity = NewVector3(0, -workspace.Gravity, 0)
+
+    local function PredictPosition(Origin, TargetPart, ProjectileSpeed) -- Test
+        local Position = TargetPart.Position
+        local Velocity = TargetPart.AssemblyLinearVelocity
+
+        for _ = 1, 4 do
+            local Distance = (Position - Origin).Magnitude
+            local Time = Distance / ProjectileSpeed
+
+            Position = TargetPart.Position + Velocity * Time + 0.5 * Gravity * Time * Time
+        end
+
+        return Position
+    end
+
     for Index, Func in getgc() do
         if Func and Typeof(Func) == "function" then
             local Info = debug.getinfo(Func)
@@ -347,8 +364,9 @@ if moehack.data.use_custom_silent_aim and moehack.data.game_name == "Arsenal" th
                     if ClosestHitbox and Args[1] == LocalPlayer.Name and Toggles["combat/bulletredirection"].Value then
                         local Origin = Args[5]
 
-                        if Typeof(Origin) == "Vector3" then
-                            Args[4] = ClosestHitbox.Position
+                        if Typeof(Origin) == "Vector3" and Type(Args[3]) == "number" then
+                            local PredictedPosition = PredictPosition(Origin, ClosestHitbox, Args[3])
+                            Args[4] = PredictedPosition
                         end
                     end
 
