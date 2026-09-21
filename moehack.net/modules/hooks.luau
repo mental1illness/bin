@@ -11,6 +11,7 @@ local Lower = string.lower
 --# Services*
 
 local Players = GetService(Game, "Players")
+local Stats   = GetService(Game, "Stats")
 
 --# Vars*
 
@@ -320,25 +321,57 @@ if moehack.data.use_custom_silent_aim and moehack.data.game_name == "Operation O
 end
 
 if moehack.data.use_custom_silent_aim and moehack.data.game_name == "Arsenal" then
-
-    local Gravity = NewVector3(0, -workspace.Gravity, 0)
-
-    local function PredictPosition(Origin, TargetPart, ProjectileSpeed) -- Test
-        local Position = TargetPart.Position
-        local Velocity = TargetPart.AssemblyLinearVelocity
-
-        if ProjectileSpeed <= 0 then
-            return Position
+    local function PredictPosition(Origin: Vector3, TargetPart: BasePart, ProjectileSpeed: number, GravityVector: Vector3?, PingSeconds: number?): (Vector3, number)
+        if ProjectileSpeed <= 0 or not TargetPart then
+            return TargetPart and TargetPart.Position or Origin, 0
         end
 
-        for _ = 1, 3 do
-            local Distance = (Position - Origin).Magnitude
-            local Time = Distance / ProjectileSpeed
+        local Gravity = GravityVector or Vector3.zero
+        local Ping = PingSeconds or 0
 
-            Position = TargetPart.Position + Velocity * Time
+        local TargetVelocity = TargetPart.AssemblyLinearVelocity
+        local TargetPos = TargetPart.Position + (TargetVelocity * Ping)
+
+        local Displacement = TargetPos - Origin
+
+        local EffectiveVelocity = TargetVelocity - (0.5 * Gravity)
+
+        local A = EffectiveVelocity:Dot(EffectiveVelocity) - (ProjectileSpeed * ProjectileSpeed)
+        local B = 2 * Displacement:Dot(EffectiveVelocity)
+        local C = Displacement:Dot(Displacement)
+
+        local Discriminant = (B * B) - (4 * A * C)
+
+        if Discriminant < 0 then
+            return TargetPos, 0
         end
 
-        return Position
+        local TimeToImpact: number
+
+        if math.abs(A) < 1e-6 then
+            if math.abs(B) < 1e-6 then
+                return TargetPos, 0
+            end
+            TimeToImpact = -C / B
+        else
+            local SqrtDisc = math.sqrt(Discriminant)
+            local T1 = (-B - SqrtDisc) / (2 * A)
+            local T2 = (-B + SqrtDisc) / (2 * A)
+
+            if T1 > 0 and T2 > 0 then
+                TimeToImpact = math.min(T1, T2)
+            elseif T1 > 0 then
+                TimeToImpact = T1
+            elseif T2 > 0 then
+                TimeToImpact = T2
+            else
+                return TargetPos, 0
+            end
+        end
+
+        local AimPosition = TargetPos + (TargetVelocity * TimeToImpact) - (0.5 * Gravity * (TimeToImpact * TimeToImpact))
+
+        return AimPosition, TimeToImpact
     end
 
     for Index, Func in getgc() do
@@ -368,8 +401,11 @@ if moehack.data.use_custom_silent_aim and moehack.data.game_name == "Arsenal" th
                     if ClosestHitbox and Args[1] == LocalPlayer.Name and Toggles["combat/bulletredirection"].Value then
                         local Origin = Args[5]
 
-                        if Typeof(Origin) == "Vector3" and Type(Args[3]) == "number" then
-                            local PredictedPosition = PredictPosition(Origin, ClosestHitbox, Args[3])
+                        if typeof(Origin) == "Vector3" and type(Args[3]) == "number" then
+                            local PingSeconds = Stats.Network.ServerStatsItem["Data Ping"]:GetValue() / 1000
+                            local GravityVector = Vector3.new(0, -workspace.Gravity, 0)
+
+                            local PredictedPosition = PredictPosition(Origin, ClosestHitbox, Args[3], GravityVector, PingSeconds)
                             Args[4] = PredictedPosition
                         end
                     end

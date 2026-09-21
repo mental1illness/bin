@@ -306,7 +306,7 @@ function Utility.GetTool(Player, Character)
     end
 
 	if moehack.data.game_name == "Arsenal" then
-		return Player.Equipped.Value
+		return Player.NRPBS.EquippedTool.Value
 	end
 
     local Tool = FindFirstChildOfClass(Character, "Tool")
