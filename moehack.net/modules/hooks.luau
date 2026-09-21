@@ -320,22 +320,30 @@ if moehack.data.use_custom_silent_aim and moehack.data.game_name == "Operation O
 end
 
 if moehack.data.use_custom_silent_aim and moehack.data.game_name == "Arsenal" then
-    local function PredictPosition(Origin, TargetPart, ProjectileSpeed) -- Test
-        local Position = TargetPart.Position
-        local Velocity = TargetPart.AssemblyLinearVelocity
+    local function PredictPosition(Origin: Vector3, ProjectileSpeed: number, HitPart: BasePart): Vector3
+        local TargetPosition = HitPart.Position
+        local TargetVelocity = HitPart.AssemblyLinearVelocity
 
         if ProjectileSpeed <= 0 then
-            return Position
+            return TargetPosition
         end
 
-        for _ = 1, 3 do
-            local Distance = (Position - Origin).Magnitude
-            local Time = Distance / ProjectileSpeed
+        local Gravity = NewVector3(0, -Workspace.Gravity, 0)
+        local Time = (TargetPosition - Origin).Magnitude / ProjectileSpeed
 
-            Position = TargetPart.Position + Velocity * Time
+        for _ = 1, 8 do
+            local PredictedTargetPosition = TargetPosition + TargetVelocity * Time
+            local BulletDropCompensation = -0.5 * Gravity * Time * Time
+            local AimPosition = PredictedTargetPosition + BulletDropCompensation
+
+            Time = (AimPosition - Origin).Magnitude / ProjectileSpeed
         end
 
-        return Position
+        local PredictedTargetPosition = TargetPosition + TargetVelocity * Time
+
+        local BulletDropCompensation = -0.5 * Gravity * Time * Time
+
+        return PredictedTargetPosition + BulletDropCompensation
     end
 
     for Index, Func in getgc() do
@@ -366,7 +374,7 @@ if moehack.data.use_custom_silent_aim and moehack.data.game_name == "Arsenal" th
                         local Origin = Args[5]
 
                         if Typeof(Origin) == "Vector3" and Type(Args[3]) == "number" then
-                            local PredictedPosition = PredictPosition(Origin, ClosestHitbox, Args[3])
+                            local PredictedPosition = PredictPosition(Origin, Args[3], ClosestHitbox)
                             Args[4] = PredictedPosition
                         end
                     end
