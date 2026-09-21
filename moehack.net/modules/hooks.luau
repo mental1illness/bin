@@ -403,7 +403,7 @@ if moehack.data.use_custom_silent_aim and moehack.data.game_name == "Arsenal" th
 
                         if typeof(Origin) == "Vector3" and type(Args[3]) == "number" then
                             local PingSeconds = Stats.Network.ServerStatsItem["Data Ping"]:GetValue() / 1000
-                            local GravityVector = Vector3.new(0, -workspace.Gravity, 0)
+                            local GravityVector = NewVector3(0, -workspace.Gravity, 0)
 
                             local PredictedPosition = PredictPosition(Origin, ClosestHitbox, Args[3], GravityVector, PingSeconds)
                             Args[4] = PredictedPosition
