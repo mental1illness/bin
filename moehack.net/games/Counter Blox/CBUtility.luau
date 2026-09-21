@@ -12,6 +12,7 @@ local ForEach, Insert, RemoveTable = table.foreach, table.insert, table.remove
 local FindFirstChild, WaitForChild, FindFirstChildOfClass = workspace.FindFirstChild, workspace.WaitForChild, workspace.FindFirstChildOfClass
 local WorldToViewportPoint = workspace.CurrentCamera.WorldToViewportPoint
 local GetService = Game.GetService
+local Raycast = workspace.Raycast
 
 --# Services
 
@@ -180,7 +181,7 @@ function CBUtility.HitPart(Data)
         Gun,
         nil,
         Data.DamageModifier,
-        IsHeadshot,
+        CBUtility.Client.fgun.Range.Value,
         true,
         Camera.CFrame.Position,
         workspace:GetServerTimeNow(),
@@ -193,5 +194,21 @@ function CBUtility.HitPart(Data)
         nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil
     )
 end
+
+for _, Player in Players:GetPlayers() do
+    if Player ~= LocalPlayer then
+        local Character = Player.Character
+        local Head = Character and Character:FindFirstChild("Head")
+
+        if Head then
+            CBUtility.HitPart({
+                HitPart = Head,
+                HitPosition = Head.Position,
+                DamageModifier = 1
+            })
+        end
+    end
+end
+
 
 return CBUtility
