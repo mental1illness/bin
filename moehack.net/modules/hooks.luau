@@ -8,11 +8,11 @@ local GetService = Game.GetService
 local LookAt = CFrame.lookAt
 local Lower = string.lower
 
-*--# Services*
+--# Services*
 
 local Players = GetService(Game, "Players")
 
-*--# Vars*
+--# Vars*
 
 local Params = RaycastParams.new()
 Params.FilterType = Enum.RaycastFilterType.Exclude
@@ -24,7 +24,7 @@ local Camera = workspace.CurrentCamera
 local MagicBulletOffset = NewVector3(0, 0, -3)
 local LocalPlayer = Players.LocalPlayer
 
-*--# Helper Funcs*
+--# Helper Funcs*
 
 LoadModule = function(Path)
     local FuckYouCacheBitch = getgenv().FuckYouCacheBitch
@@ -79,7 +79,7 @@ function IsBehindWalls(Hitbox)
     return true
 end
 
-*--# Modules*
+--# Modules*
 
 local Combat = LoadModule("moehack.net/modules/combat.luau", true)
 local Hooks = {}
@@ -322,7 +322,7 @@ end
 if moehack.data.use_custom_silent_aim and moehack.data.game_name == "Arsenal" then
     for Index, Func in getgc() do
         if Func and Typeof(Func) == "function" then
-            local Info = Debug.getinfo(Func)
+            local Info = debug.getinfo(Func)
 
             if Info and Info.name and Lower(Info.name) == "raycast" then
                 local Old
