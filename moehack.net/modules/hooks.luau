@@ -350,7 +350,7 @@ if moehack.data.use_custom_silent_aim and moehack.data.game_name == "Arsenal" th
         if Func and Typeof(Func) == "function" then
             local Info = debug.getinfo(Func)
 
-            if Info and Info.name and Lower(Info.name) == "raycast" then
+            if Info and Info.name and Lower(Info.name) == "cast" then
                 local Old
                 Old = hookfunction(Func, function(Self, ...)
                     local Args = {...}
