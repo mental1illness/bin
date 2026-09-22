@@ -125,6 +125,7 @@ function Combat.GetTarget(FOV: number, NearestHitbox: boolean)
     local ViewportSize = Camera.ViewportSize
     local Center = NewVector(ViewportSize.X * 0.5, ViewportSize.Y * 0.5)
     local BestTarget = nil
+    local PlayerTarget = nil
     local BestHitboxPart = nil
     local BestDistance = FOV
 
@@ -151,6 +152,7 @@ function Combat.GetTarget(FOV: number, NearestHitbox: boolean)
                             if Distance <= BestDistance then
                                 BestDistance = Distance
                                 BestTarget = Character
+                                
                                 BestHitboxPart = Hitbox
                             end
                         end
@@ -200,6 +202,7 @@ function Combat.GetTarget(FOV: number, NearestHitbox: boolean)
                                 if Distance <= BestDistance then
                                     BestDistance = Distance
                                     BestTarget = Character
+                                    PlayerTarget = Player
                                     BestHitboxPart = Hitbox
                                 end
                             end
@@ -213,6 +216,7 @@ function Combat.GetTarget(FOV: number, NearestHitbox: boolean)
                             if Distance <= BestDistance then
                                 BestDistance = Distance
                                 BestTarget = Character
+                                PlayerTarget = Player
                                 BestHitboxPart = RootPart
                             end
                         end
@@ -222,7 +226,7 @@ function Combat.GetTarget(FOV: number, NearestHitbox: boolean)
         end
     end
 
-    return BestTarget, BestHitboxPart
+    return BestTarget, BestHitboxPart, PlayerTarget
 end
 
 function Combat.Tick(Delta)
@@ -245,7 +249,7 @@ function Combat.Tick(Delta)
 
         if StickyAim and Combat.AimAssistTarget then
             local Character = IsA(Combat.AimAssistTarget, "Model") and Combat.AimAssistTarget or Combat.AimAssistTarget.Character
-            local MaxHealth, Health = Utility.GetHealth(Player, Character)
+            local MaxHealth, Health = Utility.GetHealth(Combat.AimAssistPlayer, Character)
             if Health > 0 then
                 if UseNearestHitbox then
                     local BestDistance = FOV
@@ -253,7 +257,7 @@ function Combat.Tick(Delta)
                     local Center = NewVector(ViewportSize.X * 0.5, ViewportSize.Y * 0.5)
 
                     for _, Part in Character:GetChildren() do
-                        if Part:IsA("BasePart") then
+                        if IsA(Part, "BasePart") then
                             local Position, OnScreen = WorldToViewportPoint(Camera, Part.Position)
 
                             if OnScreen and Position.Z > 0 then
@@ -273,14 +277,16 @@ function Combat.Tick(Delta)
                 Target = Combat.AimAssistTarget
             else
                 Combat.AimAssistTarget = nil
+                Combat.AimAssistPlayer = nil
             end
         end
 
         if not Target then
-            Target, Hitbox = Combat.GetTarget(FOV, UseNearestHitbox)
+            Target, Hitbox, Player = Combat.GetTarget(FOV, UseNearestHitbox)
 
             if Target then
                 Combat.AimAssistTarget = Target
+                Combat.AimAssistPlayer = Player
             end
         end
 
@@ -340,13 +346,16 @@ function Combat.Tick(Delta)
                     end
                 elseif not StickyAim then
                     Combat.AimAssistTarget = nil
+                    Combat.AimAssistPlayer = nil
                 end
             elseif not StickyAim then
                 Combat.AimAssistTarget = nil
+                Combat.AimAssistPlayer = nil
             end
         end
     else
         Combat.AimAssistTarget = nil
+        Combat.AimAssistPlayer = nil
     end
 
     if Toggles["combat/triggerbot"].Value and Options["combat/triggerbot/key"]:GetState() then
