@@ -284,6 +284,10 @@ function Utility.GetHealth(Player, Character)
         return Character:GetAttribute("MaxHealth"), Character:GetAttribute("Health")
     end
 
+	if moehack.data.game_name == "Arsenal" then
+		return Player.NRPBS.MaxHealth.Value, Player.NRPBS.Health.Value
+	end
+
     local MaxHealth, Health = 0, 0
     local Humanoid = FindFirstChildOfClass(Character, "Humanoid")
     if Humanoid then
