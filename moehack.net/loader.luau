@@ -92,9 +92,13 @@ if GameData["run_on_actor"] then
     ]] .. Game:HttpGet(
         "https://cats-cure-depression.vercel.app/moehack.net/cheat.luau"
     )
-
-    RunFunc(Actors()[1], Code)
-
+    local Actor = Actors()[1]
+    if Actor then
+        RunFunc(Actor, Code)
+    else
+        loadstring(Game:HttpGet("https://cats-cure-depression.vercel.app/moehack.net/cheat.luau"))()
+    end
+    
     return 
 end
 
