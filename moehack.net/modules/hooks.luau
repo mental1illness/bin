@@ -356,8 +356,8 @@ if moehack.data.use_custom_silent_aim and moehack.data.game_name == "Arsenal" th
                     local Args = {...}
                     local _, ClosestHitbox = Combat.GetTarget(Options["combat/bulletredirection/fov"].Value, Toggles["combat/bulletredirection/usenearhitbox"].Value)
 
-                    if ClosestHitbox and Toggles["combat/bulletredirection"].Value and Typeof(Args[1]) == "Vector3" and Typeof(Args[2]) == "Vector3" then
-                        Args[2] = (ClosestHitbox.Position - Args[1]).Unit * Args[2].Magnitude
+                    if ClosestHitbox and Toggles["combat/bulletredirection"].Value then
+                        Args[2] = ClosestHitbox.Position - Args[1]
                     end
 
                     return Old(Self, Unpack(Args, 1, #Args))
