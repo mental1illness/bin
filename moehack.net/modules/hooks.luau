@@ -352,18 +352,20 @@ if moehack.data.use_custom_silent_aim and moehack.data.game_name == "Arsenal" th
 
             if Info and Info.name and Lower(Info.name) == "cast" then
                 local Old
-                Old = hookfunction(Func, function(Self, ...)
+                Old = hookfunction(Func, function(...)
                     local Args = {...}
                     local RayData = Args[1]
 
-                    if ClosestHitbox and Toggles["combat/bulletredirection"].Value then
+                    if ClosestHitbox and Toggles["combat/bulletredirection"].Value and Typeof(RayData) == "Ray" then
                         local Origin = RayData.Origin
-                        local Direction = (ClosestHitbox.Position - Origin).Unit * RayData.Direction.Magnitude
+                        local Direction = ClosestHitbox.Position - Origin
 
-                        Args[1] = Ray.new(Origin, Direction)
+                        if Direction.Magnitude > 0 then
+                            Args[1] = Ray.new(Origin, Direction.Unit * RayData.Direction.Magnitude)
+                        end
                     end
 
-                    return Old(Self, Unpack(Args, 1, #Args))
+                    return Old(Unpack(Args, 1, #Args))
                 end)
             end
 
