@@ -393,7 +393,7 @@ local Library, SaveManager, ThemeManager = LoadModule("moehack.net/interface/lib
 
         if Tabs.Misc then
             do -- Misc
-                local Movement, Exploits, Desync = Tabs.Misc:AddGroupbox({ Side = 1, Name = "Movement" }), Tabs.Misc:AddGroupbox({ Side = 2, Name = "Exploits" }), Tabs.Misc:AddGroupbox({ Side = 2, Name = "Namsync" })
+                local Movement, Exploits, Desync, Misc = Tabs.Misc:AddGroupbox({ Side = 1, Name = "Movement" }), Tabs.Misc:AddGroupbox({ Side = 2, Name = "Exploits" }), Tabs.Misc:AddGroupbox({ Side = 2, Name = "Namsync" }), Tabs.Misc:AddGroupbox({ Side = 2, Name = "Miscellaneous" })
 
                 do -- Movement
                     Movement:AddToggle("misc/movement/speed", { Text = "Speed Hack", Default = false })
@@ -524,6 +524,22 @@ local Library, SaveManager, ThemeManager = LoadModule("moehack.net/interface/lib
                         "Out",
                         "InOut",
                     } })
+                end
+
+                do -- Misc
+
+                    if moehack.data.game_name == "Arsenal" then
+
+                        local AllNations = {}
+
+                        for Index, Value in ReplicatedStorage.ItemData.Images.Announcers:GetChildren() do
+                            Insert(AllNations, Value.Name)
+                        end
+
+                        Misc:AddToggle("misc/nationchanger", { Text = "Nation Changer", Default = false })
+
+                    end
+
                 end
             end
         end
