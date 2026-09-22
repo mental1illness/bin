@@ -323,70 +323,69 @@ if moehack.data.use_custom_silent_aim and moehack.data.game_name == "Arsenal" th
     local Debris = game:GetService("Debris")
 
 
-    local function PredictPosition(
-        OriginPosition: Vector3,
-        ProjectileSpeed: number,
-        TargetHitbox: BasePart
-    ): Vector3
-        ProjectileSpeed = math.max(ProjectileSpeed, 0.01)
+ local function PredictPosition(
+    OriginPosition: Vector3,
+    ProjectileSpeed: number,
+    TargetHitbox: BasePart
+): Vector3
+    ProjectileSpeed = math.max(ProjectileSpeed, 0.01)
 
-        local TargetPosition = TargetHitbox.Position
-        local TargetVelocity = TargetHitbox.AssemblyLinearVelocity
-        local Displacement = TargetPosition - OriginPosition
+    local TargetPosition = TargetHitbox.Position
+    local TargetVelocity = TargetHitbox.AssemblyLinearVelocity
+    local Displacement = TargetPosition - OriginPosition
 
-        local A = TargetVelocity:Dot(TargetVelocity) - ProjectileSpeed ^ 2
-        local B = 2 * Displacement:Dot(TargetVelocity)
-        local C = Displacement:Dot(Displacement)
+    local A = TargetVelocity:Dot(TargetVelocity) - ProjectileSpeed ^ 2
+    local B = 2 * Displacement:Dot(TargetVelocity)
+    local C = Displacement:Dot(Displacement)
 
-        local TimeToHit
+    local TimeToHit
 
-        if math.abs(A) < 0.0001 then
-            if math.abs(B) > 0.0001 then
-                TimeToHit = -C / B
-            end
-        else
-            local Discriminant = B * B - 4 * A * C
+    if math.abs(A) < 0.0001 then
+        if math.abs(B) > 0.0001 then
+            TimeToHit = -C / B
+        end
+    else
+        local Discriminant = B * B - 4 * A * C
 
-            if Discriminant >= 0 then
-                local SquareRoot = math.sqrt(Discriminant)
-                local FirstTime = (-B - SquareRoot) / (2 * A)
-                local SecondTime = (-B + SquareRoot) / (2 * A)
+        if Discriminant >= 0 then
+            local SquareRoot = math.sqrt(Discriminant)
+            local FirstTime = (-B - SquareRoot) / (2 * A)
+            local SecondTime = (-B + SquareRoot) / (2 * A)
 
-                if FirstTime > 0 and SecondTime > 0 then
-                    TimeToHit = math.min(FirstTime, SecondTime)
-                elseif FirstTime > 0 then
-                    TimeToHit = FirstTime
-                elseif SecondTime > 0 then
-                    TimeToHit = SecondTime
-                end
+            if FirstTime > 0 and SecondTime > 0 then
+                TimeToHit = math.min(FirstTime, SecondTime)
+            elseif FirstTime > 0 then
+                TimeToHit = FirstTime
+            elseif SecondTime > 0 then
+                TimeToHit = SecondTime
             end
         end
-
-        TimeToHit = TimeToHit or Displacement.Magnitude / ProjectileSpeed
-
-        local PredictedPosition =
-            TargetPosition + TargetVelocity * TimeToHit
-
-        local PredictionPart = workspace:FindFirstChild("ProjectilePrediction")
-
-        if not PredictionPart then
-            PredictionPart = Instance.new("Part")
-            PredictionPart.Name = "ProjectilePrediction"
-            PredictionPart.Shape = Enum.PartType.Ball
-            PredictionPart.Size = Vector3.new(0.6, 0.6, 0.6)
-            PredictionPart.Anchored = true
-            PredictionPart.CanCollide = false
-            PredictionPart.CanTouch = false
-            PredictionPart.CanQuery = false
-            PredictionPart.Material = Enum.Material.Neon
-            PredictionPart.Color = Color3.fromRGB(255, 80, 80)
-            PredictionPart.Parent = workspace
-        end
-
-        PredictionPart.Position = PredictedPosition
-
-        return PredictedPosition
     end
+
+    TimeToHit = TimeToHit or Displacement.Magnitude / ProjectileSpeed
+
+    local PredictedPosition = TargetPosition + TargetVelocity * TimeToHit
+
+    PredictionAdornment = Instance.new("BoxHandleAdornment")
+    PredictionAdornment.Name = "ProjectilePrediction"
+    PredictionAdornment.AlwaysOnTop = true
+    PredictionAdornment.ZIndex = 10
+    PredictionAdornment.Transparency = 0.35
+    PredictionAdornment.Color3 = Color3.fromRGB(255, 80, 80)
+    PredictionAdornment.Size = TargetHitbox.Size
+    PredictionAdornment.Parent = workspace
+
+
+    PredictionAdornment.Adornee = TargetHitbox
+    PredictionAdornment.Size = TargetHitbox.Size
+    PredictionAdornment.CFrame =
+        TargetHitbox.CFrame:ToObjectSpace(
+            CFrame.new(PredictedPosition) * TargetHitbox.CFrame.Rotation
+        )
+
+    return PredictedPosition
+end
+
 
 
 
@@ -425,7 +424,7 @@ if moehack.data.use_custom_silent_aim and moehack.data.game_name == "Arsenal" th
                         if Typeof(Origin) == "Vector3" and Type(Args[3]) == "number" then
                             
                             local PredictedPosition = PredictPosition(Origin, Args[3], ClosestHitbox)
-                            Args[4] = ClosestHitbox.Position
+                            Args[4] = PredictedPosition
                         end
                     end
 
