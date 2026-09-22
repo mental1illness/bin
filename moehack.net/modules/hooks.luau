@@ -355,7 +355,7 @@ if moehack.data.use_custom_silent_aim and moehack.data.game_name == "Arsenal" th
                 Old = hookfunction(Func, function(...)
                     local Args = {...}
                     local RayData = Args[1]
-                    
+
                     local _, ClosestHitbox = Combat.GetTarget(Options["combat/bulletredirection/fov"].Value, Toggles["combat/bulletredirection/usenearhitbox"].Value)
 
                     if ClosestHitbox and Toggles["combat/bulletredirection"].Value then
@@ -379,6 +379,7 @@ if moehack.data.use_custom_silent_aim and moehack.data.game_name == "Arsenal" th
                         local Origin = Args[5]
 
                         if Typeof(Origin) == "Vector3" and Type(Args[3]) == "number" then
+                            Args[3] = 9e9
                             local PredictedPosition = PredictPosition(Origin, Args[3], ClosestHitbox)
                             Args[4] = PredictedPosition
                         end
