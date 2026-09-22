@@ -320,31 +320,75 @@ if moehack.data.use_custom_silent_aim and moehack.data.game_name == "Operation O
 end
 
 if moehack.data.use_custom_silent_aim and moehack.data.game_name == "Arsenal" then
-    local function PredictPosition(Origin: Vector3, ProjectileSpeed: number, HitPart: BasePart): Vector3
-        local TargetPosition = HitPart.Position
-        local TargetVelocity = HitPart.AssemblyLinearVelocity
+    local Debris = game:GetService("Debris")
 
-        if ProjectileSpeed <= 0 then
-            return TargetPosition
+
+    local function PredictPosition(
+        OriginPosition: Vector3,
+        ProjectileSpeed: number,
+        TargetHitbox: BasePart
+    ): Vector3
+        ProjectileSpeed = math.max(ProjectileSpeed, 0.01)
+
+        local TargetPosition = TargetHitbox.Position
+        local TargetVelocity = TargetHitbox.AssemblyLinearVelocity
+        local Displacement = TargetPosition - OriginPosition
+
+        local A = TargetVelocity:Dot(TargetVelocity) - ProjectileSpeed ^ 2
+        local B = 2 * Displacement:Dot(TargetVelocity)
+        local C = Displacement:Dot(Displacement)
+
+        local TimeToHit
+
+        if math.abs(A) < 0.0001 then
+            if math.abs(B) > 0.0001 then
+                TimeToHit = -C / B
+            end
+        else
+            local Discriminant = B * B - 4 * A * C
+
+            if Discriminant >= 0 then
+                local SquareRoot = math.sqrt(Discriminant)
+                local FirstTime = (-B - SquareRoot) / (2 * A)
+                local SecondTime = (-B + SquareRoot) / (2 * A)
+
+                if FirstTime > 0 and SecondTime > 0 then
+                    TimeToHit = math.min(FirstTime, SecondTime)
+                elseif FirstTime > 0 then
+                    TimeToHit = FirstTime
+                elseif SecondTime > 0 then
+                    TimeToHit = SecondTime
+                end
+            end
         end
 
-        local Gravity = NewVector3(0, -Workspace.Gravity, 0)
-        local Time = (TargetPosition - Origin).Magnitude / ProjectileSpeed
+        TimeToHit = TimeToHit or Displacement.Magnitude / ProjectileSpeed
 
-        for _ = 1, 8 do
-            local PredictedTargetPosition = TargetPosition + TargetVelocity * Time
-            local BulletDropCompensation = -0.5 * Gravity * Time * Time
-            local AimPosition = PredictedTargetPosition + BulletDropCompensation
+        local PredictedPosition =
+            TargetPosition + TargetVelocity * TimeToHit
 
-            Time = (AimPosition - Origin).Magnitude / ProjectileSpeed
+        local PredictionPart = workspace:FindFirstChild("ProjectilePrediction")
+
+        if not PredictionPart then
+            PredictionPart = Instance.new("Part")
+            PredictionPart.Name = "ProjectilePrediction"
+            PredictionPart.Shape = Enum.PartType.Ball
+            PredictionPart.Size = Vector3.new(0.6, 0.6, 0.6)
+            PredictionPart.Anchored = true
+            PredictionPart.CanCollide = false
+            PredictionPart.CanTouch = false
+            PredictionPart.CanQuery = false
+            PredictionPart.Material = Enum.Material.Neon
+            PredictionPart.Color = Color3.fromRGB(255, 80, 80)
+            PredictionPart.Parent = workspace
         end
 
-        local PredictedTargetPosition = TargetPosition + TargetVelocity * Time
+        PredictionPart.Position = PredictedPosition
 
-        local BulletDropCompensation = -0.5 * Gravity * Time * Time
-
-        return PredictedTargetPosition + BulletDropCompensation
+        return PredictedPosition
     end
+
+
 
     for Index, Func in getgc() do
         if Func and Typeof(Func) == "function" then
@@ -379,8 +423,8 @@ if moehack.data.use_custom_silent_aim and moehack.data.game_name == "Arsenal" th
                         local Origin = Args[5]
 
                         if Typeof(Origin) == "Vector3" and Type(Args[3]) == "number" then
-                            Args[3] = 9e9
-                            -- ocal PredictedPosition = PredictPosition(Origin, Args[3], ClosestHitbox)
+                            
+                            local PredictedPosition = PredictPosition(Origin, Args[3], ClosestHitbox)
                             Args[4] = ClosestHitbox.Position
                         end
                     end
