@@ -407,6 +407,16 @@ if moehack.data.use_custom_silent_aim and moehack.data.game_name == "Arsenal" th
                     return Old(Unpack(Args, 1, #Args))
                 end)
             end
+
+            if Info and Info.name and Lower(Info.name) == "getnation" then
+                local Old
+                Old = hookfunction(Func, function(...)
+                    if Toggles["misc/nationchanger"].Value then
+                        return Options["misc/nationchanger/type"].Value
+                    end
+                    return Old(...)
+                end)
+            end
         end
     end
 end

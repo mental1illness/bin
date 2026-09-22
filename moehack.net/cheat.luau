@@ -536,7 +536,14 @@ local Library, SaveManager, ThemeManager = LoadModule("moehack.net/interface/lib
                             Insert(AllNations, Value.Name)
                         end
 
-                        Misc:AddToggle("misc/nationchanger", { Text = "Nation Changer", Default = false })
+                        Misc:AddToggle("misc/nationchanger", { Text = "Nation Changer", Default = false }) do
+                            local DepBox = Misc:AddDependencyBox()
+                            DepBox:AddDropdown("misc/nationchanger/type", { Text = "Type", Default = 1, Values = AllNations })
+
+                            DepBox:SetupDependencies({
+                                { Toggles["misc/nationchanger"], true } 
+                            });
+                        end
 
                     end
 
