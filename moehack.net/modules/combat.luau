@@ -356,6 +356,10 @@ function Combat.Tick(Delta)
 
         local Target, Hitbox = Combat.GetTarget(FOV, true)
 
+        if Combat.MouseThingBruh then
+            mouse1release()
+        end
+
         if Target and Hitbox then
             local Visible = true
 
