@@ -675,7 +675,7 @@ function ESP.Render(Entity: {})
 
     local MaxHealth, Health = Utility.GetHealth(Player, RealCharacter)
     local Humanoid = Utility.GetHumanoid(Entity)
-    local IsTeammate = Utility.IsTeammate(Player, LocalPlayer)
+    local IsTeammate = Player and Utility.IsTeammate(Player, LocalPlayer) or false
 
     if Humanoid and moehack.data.game_name == "Blox Strike" then
         Objects.Holder.Visible = false
