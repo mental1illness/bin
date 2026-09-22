@@ -323,7 +323,11 @@ if moehack.data.use_custom_silent_aim and moehack.data.game_name == "Arsenal" th
     local Debris = game:GetService("Debris")
 
 
-    local function PredictPosition(OriginPosition: Vector3, ProjectileSpeed: number, TargetHitbox: BasePart): Vector3
+    local function PredictPosition(
+        OriginPosition: Vector3,
+        ProjectileSpeed: number,
+        TargetHitbox: BasePart
+    ): Vector3
         ProjectileSpeed = math.max(ProjectileSpeed, 0.01)
 
         local TargetPosition = TargetHitbox.Position
@@ -334,19 +338,25 @@ if moehack.data.use_custom_silent_aim and moehack.data.game_name == "Arsenal" th
         local B = 2 * Displacement:Dot(TargetVelocity)
         local C = Displacement:Dot(Displacement)
 
-        local TimeToHit
+        local TimeToHit: number?
 
         if math.abs(A) < 0.0001 then
             if math.abs(B) > 0.0001 then
-                TimeToHit = -C / B
+                local Time = -C / B
+
+                if Time > 0 then
+                    TimeToHit = Time
+                end
             end
         else
             local Discriminant = B * B - 4 * A * C
 
             if Discriminant >= 0 then
                 local SquareRoot = math.sqrt(Discriminant)
-                local FirstTime = (-B - SquareRoot) / (2 * A)
-                local SecondTime = (-B + SquareRoot) / (2 * A)
+                local Denominator = 2 * A
+
+                local FirstTime = (-B - SquareRoot) / Denominator
+                local SecondTime = (-B + SquareRoot) / Denominator
 
                 if FirstTime > 0 and SecondTime > 0 then
                     TimeToHit = math.min(FirstTime, SecondTime)
@@ -358,10 +368,13 @@ if moehack.data.use_custom_silent_aim and moehack.data.game_name == "Arsenal" th
             end
         end
 
-        TimeToHit = TimeToHit or Displacement.Magnitude / ProjectileSpeed
+        if not TimeToHit then
+            return TargetPosition
+        end
+
+        local PredictedPosition = TargetPosition + TargetVelocity * TimeToHit
         return PredictedPosition
     end
-
 
 
 
