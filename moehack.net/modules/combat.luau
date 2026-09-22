@@ -20,7 +20,6 @@ local ReplicatedStorage = GetService(Game, "ReplicatedStorage")
 local RunService = GetService(Game, "RunService")
 local Stats = GetService(Game, "Stats")
 local DataPing = Stats.Network.ServerStatsItem["Data Ping"]
-local VirtualInputManager = Create("VirtualInputManager")
 local UserInputService = GetService(Game, "UserInputService")
 local Players = GetService(Game, "Players")
 
@@ -81,6 +80,7 @@ local Combat = {
     RCSMouseSensitivity = 0.0025,
     RCSRecoil = 0,
     RCSCorrection = 0,
+    MouseThingBruh = false
 }
 
 function Combat.IsBehindWalls(Target, Hitbox)
@@ -370,10 +370,12 @@ function Combat.Tick(Delta)
                 end
 
                 if Combat.TriggerBotTime and os.clock() - Combat.TriggerBotTime >= ReactionTime then
-                    local Middle = Camera.ViewportSize / 2
-
-                    VirtualInputManager:SendMouseButtonEvent(Middle.X, Middle.Y, 0, true, Game, 0)
-                    VirtualInputManager:SendMouseButtonEvent(Middle.X, Middle.Y, 0, false, Game, 0)
+                    if Combat.MouseThingBruh then
+                        mouse1release()
+                    else
+                        mouse1press()
+                    end
+                    Combat.MouseThingBruh = not Combat.MouseThingBruh
                 end
             else
                 Combat.TriggerBotTarget = nil
