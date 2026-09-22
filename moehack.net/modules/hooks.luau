@@ -356,7 +356,7 @@ if moehack.data.use_custom_silent_aim and moehack.data.game_name == "Arsenal" th
                     local Args = {...}
                     local RayData = Args[1]
 
-                    if ClosestHitbox and Toggles["combat/bulletredirection"].Value and Typeof(RayData) == "Ray" then
+                    if ClosestHitbox and Toggles["combat/bulletredirection"].Value then
                         local Origin = RayData.Origin
                         local Direction = (ClosestHitbox.Position - Origin).Unit * RayData.Direction.Magnitude
 
