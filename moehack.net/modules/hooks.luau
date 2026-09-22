@@ -380,8 +380,8 @@ if moehack.data.use_custom_silent_aim and moehack.data.game_name == "Arsenal" th
 
                         if Typeof(Origin) == "Vector3" and Type(Args[3]) == "number" then
                             Args[3] = 9e9
-                            local PredictedPosition = PredictPosition(Origin, Args[3], ClosestHitbox)
-                            Args[4] = PredictedPosition
+                            -- ocal PredictedPosition = PredictPosition(Origin, Args[3], ClosestHitbox)
+                            Args[4] = ClosestHitbox.Position
                         end
                     end
 
