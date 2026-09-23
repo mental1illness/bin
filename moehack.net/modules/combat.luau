@@ -68,6 +68,9 @@ Library:GiveSignal( Players.PlayerRemoving:Connect(function(Player)
     PlayersCache[Player] = nil
 end) )
 
+local HitboxCache = {}
+local HitboxConnections = {}
+
 --# Main
 
 RaycastParams.FilterType = Enum.RaycastFilterType.Exclude
@@ -121,6 +124,71 @@ function Combat.IsBehindWalls(Target, Hitbox)
     return true
 end
 
+function Combat.GetHitboxes(Character)
+    local Cached = HitboxCache[Character]
+
+    if Cached then
+        return Cached
+    end
+
+    Cached = {}
+    HitboxCache[Character] = Cached
+
+    for _, Part in QueryDescendants(Character, "BasePart") do
+        if Part.Transparency < 1 then
+            Cached[#Cached + 1] = Part
+        end
+    end
+
+    local DescendantAdded = Character.DescendantAdded:Connect(function(Descendant)
+        if not IsA(Descendant, "BasePart") then
+            return
+        end
+
+        if Descendant.Transparency >= 1 then
+            return
+        end
+
+        for _, Part in Cached do
+            if Part == Descendant then
+                return
+            end
+        end
+
+        Cached[#Cached + 1] = Descendant
+    end)
+
+    local DescendantRemoving = Character.DescendantRemoving:Connect(function(Descendant)
+        for Index = #Cached, 1, -1 do
+            if Cached[Index] == Descendant then
+                Remove(Cached, Index)
+                break
+            end
+        end
+    end)
+
+    HitboxConnections[Character] = {
+        DescendantAdded,
+        DescendantRemoving
+    }
+
+    return Cached
+end
+
+function Combat.ClearHitboxCache(Character)
+    HitboxCache[Character] = nil
+
+    local Connections = HitboxConnections[Character]
+
+    if Connections then
+        for _, Connection in Connections do
+            Connection:Disconnect()
+        end
+
+        HitboxConnections[Character] = nil
+    end
+end
+
 function Combat.GetTarget(FOV: number, NearestHitbox: boolean)
     local ViewportSize = Camera.ViewportSize
     local Center = NewVector(ViewportSize.X * 0.5, ViewportSize.Y * 0.5)
@@ -142,8 +210,8 @@ function Combat.GetTarget(FOV: number, NearestHitbox: boolean)
             end
 
             if NearestHitbox then
-                for _, Hitbox in QueryDescendants(Character, "BasePart") do
-                    if Hitbox.Transparency < 1 then
+                for _, Hitbox in Combat.GetHitboxes(Character) do
+                    if Hitbox.Parent and Hitbox.Transparency < 1 then
                         local Position, OnScreen = WorldToViewportPoint(Camera, Hitbox.Position)
 
                         if OnScreen and Position.Z > 0 then
@@ -152,7 +220,6 @@ function Combat.GetTarget(FOV: number, NearestHitbox: boolean)
                             if Distance <= BestDistance then
                                 BestDistance = Distance
                                 BestTarget = Character
-                                
                                 BestHitboxPart = Hitbox
                             end
                         end
@@ -181,46 +248,60 @@ function Combat.GetTarget(FOV: number, NearestHitbox: boolean)
     end
 
     for _, Player in PlayersCache do
-        if Player ~= LocalPlayer then
-            if Utility.IsTeammate(Player, LocalPlayer) and not Toggles["combat/settings/targetteammates"].Value then
-                continue
-            end
-            local Character = Utility.GetCharacter(Player)
+        if Player == LocalPlayer then
+            continue
+        end
 
-            if Character then
-                local RootPart = Character.PrimaryPart
-                local MaxHealth, Health = Utility.GetHealth(Player, Character)
+        if Utility.IsTeammate(Player, LocalPlayer) and not Toggles["combat/settings/targetteammates"].Value then
+            continue
+        end
 
-                if  RootPart and Health > 0 then
-                    if NearestHitbox then
-                        for _, Hitbox in QueryDescendants(Character, "BasePart") do
-                            local Position, OnScreen = WorldToViewportPoint(Camera, Hitbox.Position)
+        local Character = Utility.GetCharacter(Player)
 
-                            if OnScreen and Position.Z > 0 then
-                                local Distance = (NewVector(Position.X, Position.Y) - Center).Magnitude
+        if not Character then
+            continue
+        end
 
-                                if Distance <= BestDistance then
-                                    BestDistance = Distance
-                                    BestTarget = Character
-                                    PlayerTarget = Player
-                                    BestHitboxPart = Hitbox
-                                end
-                            end
-                        end
-                    else
-                        local Position, OnScreen = WorldToViewportPoint(Camera, RootPart.Position)
+        local RootPart = Character.PrimaryPart
 
-                        if OnScreen and Position.Z > 0 then
-                            local Distance = (NewVector(Position.X, Position.Y) - Center).Magnitude
+        if not RootPart then
+            continue
+        end
 
-                            if Distance <= BestDistance then
-                                BestDistance = Distance
-                                BestTarget = Character
-                                PlayerTarget = Player
-                                BestHitboxPart = RootPart
-                            end
+        local _, Health = Utility.GetHealth(Player, Character)
+
+        if not Health or Health <= 0 then
+            continue
+        end
+
+        if NearestHitbox then
+            for _, Hitbox in Combat.GetHitboxes(Character) do
+                if Hitbox.Parent and Hitbox.Transparency < 1 then
+                    local Position, OnScreen = WorldToViewportPoint(Camera, Hitbox.Position)
+
+                    if OnScreen and Position.Z > 0 then
+                        local Distance = (NewVector(Position.X, Position.Y) - Center).Magnitude
+
+                        if Distance <= BestDistance then
+                            BestDistance = Distance
+                            BestTarget = Character
+                            PlayerTarget = Player
+                            BestHitboxPart = Hitbox
                         end
                     end
+                end
+            end
+        else
+            local Position, OnScreen = WorldToViewportPoint(Camera, RootPart.Position)
+
+            if OnScreen and Position.Z > 0 then
+                local Distance = (NewVector(Position.X, Position.Y) - Center).Magnitude
+
+                if Distance <= BestDistance then
+                    BestDistance = Distance
+                    BestTarget = Character
+                    PlayerTarget = Player
+                    BestHitboxPart = RootPart
                 end
             end
         end
