@@ -3,6 +3,7 @@
 
 --# Aliases
 
+local Spawn = task.spawn
 local FromOffset, FromScale, UDim2New = UDim2.fromOffset, UDim2.fromScale, UDim2.new
 local Create, IsA = Instance.new, workspace.IsA
 local GetService = game.GetService
@@ -97,38 +98,41 @@ function Intro.Create()
         WarningText.TextTransparency = 1
 
         local Start = os.clock()
+        Spawn(function()
+            while true do
+                local Alpha = math.clamp((os.clock() - Start) / Duration, 0, 1)
 
-        while true do
-            local Alpha = math.clamp((os.clock() - Start) / Duration, 0, 1)
+                Background.BackgroundTransparency = 1 - Alpha
+                WarningText.TextTransparency = 1 - Alpha
 
-            Background.BackgroundTransparency = 1 - Alpha
-            WarningText.TextTransparency = 1 - Alpha
+                if Alpha >= 1 then
+                    break
+                end
 
-            if Alpha >= 1 then
-                break
+                RunService.RenderStepped:Wait()
             end
-
-            RunService.RenderStepped:Wait()
-        end
+        end)
     end
 
     function MyFuckingIntro:FadeOut(Duration)
         Duration = Duration or 0.5
 
         local Start = os.clock()
+        Spawn(function()
+            while true do
+                local Alpha = math.clamp((os.clock() - Start) / Duration, 0, 1)
 
-        while true do
-            local Alpha = math.clamp((os.clock() - Start) / Duration, 0, 1)
+                Background.BackgroundTransparency = Alpha
+                WarningText.TextTransparency = Alpha
 
-            Background.BackgroundTransparency = Alpha
-            WarningText.TextTransparency = Alpha
+                if Alpha >= 1 then
+                    break
+                end
 
-            if Alpha >= 1 then
-                break
+                RunService.RenderStepped:Wait()
             end
+        end)
 
-            RunService.RenderStepped:Wait()
-        end
 
         ScreenGui:Destroy()
     end
