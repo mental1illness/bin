@@ -390,7 +390,7 @@ if moehack.data.use_custom_silent_aim and moehack.data.game_name == "Arsenal" th
 
                     local _, ClosestHitbox = Combat.GetTarget(Options["combat/bulletredirection/fov"].Value, Toggles["combat/bulletredirection/usenearhitbox"].Value)
 
-                    if ClosestHitbox and Toggles["combat/bulletredirection"].Value then
+                    if ClosestHitbox and Toggles["combat/bulletredirection"].Value and not IsBehindWalls(ClosestHitbox) then
                         local Origin = RayData.Origin
                         local Direction = ClosestHitbox.Position - Origin
                         Args[1] = NewRay(Origin, Direction.Unit * RayData.Direction.Magnitude)
@@ -407,7 +407,8 @@ if moehack.data.use_custom_silent_aim and moehack.data.game_name == "Arsenal" th
                     local Args = {...}
                     local _, ClosestHitbox = Combat.GetTarget(Options["combat/bulletredirection/fov"].Value, Toggles["combat/bulletredirection/usenearhitbox"].Value)
 
-                    if ClosestHitbox and Args[1] == LocalPlayer.Name and Toggles["combat/bulletredirection"].Value then
+
+                    if ClosestHitbox and Args[1] == LocalPlayer.Name and Toggles["combat/bulletredirection"].Value and not IsBehindWalls(ClosestHitbox) then
                         local Origin = Args[5]
 
                         if Typeof(Origin) == "Vector3" and Type(Args[3]) == "number" then
