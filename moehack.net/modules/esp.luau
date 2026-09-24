@@ -752,7 +752,7 @@ function ESP.ChamsRender(Entity: {})
             if Picker.Value ~= Viewport.BackgroundColor3 then
                 Viewport.BackgroundColor3 = Picker.Value
             end
-            if Picker.Transparency ~= Idx.Transparency and Idx.Transparency ~= 1 then
+            if Picker.Transparency ~= Idx.Transparency then
                 Idx.Transparency = Picker.Transparency
             end
         end
