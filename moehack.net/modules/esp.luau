@@ -738,8 +738,8 @@ function ESP.ChamsRender(Entity: {})
 
         for Idx, _ in ChamsParts do
             local Picker = Options['esp/chams/color']
-            if Picker.Value ~= Idx.Value then
-                Idx.Value = Picker.Value
+            if Picker.Value ~= Idx.Color then
+                Idx.Color = Picker.Value
             end
             if Picker.Transparency ~= Idx.Transparency then
                 Idx.Transparency = Picker.Transparency
