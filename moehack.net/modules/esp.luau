@@ -689,6 +689,8 @@ function ESP.ChamsRender(Entity: {})
         Model.Name = "\0"
         Entity.ChamsModel = Model
         Entity.ChamsParts = Entity.ChamsParts or {}
+
+        Create("Humanoid", Model)
     end
 
     for _, Value in Entity.BodyParts do
