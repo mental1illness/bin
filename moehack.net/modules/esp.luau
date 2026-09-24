@@ -8,8 +8,8 @@ local Atan2, Rad, Pi, Abs, Minimum, Maximum, Floor, Clamp = math.atan2, math.rad
 local NewVector, NewVector3, NewCFrame = vector.create, Vector3.new, CFrame.new
 local Create, IsA = Instance.new, workspace.IsA
 local Spawn, Wait = task.spawn, task.wait
-local ForEach, Insert, RemoveTable = table.foreach, table.insert, table.remove
-local FindFirstChild, WaitForChild, FindFirstChildOfClass, Destroy, Clone = workspace.FindFirstChild, workspace.WaitForChild, workspace.FindFirstChildOfClass, workspace.Destroy, workspace.Clone
+local ForEach, Insert, RemoveTable, Clear = table.foreach, table.insert, table.remove, table.clear
+local FindFirstChild, WaitForChild, FindFirstChildOfClass, Destroy, Clone, BulkMoveTo = workspace.FindFirstChild, workspace.WaitForChild, workspace.FindFirstChildOfClass, workspace.Destroy, workspace.Clone, workspace.BulkMoveTo
 local WorldToViewportPoint = workspace.CurrentCamera.WorldToViewportPoint
 local GetService = Game.GetService
 
@@ -57,6 +57,11 @@ local Library = getgenv().Library
 local Toggles, Options = getgenv().Toggles, getgenv().Options
 local ScreenGui = Create("ScreenGui", gethui())
 
+local ChamsPartBuffer = table.create(32)
+local ChamsCFrameBuffer = table.create(32)
+
+local EnumFireCFChange = Enum.BulkMoveMode.FireCFrameChanged
+
 local Corners = {
     { 1,  1,  1},
     {-1,  1,  1},
@@ -96,6 +101,7 @@ local Viewport = Create("ViewportFrame", ScreenGui) do -- Viewport
     Viewport.Size = UDim2New(1, 0, 1, 0)
     Viewport.BackgroundTransparency = 1
     Viewport.CurrentCamera = CurrentCamera
+    Viewport.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 
     function _ViewportSync()
         Viewport.Ambient = Lighting.Ambient
@@ -693,17 +699,32 @@ function ESP.ChamsRender(Entity: {})
         Create("Humanoid", Model)
     end
 
+    local ChamsParts = Entity.ChamsParts
+    
+    Clear(ChamsPartBuffer)
+    Clear(ChamsCFrameBuffer)
+    local Count = 0
+
     for _, Value in Entity.BodyParts do
-        local Part = Entity.ChamsParts[Value]
+        local Part = ChamsParts[Value]
 
         if not Part then
             Part = Clone(Value)
             if not Part then continue end
             Part.Parent = Model
-            Entity.ChamsParts[Value] = Part
+            ChamsParts[Value] = Part
         end
 
-        Part.CFrame = Value.CFrame
+        local TargetCFrame = Value.CFrame
+        if Part.CFrame ~= TargetCFrame then
+            Count += 1
+            ChamsPartBuffer[Count] = Part
+            ChamsCFrameBuffer[Count] = TargetCFrame
+        end
+    end
+
+    if Count > 0 then
+        BulkMoveTo(workspace, ChamsPartBuffer, ChamsCFrameBuffer, EnumFireCFChange)
     end
 end
 
