@@ -683,9 +683,16 @@ function ESP.GetBoundingBox(Model: {})
     return LowestX, HighestX, LowestY, HighestY, OnScreen
 end
 
+function ESP.ChamsRemove(Entity: {})
+    if Entity.ChamsModel then
+        Destroy(Entity.ChamsModel)
+    end
+    Entity.ChamsParts = {}
+end
+
 function ESP.ChamsRender(Entity: {})
     if not Toggles["esp/chams"].Value then
-        if Viewport.Visible then Viewport.Visible = false end
+        if Viewport.Visible then ESP.ChamsRemove(Entity); Viewport.Visible = false end
         return
     end
     if not Viewport.Visible then Viewport.Visible = true end
@@ -782,6 +789,7 @@ function ESP.Render(Entity: {})
 
 	if not RealCharacter then
 		Objects.Holder.Visible = false
+        ESP.ChamsRemove(Entity)
 		return
 	end
 
@@ -791,6 +799,7 @@ function ESP.Render(Entity: {})
 
     if Humanoid and moehack.data.game_name == "Blox Strike" then
         Objects.Holder.Visible = false
+        ESP.ChamsRemove(Entity)
         return
     end
 
@@ -803,12 +812,14 @@ function ESP.Render(Entity: {})
 
     if IsTeammate and not Toggles["esp/settings/renderteam"].Value then
         Objects.Holder.Visible = false
+        ESP.ChamsRemove(Entity)
         return
     end
 
     
     if Health <= 0 then
         Objects.Holder.Visible = false
+        ESP.ChamsRemove(Entity)
         return
     end
 
@@ -826,6 +837,7 @@ function ESP.Render(Entity: {})
 
     if Distance > Options["esp/settings/renderdist"].Value then
         Objects.Holder.Visible = false
+        ESP.ChamsRemove(Entity)
         return
     end
 
@@ -1037,6 +1049,7 @@ function ESP.Update(DeltaTime)
     if not Toggles["esp/enabled"].Value then
         LastHz = 0
         if ScreenGui.Enabled then
+            for _, Entity in ESP.Entities do ESP.ChamsRemove(Entity) end
             ScreenGui.Enabled = false
         end
         return
