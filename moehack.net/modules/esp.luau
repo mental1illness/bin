@@ -9,7 +9,7 @@ local NewVector, NewVector3, NewCFrame = vector.create, Vector3.new, CFrame.new
 local Create, IsA = Instance.new, workspace.IsA
 local Spawn, Wait = task.spawn, task.wait
 local ForEach, Insert, RemoveTable = table.foreach, table.insert, table.remove
-local FindFirstChild, WaitForChild, FindFirstChildOfClass = workspace.FindFirstChild, workspace.WaitForChild, workspace.FindFirstChildOfClass
+local FindFirstChild, WaitForChild, FindFirstChildOfClass, Destroy, Clone = workspace.FindFirstChild, workspace.WaitForChild, workspace.FindFirstChildOfClass, workspace.Destroy, workspace.Clone
 local WorldToViewportPoint = workspace.CurrentCamera.WorldToViewportPoint
 local GetService = Game.GetService
 
@@ -18,8 +18,7 @@ local GetService = Game.GetService
 local MarketplaceService = GetService(Game, "MarketplaceService")
 local ReplicatedStorage  = GetService(Game, "ReplicatedStorage")
 local RunService         = GetService(Game, "RunService")
-local Stats              = GetService(Game, "Stats")
-local DataPing           = Stats.Network.ServerStatsItem["Data Ping"]
+local Lighting           = GetService(Game, "Lighting")
 local Players            = GetService(Game, "Players")
 
 local LocalPlayer        = Players.LocalPlayer
@@ -90,6 +89,52 @@ end) )
 Library:GiveSignal( Players.PlayerRemoving:Connect(function(Player)
     PlayersCache[Player] = nil
 end) )
+
+--# Main
+
+local Viewport = Create("ViewportFrame", ScreenGui) do -- Viewport
+    Viewport.Size = UDim2New(1, 0, 1, 0)
+    Viewport.BackgroundTransparency = 1
+    Viewport.CurrentCamera = CurrentCamera
+
+    function _ViewportSync()
+        Viewport.Ambient = Lighting.Ambient
+        Viewport.LightColor = Lighting.ColorShift_Top
+        Viewport.LightDirection = -Lighting:GetSunDirection()
+    end
+
+    _ViewportSync()
+
+    for _, Property in { "Ambient", "ColorShift_Top", "ClockTime", "GeographicLatitude" } do
+        Library:GiveSignal(Lighting:GetPropertyChangedSignal(Property):Connect(_ViewportSync))
+    end
+     
+    --[[ Library:GiveSignal(Viewport.ChildAdded:Connect(function(Object)
+        if IsA(Object, "BasePart") or IsA(Object, "Model") then
+            for _, Val in Object:GetDescendants() do
+                if not (
+                    IsA(Val, "BasePart")
+                    or IsA(Val, "Accessory")
+                    or IsA(Val, "JointInstance")
+                    or IsA(Val, "Tool")
+                    or IsA(Val, "WeldConstraint")
+                    or IsA(Val, "Attachment")
+                    or IsA(Val, "Humanoid")
+                    or IsA(Val, "SpecialMesh")
+                    or IsA(Val, "SurfaceAppearance")
+                    or IsA(Val, "Decal")
+                    or IsA(Val, "Texture")
+                    or IsA(Val, "Clothing")
+                    or IsA(Val, "CharacterMesh")
+                    or IsA(Val, "BodyColors")
+                ) then
+                    Destroy(Val)
+                    continue
+                end
+            end
+        end
+    end))]]
+end
 
 function ESP.CreateElements(Entity: table)
     local Objects = {}
@@ -557,6 +602,8 @@ function ESP.AddTarget(Target, Settings)
         Humanoid = Settings.Humanoid,
         BodyParts = {},
         TargetConnections = {},
+        ChamsModel = nil,
+        ChamsParts = {},
         IsCustom = true,
     }
 
@@ -602,6 +649,8 @@ function ESP.ApplyAllPlayer()
         local Entity = {
             Player = Player,
             Humanoid = nil,
+            ChamsModel = nil,
+            ChamsParts = {},
             BodyParts = {},
         }
         Entity["Objects"] = ESP.CreateElements(Entity)
@@ -651,6 +700,40 @@ function ESP.GetBoundingBox(Model: {})
     end
 
     return LowestX, HighestX, LowestY, HighestY, OnScreen
+end
+
+function ESP.ChamsRender(Entity: {})
+
+    if not Toggles["esp/chams"].Value then
+        if Viewport.Visible then Viewport.Visible = false end
+        return
+    end
+    if not Viewport.Visible then Viewport.Visible = true end
+
+    if not Entity do
+        local Model = Create("Model", Viewport)
+        Model.Name = "\0"
+
+        for Index, Value in Entity.BodyParts do
+            local Part = Clone(Value)
+            Part.Parent = Model
+            Entity.ChamsParts[Value] = Part
+        end
+    end
+
+
+    --# Render it bru8h
+
+    for Index, Value in Entity.BodyParts do
+        if not Entity.ChamsParts[Value] then
+            local Part = Clone(Value)
+            Part.Parent = Model
+            Entity.ChamsParts[Value] = Part
+        end
+
+        Entity.ChamsParts[Value].CFrame = Part.CFrame
+    end
+
 end
 
 function ESP.Render(Entity: {})
@@ -912,6 +995,7 @@ function ESP.Render(Entity: {})
         end
     end
     
+    ESP.ChamsRender(Entity)
 
     Objects.Holder.Position = FromOffset(LowX, LowY)
     Objects.Holder.Size = FromOffset(HighX - LowX, HighY - LowY)

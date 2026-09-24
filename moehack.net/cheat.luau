@@ -173,6 +173,8 @@ local Library, SaveManager, ThemeManager = LoadModule("moehack.net/interface/lib
                     Main:AddToggle("esp/distance", { Text = "Distance", Default = false }):AddColorPicker('esp/distance/color', { Default = Color3.fromRGB(255, 255, 255), Title = 'Distance Color' })
                     Main:AddToggle("esp/tool", { Text = "Tool", Default = false }):AddColorPicker('esp/tool/color', { Default = Color3.fromRGB(255, 255, 255), Title = 'Tool Color' })
 
+                    Main:AddToggle("esp/chams", { Text = "Chams", Default = false })
+
                 end
 
 
