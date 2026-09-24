@@ -711,7 +711,7 @@ function ESP.ChamsRender(Entity: {})
 
         if not Part then
             Part = Clone(Value)
-            if Part.Name == "HumanoidRootPart" then continue end
+            if Part.Transparency <= 1 then continue end
             if not Part then continue end
 
             if IsA(Part, "MeshPart") then
@@ -737,7 +737,7 @@ function ESP.ChamsRender(Entity: {})
             ChamsCFrameBuffer[Count] = TargetCFrame
         end
 
-        for _, Idx in ChamsParts do
+        for RealPart, Idx in ChamsParts do
 
             local Material = Enum.Material[Options["esp/chams/material"].Value]
 
@@ -753,7 +753,7 @@ function ESP.ChamsRender(Entity: {})
             if Picker.Value ~= Viewport.BackgroundColor3 then
                 Viewport.BackgroundColor3 = Picker.Value
             end
-            if Picker.Transparency ~= Idx.Transparency then
+            if Picker.Transparency ~= Idx.Transparency and not RealPart.Transparency <= 1 then
                 Idx.Transparency = Picker.Transparency
             end
         end
