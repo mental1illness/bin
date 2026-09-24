@@ -102,7 +102,7 @@ local Viewport = Create("ViewportFrame", ScreenGui) do -- Viewport
     Viewport.BackgroundTransparency = 1
     Viewport.CurrentCamera = CurrentCamera
     Viewport.BorderSizePixel = 0
-    Viewport.BackgroundColor3 = Color3.fromRGB(95, 95, 95)
+    Viewport.BackgroundColor3 = Color3.fromRGB(-5000, -5000, -5000)
 
     --[[function _ViewportSync()
         Viewport.Ambient = Lighting.Ambient
@@ -712,6 +712,19 @@ function ESP.ChamsRender(Entity: {})
         if not Part then
             Part = Clone(Value)
             if not Part then continue end
+
+            if IsA(Part, "MeshPart") then
+                Part.TextureID = ""
+            end
+
+            for _, V in Part:GetDescendants() do
+                if IsA(V, "Decal") or V:IsA(V, "Texture") or V:IsA(V, "SurfaceAppearance") then
+                    Destroy(Child)
+                elseif IsA(V, "SpecialMesh") then
+                    V.TextureId = ""
+                end
+            end
+
             Part.Parent = Model
             ChamsParts[Value] = Part
         end
@@ -722,6 +735,17 @@ function ESP.ChamsRender(Entity: {})
             ChamsPartBuffer[Count] = Part
             ChamsCFrameBuffer[Count] = TargetCFrame
         end
+
+        for Idx, _ in ChamsParts do
+            local Picker = Options['esp/chams/color']
+            if Picker.Color ~= Idx.Color then
+                Idx.Color = Picker.Color
+            end
+            if Picker.Transparency ~= Idx.Transparency then
+                Idx.Transparency = Picker.Transparency
+            end
+        end
+
     end
 
     if Count > 0 then
