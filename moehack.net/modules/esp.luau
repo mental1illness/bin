@@ -108,32 +108,6 @@ local Viewport = Create("ViewportFrame", ScreenGui) do -- Viewport
     for _, Property in { "Ambient", "ColorShift_Top", "ClockTime", "GeographicLatitude" } do
         Library:GiveSignal(Lighting:GetPropertyChangedSignal(Property):Connect(_ViewportSync))
     end
-     
-    --[[ Library:GiveSignal(Viewport.ChildAdded:Connect(function(Object)
-        if IsA(Object, "BasePart") or IsA(Object, "Model") then
-            for _, Val in Object:GetDescendants() do
-                if not (
-                    IsA(Val, "BasePart")
-                    or IsA(Val, "Accessory")
-                    or IsA(Val, "JointInstance")
-                    or IsA(Val, "Tool")
-                    or IsA(Val, "WeldConstraint")
-                    or IsA(Val, "Attachment")
-                    or IsA(Val, "Humanoid")
-                    or IsA(Val, "SpecialMesh")
-                    or IsA(Val, "SurfaceAppearance")
-                    or IsA(Val, "Decal")
-                    or IsA(Val, "Texture")
-                    or IsA(Val, "Clothing")
-                    or IsA(Val, "CharacterMesh")
-                    or IsA(Val, "BodyColors")
-                ) then
-                    Destroy(Val)
-                    continue
-                end
-            end
-        end
-    end))]]
 end
 
 function ESP.CreateElements(Entity: table)
@@ -710,7 +684,7 @@ function ESP.ChamsRender(Entity: {})
     end
     if not Viewport.Visible then Viewport.Visible = true end
 
-    if not Entity do
+    if not Entity then
         local Model = Create("Model", Viewport)
         Model.Name = "\0"
 
