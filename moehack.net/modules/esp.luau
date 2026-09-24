@@ -719,7 +719,7 @@ function ESP.ChamsRender(Entity: {})
 
             for _, V in Part:GetDescendants() do
                 if IsA(V, "Decal") or V:IsA(V, "Texture") or V:IsA(V, "SurfaceAppearance") then
-                    Destroy(Child)
+                    Destroy(V)
                 elseif IsA(V, "SpecialMesh") then
                     V.TextureId = ""
                 end
