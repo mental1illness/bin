@@ -747,33 +747,34 @@ function ESP.ChamsRender(Entity: {})
             ChamsCFrameBuffer[Count] = TargetCFrame
         end
 
-        for RealPart, Idx in ChamsParts do
-
-            local Material = Enum.Material[Options["esp/chams/material"].Value]
-
-            local Picker = Options['esp/chams/color']
-            if Picker.Value ~= Idx.Color then
-                Idx.Color = Picker.Value
-            end
-
-            if Idx.Material ~= Material then
-                Idx.Material = Material
-            end
-
-            if Picker.Value ~= Viewport.BackgroundColor3 then
-                Viewport.BackgroundColor3 = Picker.Value
-            end
-            if Picker.Transparency ~= Idx.Transparency and RealPart.Transparency < 1 then
-                Idx.Transparency = Picker.Transparency
-            end
-
-        end
-
     end
 
     if Count > 0 then
         BulkMoveTo(workspace, ChamsPartBuffer, ChamsCFrameBuffer, EnumFireCFChange)
     end
+
+    for RealPart, Idx in ChamsParts do
+
+        local Material = Enum.Material[Options["esp/chams/material"].Value]
+
+        local Picker = Options['esp/chams/color']
+        if Picker.Value ~= Idx.Color then
+            Idx.Color = Picker.Value
+        end
+
+        if Idx.Material ~= Material then
+            Idx.Material = Material
+        end
+
+        if Picker.Value ~= Viewport.BackgroundColor3 then
+            Viewport.BackgroundColor3 = Picker.Value
+        end
+        if Picker.Transparency ~= Idx.Transparency and RealPart.Transparency < 1 then
+            Idx.Transparency = Picker.Transparency
+        end
+
+    end
+
 end
 
 function ESP.Render(Entity: {})
