@@ -736,12 +736,12 @@ function ESP.ChamsRender(Entity: {})
             ChamsCFrameBuffer[Count] = TargetCFrame
         end
 
-        for Idx, _ in ChamsParts do
+        for _, Idx in ChamsParts do
             local Picker = Options['esp/chams/color']
             if Picker.Value ~= Idx.Color then
                 Idx.Color = Picker.Value
             end
-            if Picker.Transparency ~= Idx.Transparency then
+            if Picker.Transparency ~= Idx.Transparency and Idx.Transparency ~= 1 then
                 Idx.Transparency = Picker.Transparency
             end
         end
