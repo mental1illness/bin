@@ -677,37 +677,32 @@ function ESP.GetBoundingBox(Model: {})
 end
 
 function ESP.ChamsRender(Entity: {})
-
     if not Toggles["esp/chams"].Value then
         if Viewport.Visible then Viewport.Visible = false end
         return
     end
     if not Viewport.Visible then Viewport.Visible = true end
 
-    if not Entity then
-        local Model = Create("Model", Viewport)
+    local Model = Entity.ChamsModel
+    if not Model then
+        Model = Create("Model", Viewport)
         Model.Name = "\0"
-
-        for Index, Value in Entity.BodyParts do
-            local Part = Clone(Value)
-            Part.Parent = Model
-            Entity.ChamsParts[Value] = Part
-        end
+        Entity.ChamsModel = Model
+        Entity.ChamsParts = Entity.ChamsParts or {}
     end
 
+    for _, Value in Entity.BodyParts do
+        local Part = Entity.ChamsParts[Value]
 
-    --# Render it bru8h
-
-    for Index, Value in Entity.BodyParts do
-        if not Entity.ChamsParts[Value] then
-            local Part = Clone(Value)
+        if not Part then
+            Part = Clone(Value)
+            if not Part then continue end
             Part.Parent = Model
             Entity.ChamsParts[Value] = Part
         end
 
-        Entity.ChamsParts[Value].CFrame = Part.CFrame
+        Part.CFrame = Value.CFrame
     end
-
 end
 
 function ESP.Render(Entity: {})
