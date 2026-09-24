@@ -686,6 +686,7 @@ end
 function ESP.ChamsRemove(Entity: {})
     if Entity.ChamsModel then
         Destroy(Entity.ChamsModel)
+        Entity.ChamsModel = nil
     end
     Entity.ChamsParts = {}
 end
