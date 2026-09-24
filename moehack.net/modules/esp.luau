@@ -737,10 +737,18 @@ function ESP.ChamsRender(Entity: {})
         end
 
         for _, Idx in ChamsParts do
+
+            local Material = Enum.Material[Options["esp/chams/material"].Value]
+
             local Picker = Options['esp/chams/color']
             if Picker.Value ~= Idx.Color then
                 Idx.Color = Picker.Value
             end
+
+            if Idx.Material ~= Material then
+                Idx.Material = Material
+            end
+
             if Picker.Value ~= Viewport.BackgroundColor3 then
                 Viewport.BackgroundColor3 = Picker.Value
             end
