@@ -999,12 +999,14 @@ function ESP.Update(DeltaTime)
 
     if not Toggles["esp/enabled"].Value then
         LastHz = 0
-        for _, Entity in ESP.Entities do
-            if Entity.Objects.Holder.Visible then
-                Entity.Objects.Holder.Visible = false
-            end
+        if ScreenGui.Enabled then
+            ScreenGui.Enabled = false
         end
-        return 
+        return
+    else
+        if not ScreenGui.Enabled then
+            ScreenGui.Enabled = true
+        end
     end
 
     ESP.ApplyAllPlayer()
