@@ -102,7 +102,7 @@ local Viewport = Create("ViewportFrame", ScreenGui) do -- Viewport
     Viewport.BackgroundTransparency = 1
     Viewport.CurrentCamera = CurrentCamera
     Viewport.BorderSizePixel = 0
-    Viewport.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    Viewport.BackgroundColor3 = Color3.fromRGB(95, 95, 95)
 
     --[[function _ViewportSync()
         Viewport.Ambient = Lighting.Ambient
