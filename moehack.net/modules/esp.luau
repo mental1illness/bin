@@ -711,6 +711,7 @@ function ESP.ChamsRender(Entity: {})
 
         if not Part then
             Part = Clone(Value)
+            if Part.Name == "HumanoidRootPart" then continue end
             if not Part then continue end
 
             if IsA(Part, "MeshPart") then
