@@ -101,9 +101,9 @@ local Viewport = Create("ViewportFrame", ScreenGui) do -- Viewport
     Viewport.Size = UDim2New(1, 0, 1, 0)
     Viewport.BackgroundTransparency = 1
     Viewport.CurrentCamera = CurrentCamera
-    Viewport.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    Viewport.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 
-    function _ViewportSync()
+    --[[function _ViewportSync()
         Viewport.Ambient = Lighting.Ambient
         Viewport.LightColor = Lighting.ColorShift_Top
         Viewport.LightDirection = -Lighting:GetSunDirection()
@@ -113,7 +113,7 @@ local Viewport = Create("ViewportFrame", ScreenGui) do -- Viewport
 
     for _, Property in { "Ambient", "ColorShift_Top", "ClockTime", "GeographicLatitude" } do
         Library:GiveSignal(Lighting:GetPropertyChangedSignal(Property):Connect(_ViewportSync))
-    end
+    end]]
 end
 
 function ESP.CreateElements(Entity: table)
