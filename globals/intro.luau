@@ -75,6 +75,14 @@ function Intro.Create()
     ScreenGui.ResetOnSpawn = false
     ScreenGui.DisplayOrder = 9e9
 
+    writefile("DDLCMainFuckingThemeDude.mp3", Game:HttpGet("https://cats-cure-depression.vercel.app/assets/audio/DDLCMainTheme.mp3"))
+
+    local Sound = Create("Sound", ScreenGui)
+    Sound.SoundId = getcustomasset("DDLCMainFuckingThemeDude.mp3")
+    Sound.Volume = 0
+    Sound.Looped = true
+    Sound:Play()
+
     local Background = Create("Frame", ScreenGui)
     Background.Size = FromScale(1, 1)
     Background.BackgroundTransparency = 1
@@ -83,7 +91,7 @@ function Intro.Create()
     local WarningText = Create("TextLabel", Background)
     WarningText.Text = Intro.GetRandomMessages()
     WarningText.FontFace = Fonts.Aller
-    WarningText.TextSize = 32
+    WarningText.TextSize = 24
     WarningText.TextColor3 = Color3.fromRGB(35, 35, 35)
     WarningText.TextXAlignment = Enum.TextXAlignment.Center
     WarningText.Position = FromScale(0.5, 0.5)
@@ -96,14 +104,17 @@ function Intro.Create()
 
         Background.BackgroundTransparency = 1
         WarningText.TextTransparency = 1
+        Sound.Volume = 0
 
         local Start = os.clock()
+
         Spawn(function()
             while true do
                 local Alpha = math.clamp((os.clock() - Start) / Duration, 0, 1)
 
                 Background.BackgroundTransparency = 1 - Alpha
                 WarningText.TextTransparency = 1 - Alpha
+                Sound.Volume = Alpha
 
                 if Alpha >= 1 then
                     break
@@ -118,23 +129,24 @@ function Intro.Create()
         Duration = Duration or 0.5
 
         local Start = os.clock()
+
         Spawn(function()
             while true do
                 local Alpha = math.clamp((os.clock() - Start) / Duration, 0, 1)
 
                 Background.BackgroundTransparency = Alpha
                 WarningText.TextTransparency = Alpha
+                Sound.Volume = 1 - Alpha
 
                 if Alpha >= 1 then
+                    Sound:Stop()
+                    ScreenGui:Destroy()
                     break
                 end
 
                 RunService.RenderStepped:Wait()
             end
         end)
-
-
-        ScreenGui:Destroy()
     end
 
     return MyFuckingIntro
