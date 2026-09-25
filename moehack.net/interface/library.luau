@@ -3,7 +3,7 @@
 
 writefile(
 	"Tahoma.ttf",
-	game:HttpGet("https://mental1illness.vercel.app/fonts/windows-xp-tahoma.ttf")
+	game:HttpGet("https://mental1illness.vercel.app/assets/fonts/windows-xp-tahoma.ttf")
 )
 
 writefile("Tahoma.font", game:GetService("HttpService"):JSONEncode({
@@ -18,13 +18,13 @@ writefile("Tahoma.font", game:GetService("HttpService"):JSONEncode({
 	},
 }))
 
-writefile("Scrollbar.png", game:HttpGet("https://mental1illness.vercel.app/images/scrollbar.png"))
-writefile("saturation_value_gradient.png", game:HttpGet("https://mental1illness.vercel.app/images/saturation_value_gradient.png"))
-writefile("glow.png", game:HttpGet("https://mental1illness.vercel.app/images/glow.png"))
-writefile("dropdown_arrow.png", game:HttpGet("https://mental1illness.vercel.app/images/dropdown_arrow.png"))
-writefile("dot_cursor.png", game:HttpGet("https://mental1illness.vercel.app/images/dot_cursor.png"))
-writefile("checkerslong.png", game:HttpGet("https://mental1illness.vercel.app/images/checkerslong.png"))
-writefile("checkers.png", game:HttpGet("https://mental1illness.vercel.app/images/checkers.png"))
+writefile("Scrollbar.png", game:HttpGet("https://mental1illness.vercel.app/assets/images/scrollbar.png"))
+writefile("saturation_value_gradient.png", game:HttpGet("https://mental1illness.vercel.app/assets/images/saturation_value_gradient.png"))
+writefile("glow.png", game:HttpGet("https://mental1illness.vercel.app/assets/images/glow.png"))
+writefile("dropdown_arrow.png", game:HttpGet("https://mental1illness.vercel.app/assets/images/dropdown_arrow.png"))
+writefile("dot_cursor.png", game:HttpGet("https://mental1illness.vercel.app/assets/images/dot_cursor.png"))
+writefile("checkerslong.png", game:HttpGet("https://mental1illness.vercel.app/assets/images/checkerslong.png"))
+writefile("checkers.png", game:HttpGet("https://mental1illness.vercel.app/assets/images/checkers.png"))
 
 local InputService = game:GetService("UserInputService")
 local TextService = game:GetService("TextService")

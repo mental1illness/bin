@@ -83,7 +83,7 @@ function Intro.Create()
     local WarningText = Create("TextLabel", Background)
     WarningText.Text = Intro.GetRandomMessages()
     WarningText.FontFace = Fonts.Aller
-    WarningText.TextSize = 20
+    WarningText.TextSize = 32
     WarningText.TextColor3 = Color3.fromRGB(35, 35, 35)
     WarningText.TextXAlignment = Enum.TextXAlignment.Center
     WarningText.Position = FromScale(0.5, 0.5)
