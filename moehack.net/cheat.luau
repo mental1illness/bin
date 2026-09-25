@@ -176,34 +176,29 @@ local Library, SaveManager, ThemeManager = LoadModule("moehack.net/interface/lib
                     Main:AddToggle("esp/chams", { Text = "Chams", Default = false }):AddColorPicker('esp/chams/color', { Default = Color3.fromRGB(255, 255, 255), Title = 'Chams Color', Transparency = 0.5 }) do
                         local Depbox = Main:AddDependencyBox()
 
-                        Depbox:AddDropdown("esp/chams/modes", {
+                        --[[Depbox:AddDropdown("esp/chams/modes", {
                             Text = "Modes",
                             Default = "Viewport",
                             Values = {
                                 "Adorments",
                                 "Viewport"
                             }
+                        })]]
+
+                        
+
+                        Depbox:AddDropdown("esp/chams/material", {
+                            Text = "Material",
+                            Default = "ForceField",
+                            Values = {
+                                "Plastic",
+                                "SmoothPlastic",
+                                "Neon",
+                                "ForceField",
+                                "Glass",
+                                "Metal",
+                            }
                         })
-
-                        local ViewportDepbox = Main:AddDependencyBox() do
-                            ViewportDepbox:AddDropdown("esp/chams/material", {
-                                Text = "Material",
-                                Default = "ForceField",
-                                Values = {
-                                    "Plastic",
-                                    "SmoothPlastic",
-                                    "Neon",
-                                    "ForceField",
-                                    "Glass",
-                                    "Metal",
-                                }
-                            })
-
-                            ViewportDepbox:SetupDependencies({
-                                { Options["esp/chams/modes"], "Viewport" }
-                            })
-                        end
-
 
                         Depbox:SetupDependencies({
                             { Toggles["esp/chams"], true }
