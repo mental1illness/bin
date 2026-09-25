@@ -200,7 +200,7 @@ local Library, SaveManager, ThemeManager = LoadModule("moehack.net/interface/lib
                             })
 
                             ViewportDepbox:SetupDependencies({
-                                { Toggles["esp/chams/modes"], true }
+                                { Options["esp/chams/modes"], "Viewport" }
                             })
                         end
 
