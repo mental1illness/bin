@@ -7,6 +7,14 @@
     },
     "game_name": "Operation One"
   },
+  "286090429": {
+    "use_custom_silent_aim": true,
+    "run_on_actor": true,
+    "tab_to_remove": {
+        
+    },
+    "game_name": "Arsenal"
+  },
   "138485390344924": {
     "use_custom_silent_aim": true,
     "run_on_actor": false,
