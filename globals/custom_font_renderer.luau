@@ -49,6 +49,57 @@ local Fonts: {[string]: any} = {}
 local FontSizes: {[string]: {number}} = {}
 local Loaded = false
 
+local RenderCache: {[string]: any} = {}
+local RenderCacheOrder: {string} = {}
+local RenderCacheLimit = 64
+
+local function ClearRenderCache()
+    table.clear(RenderCache)
+    table.clear(RenderCacheOrder)
+end
+
+local function AddRenderCache(Key: string, Value: any)
+    if RenderCache[Key] then
+        return
+    end
+
+    RenderCache[Key] = Value
+    RenderCacheOrder[#RenderCacheOrder + 1] = Key
+
+    if #RenderCacheOrder > RenderCacheLimit then
+        local OldestKey = table.remove(RenderCacheOrder, 1)
+        RenderCache[OldestKey] = nil
+    end
+end
+
+local function ColorKey(Color)
+    if not Color then
+        return "nil"
+    end
+
+    return string.format("%.6f,%.6f,%.6f", Color.R, Color.G, Color.B)
+end
+
+local function MakeRenderCacheKey(Runs, FontObject, DefaultColor, Transparency, UseShadow, UseOutline)
+    local Parts = {
+        FontObject.key or tostring(FontObject),
+        ColorKey(DefaultColor),
+        string.format("%.6f", Transparency),
+        UseShadow and "1" or "0",
+        UseOutline and "1" or "0",
+    }
+
+    for Index, Run in Runs do
+        local Text = Run.text or Run[1] or ""
+        local Color = Run.color or Run[2] or DefaultColor
+        Parts[#Parts + 1] = tostring(Index)
+        Parts[#Parts + 1] = Text
+        Parts[#Parts + 1] = ColorKey(Color)
+    end
+
+    return table.concat(Parts, "\31")
+end
+
 local function LoadFonts(): boolean
     if Loaded then
         return AtlasBuffer ~= nil
@@ -90,6 +141,7 @@ local function LoadFonts(): boolean
     end)
 
     if not Success then
+        Loaded = false
         return false
     end
 
@@ -98,6 +150,7 @@ local function LoadFonts(): boolean
     end)
 
     if not IndexSuccess or type(Index) ~= "table" then
+        Loaded = false
         return false
     end
 
@@ -393,36 +446,61 @@ function Text:Set(Runs, FontObject, Options)
 
     local DefaultColor = Options.color or self.Color
     local Transparency = Options.transparency or self.Transparency
-    local Items = MakeItems(Runs, FontObject, DefaultColor)
-    local Output, Width, _, _ = DrawRow(
-        Items,
+    local UseOutline = Options.outline == true
+    local UseShadow = Options.shadow == true or UseOutline
+    local CacheKey = MakeRenderCacheKey(
+        Runs,
         FontObject,
         DefaultColor,
-        Transparency
+        Transparency,
+        UseShadow,
+        UseOutline
     )
+    local CachedRender = RenderCache[CacheKey]
+    local Output, Width, ShadowOutput, ShadowWidth
 
-    local UseShadow = Options.shadow == true
-    local ShadowOutput, ShadowWidth
-    if UseShadow then
-        local ShadowItems = {}
-        for Index, Item in Items do
-            ShadowItems[Index] = {
-                code = Item.code,
-                color = Color3.new(0, 0, 0),
-                red = 0,
-                green = 0,
-                blue = 0,
-                glyph = Item.glyph,
-                advance = Item.advance,
-            }
-        end
-
-        ShadowOutput, ShadowWidth = DrawRow(
-            ShadowItems,
+    if CachedRender then
+        Output = CachedRender.output
+        Width = CachedRender.width
+        ShadowOutput = CachedRender.shadowOutput
+        ShadowWidth = CachedRender.shadowWidth
+    else
+        local Items = MakeItems(Runs, FontObject, DefaultColor)
+        Output, Width = DrawRow(
+            Items,
             FontObject,
-            Color3.new(0, 0, 0),
+            DefaultColor,
             Transparency
         )
+
+        if UseShadow then
+            local ShadowItems = {}
+            for Index, Item in Items do
+                ShadowItems[Index] = {
+                    code = Item.code,
+                    color = Color3.new(0, 0, 0),
+                    red = 0,
+                    green = 0,
+                    blue = 0,
+                    glyph = Item.glyph,
+                    advance = Item.advance,
+                }
+            end
+
+            ShadowOutput, ShadowWidth = DrawRow(
+                ShadowItems,
+                FontObject,
+                Color3.new(0, 0, 0),
+                Transparency
+            )
+        end
+
+        AddRenderCache(CacheKey, {
+            output = Output,
+            width = Width,
+            shadowOutput = ShadowOutput,
+            shadowWidth = ShadowWidth,
+        })
     end
 
     local Success, Image = pcall(function()
@@ -468,23 +546,38 @@ function Text:Set(Runs, FontObject, Options)
                 ShadowOutput
             )
 
-            local ShadowLabel = Create("ImageLabel")
-            ShadowLabel.Name = "\0"
-            ShadowLabel.BackgroundTransparency = 1
-            ShadowLabel.ResampleMode = Enum.ResamplerMode.Pixelated
-            ShadowLabel.ImageContent = Content.fromObject(ShadowImage)
-            ShadowLabel.ImageTransparency = Transparency
-            ShadowLabel.ImageColor3 = Options.shadowColor or Color3.new(1, 1, 1)
-            ShadowLabel.Position = FromOffset(
-                (Options.x or 0) + (Options.shadowX or 2),
-                (Options.y or 0) + (Options.shadowY or 2)
-            )
-            ShadowLabel.Size = FromOffset(ShadowWidth, FontObject.height)
-            ShadowLabel.ZIndex = self.ZIndex - 1
-            ShadowLabel.Parent = self.Parent
-            table.insert(self.Shadows, ShadowLabel)
+            local ShadowContent = Content.fromObject(ShadowImage)
+            local ShadowOffsets
+            if UseOutline then
+                ShadowOffsets = {
+                    {-1, -1}, {0, -1}, {1, -1},
+                    {-1, 0},           {1, 0},
+                    {-1, 1},  {0, 1},  {1, 1},
+                }
+            else
+                ShadowOffsets = {{Options.shadowX or 2, Options.shadowY or 2}}
+            end
+
+            for _, Offset in ShadowOffsets do
+                local ShadowLabel = Create("ImageLabel")
+                ShadowLabel.Name = "\0"
+                ShadowLabel.BackgroundTransparency = 1
+                ShadowLabel.ResampleMode = Enum.ResamplerMode.Pixelated
+                ShadowLabel.ImageContent = ShadowContent
+                ShadowLabel.ImageTransparency = Transparency
+                ShadowLabel.ImageColor3 = Options.shadowColor or Color3.new(1, 1, 1)
+                ShadowLabel.Position = FromOffset(
+                    (Options.x or 0) + Offset[1],
+                    (Options.y or 0) + Offset[2]
+                )
+                ShadowLabel.Size = FromOffset(ShadowWidth, FontObject.height)
+                ShadowLabel.ZIndex = self.ZIndex - 1
+                ShadowLabel.Parent = self.Parent
+                table.insert(self.Shadows, ShadowLabel)
+                table.insert(self.Labels, ShadowLabel)
+            end
+
             table.insert(self.Images, ShadowImage)
-            table.insert(self.Labels, ShadowLabel)
         end
     end
 
@@ -514,11 +607,19 @@ end
 
 SourceFont.Text = Text
 
+function SourceFont.ClearCache()
+    ClearRenderCache()
+end
+
 function SourceFont.CreateText(Parent, TextValue: string, Options)
     Options = Options or {}
 
     local FontName = Options.Font or "Default"
-    local FontSize = Options.Size or 16
+    local IsSmallOutline = FontName == "DefaultSmallOutline"
+    local FontSize = Options.Size or (IsSmallOutline and 12 or 16)
+    if IsSmallOutline then
+        FontName = "Default"
+    end
     local FontObject = SourceFont.Get(FontName, FontSize)
     if not FontObject then
         return nil
@@ -541,6 +642,7 @@ function SourceFont.CreateText(Parent, TextValue: string, Options)
         color = Color,
         transparency = Options.Transparency,
         shadow = Options.Shadow == true,
+        outline = IsSmallOutline or Options.Outline == true,
         shadowColor = Options.ShadowColor,
         shadowX = Options.ShadowX,
         shadowY = Options.ShadowY,
