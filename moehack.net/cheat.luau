@@ -12,7 +12,10 @@ local ForEach, Insert, RemoveTable, TableFind = table.foreach, table.insert, tab
 local FindFirstChild, WaitForChild = workspace.FindFirstChild, workspace.WaitForChild
 local WorldToViewportPoint = workspace.CurrentCamera.WorldToViewportPoint
 local Lower = string.lower
-local GetService = Game.GetService
+local GetService = Game.GetServic
+
+local GetThreadIdentity = getthreadidentity or get_thread_identity
+local SetThreadIdentity = setthreadidentity or set_thread_identity
 
 --# Services
 
@@ -58,6 +61,8 @@ local Intro = LoadModule("globals/intro.luau").Create()
 Intro:FadeIn(0.5)
 
 --# Variables
+
+local Identity = GetThreadIdentity()
 
 local FrameRate, Ping = 0, 0
 LoadModule("moehack.net/modules/bypass.luau")
@@ -782,6 +787,11 @@ Library:GiveSignal(
 
         Visuals.Tick(Delta)
         Combat.Tick(Delta)
+
+        if moehack.data.game_name == "Killstreak" and GetThreadIdentity ~= Identity then
+            SetThreadIdentity(Identity)
+        end
+
         ESP.Update(Delta)
         Misc.Tick(Delta)
         Desync.Tick(Delta)
