@@ -764,7 +764,7 @@ if moehack.data.game_name == "Killstreak" then
     )
 
     for _, PlayerViewmodel in workspace.GameLogic.Characters:GetChildren() do
-        if not PlayerViewmodel and and PlayerViewmodel.GetAtttribute PlayerViewmodel:GetAtttribute("BotPersonality") then continue end
+        if not PlayerViewmodel and PlayerViewmodel.GetAtttribute and PlayerViewmodel:GetAtttribute("BotPersonality") then continue end
         pcall(function()
             
             AddToESP(PlayerViewmodel)
