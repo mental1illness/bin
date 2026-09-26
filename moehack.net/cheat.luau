@@ -752,20 +752,20 @@ if moehack.data.game_name == "Killstreak" then
 
     Library:GiveSignal(
         workspace.GameLogic.Characters.ChildAdded:Connect(function(PlayerViewmodel: Model)
-            if not Player:GetPlayerFromCharacter(Model) ==  nil then return end
+            if Players:GetPlayerFromCharacter(Model) then return end
             AddToESP(PlayerViewmodel)
         end)
     )
 
     Library:GiveSignal(
         workspace.GameLogic.Characters.ChildAdded:Connect(function(PlayerViewmodel: Model)
-            if not Player:GetPlayerFromCharacter(Model) ==  nil then return end
+            if Players:GetPlayerFromCharacter(Model) then return end
             pcall(ESP.RemoveTarget, PlayerViewmodel)
         end)
     )
 
     for _, PlayerViewmodel in workspace.GameLogic.Characters:GetChildren() do
-        if not Player:GetPlayerFromCharacter(Model) ==  nil then return end
+        if Players:GetPlayerFromCharacter(Model) then continue end
         pcall(function()
             
             AddToESP(PlayerViewmodel)
