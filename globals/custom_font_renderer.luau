@@ -414,6 +414,12 @@ function Text.new(Parent, ZIndex)
     Object.Shadows = {}
     Object.Transparency = 0
     Object.Color = Color3.new(1, 1, 1)
+    Object.Runs = nil
+    Object.FontObject = nil
+    Object.RenderOptions = {}
+    Object.X = 0
+    Object.Y = 0
+    Object.Destroyed = false
     return Object
 end
 
@@ -429,6 +435,7 @@ function Text:Destroy()
     table.clear(self.Images)
     table.clear(self.Labels)
     table.clear(self.Shadows)
+    self.Destroyed = true
 end
 
 function Text:Set(Runs, FontObject, Options)
@@ -442,12 +449,30 @@ function Text:Set(Runs, FontObject, Options)
         return false
     end
 
-    self:Destroy()
+    local DefaultColor = Options.color
+    if DefaultColor == nil then
+        DefaultColor = self.Color
+    end
 
-    local DefaultColor = Options.color or self.Color
-    local Transparency = Options.transparency or self.Transparency
+    local Transparency = Options.transparency
+    if Transparency == nil then
+        Transparency = self.Transparency
+    end
+
     local UseOutline = Options.outline == true
     local UseShadow = Options.shadow == true or UseOutline
+
+    self.Runs = Runs
+    self.FontObject = FontObject
+    self.RenderOptions = table.clone(Options)
+    self.Color = DefaultColor
+    self.Transparency = Transparency
+    self.X = Options.x or self.X or 0
+    self.Y = Options.y or self.Y or 0
+    self.Destroyed = false
+
+    self:Destroy()
+    self.Destroyed = false
     local CacheKey = MakeRenderCacheKey(
         Runs,
         FontObject,
@@ -584,8 +609,121 @@ function Text:Set(Runs, FontObject, Options)
     table.insert(self.Images, Image)
     table.insert(self.Labels, ImageLabel)
 
+    self.X = Options.x or self.X or 0
+    self.Y = Options.y or self.Y or 0
+    self.RenderOptions = table.clone(Options)
     self.Width = Width
     self.Height = FontObject.height
+    self.Destroyed = false
+    return true
+end
+
+function Text:SetOptions(Options)
+    Options = Options or {}
+    if self.Destroyed or not self.Runs or not self.FontObject then
+        return false
+    end
+
+    local Next = table.clone(self.RenderOptions or {})
+    local Rerender = false
+
+    local TextValue = Options.Text
+    local NewRuns = Options.Runs
+    if TextValue ~= nil then
+        NewRuns = {{text = TextValue, color = Options.Color or self.Color}}
+    end
+    if NewRuns ~= nil then
+        Next.runs = NewRuns
+        Rerender = true
+    end
+
+    local FontObject = self.FontObject
+    local FontName = Options.Font
+    local FontSize = Options.Size
+    if FontName ~= nil or FontSize ~= nil then
+        FontName = FontName or Next.font or "Default"
+        FontSize = FontSize or Next.size or 16
+        local IsSmallOutline = FontName == "DefaultSmallOutline"
+        if IsSmallOutline then FontName = "Default" end
+        FontObject = SourceFont.Get(FontName, FontSize)
+        if not FontObject then return false end
+        Next.font = FontName
+        Next.size = FontSize
+        Rerender = true
+    end
+
+    local Color = Options.Color
+    if Color ~= nil then
+        Next.color = Color
+        self.Color = Color
+        Rerender = true
+    end
+
+    local Transparency = Options.Transparency
+    if Transparency ~= nil then
+        Next.transparency = Transparency
+        self:SetTransparency(Transparency)
+    end
+
+    local OldX, OldY = self.X or 0, self.Y or 0
+    local X, Y = OldX, OldY
+    local Position = Options.Position
+    if Position ~= nil then
+        if typeof(Position) == "Vector2" then
+            X, Y = Position.X, Position.Y
+        elseif typeof(Position) == "UDim2" then
+            X, Y = Position.X.Offset, Position.Y.Offset
+        elseif type(Position) == "table" then
+            X = Position.X or Position[1] or X
+            Y = Position.Y or Position[2] or Y
+        end
+    end
+    if Options.X ~= nil then X = Options.X end
+    if Options.Y ~= nil then Y = Options.Y end
+    self.X, self.Y = X, Y
+    Next.x, Next.y = X, Y
+
+    local Shadow = Options.Shadow
+    local Outline = Options.Outline
+    if Shadow ~= nil then Next.shadow = Shadow == true; Rerender = true end
+    if Outline ~= nil then Next.outline = Outline == true; Rerender = true end
+
+    local ShadowColor = Options.ShadowColor
+    if ShadowColor ~= nil then Next.shadowColor = ShadowColor end
+    if Options.ShadowX ~= nil then Next.shadowX = Options.ShadowX end
+    if Options.ShadowY ~= nil then Next.shadowY = Options.ShadowY end
+
+    if Options.ZIndex ~= nil then
+        self.ZIndex = Options.ZIndex
+        for _, Label in self.Labels do Label.ZIndex = self.ZIndex end
+    end
+
+    if Rerender then
+        local RunsToUse = NewRuns or self.Runs
+        Next.color = Next.color or self.Color
+        Next.transparency = Next.transparency
+        if not self:Set(RunsToUse, FontObject, Next) then return false end
+    else
+        for _, Label in self.Labels do
+            if not table.find(self.Shadows, Label) then
+                Label.Position = FromOffset(X, Y)
+            end
+        end
+        for _, Label in self.Shadows do
+            local OffsetX = Next.shadowX or (Next.outline and 0 or 2)
+            local OffsetY = Next.shadowY or (Next.outline and 0 or 2)
+            if Next.outline then
+                local CurrentPosition = Label.Position
+                local ExistingX = CurrentPosition.X.Offset - OldX
+                local ExistingY = CurrentPosition.Y.Offset - OldY
+                Label.Position = FromOffset(X + ExistingX, Y + ExistingY)
+            else
+                Label.Position = FromOffset(X + OffsetX, Y + OffsetY)
+            end
+            if ShadowColor ~= nil then Label.ImageColor3 = ShadowColor end
+        end
+        self.RenderOptions = Next
+    end
     return true
 end
 
@@ -639,6 +777,8 @@ function SourceFont.CreateText(Parent, TextValue: string, Options)
     local SetOptions = {
         x = X,
         y = Y,
+        font = FontName,
+        size = FontSize,
         color = Color,
         transparency = Options.Transparency,
         shadow = Options.Shadow == true,
