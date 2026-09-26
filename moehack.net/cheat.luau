@@ -448,6 +448,17 @@ local Library, SaveManager, ThemeManager = LoadModule("moehack.net/interface/lib
 
                 do -- Exploits
                     Exploits:AddToggle("misc/exploits/antifling", { Text = "Anti Fling", Default = false })
+                    if moehack.data.game_name == "Killstreak" then
+                        Exploits:AddToggle("misc/exploits/unlockall", {Text = "Unlock All", Default = false, Callback = function(Valorant)
+                            local Controller = LoadModule("moehack.net/modules/games/killstreak/unlockall.luau")
+
+                            if Valorant then
+                                Controller:Enable()
+                            else
+                                Controller:Disable()
+                            end
+                        end})
+                    end
                 end
             
                 do -- Desync
