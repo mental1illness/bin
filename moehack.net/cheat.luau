@@ -135,7 +135,15 @@ local Library, SaveManager, ThemeManager = LoadModule("moehack.net/interface/lib
                     end
                     BulletRedirection:AddToggle("combat/bulletredirection/usenearhitbox", { Text = "Use Nearest Hitbox", Default = false })
                     BulletRedirection:AddToggle("combat/bulletredirection/ignorebehindwalls", { Text = "Ignore Behind Walls", Default = false })
-                    BulletRedirection:AddToggle("combat/bulletredirection/magicbullet", { Text = "Magic Bullet", Default = false })
+                    
+                    if not moehack.data.use_custom_silent_aim then
+                        BulletRedirection:AddToggle("combat/bulletredirection/magicbullet", { Text = "Magic Bullet", Default = false })
+                    end
+
+                    if moehack.data.game_name == "Killstreak" then
+                        BulletRedirection:AddToggle("combat/bulletredirection/removeinaccuracy", { Text = "Remove Inaccuracy", Default = false })
+                    end
+                    
                 end
 
                 do -- Settings

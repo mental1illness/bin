@@ -247,6 +247,39 @@ function Combat.GetTarget(FOV: number, NearestHitbox: boolean)
         return BestTarget, BestHitboxPart
     end
 
+    if moehack.data.game_name == "Killstreak" then
+        local TargetUtil = filtergc("table", { Keys = { "getValidTargets", "isValidTarget" } }, true)
+
+        if TargetUtil then
+            local Bones = NearestHitbox and { "Head", "UpperTorso", "LowerTorso" } or { "Head" }
+
+            for _, Entry in TargetUtil:getValidTargets() do
+                local Character = Entry.Instance
+
+                for _, Name in Bones do
+                    local Hitbox = Character and FindFirstChild(Character, Name)
+
+                    if Hitbox and Hitbox.Parent and IsA(Hitbox, "BasePart") and Hitbox.Transparency < 1 then
+                        local Position, OnScreen = WorldToViewportPoint(Camera, Hitbox.Position)
+
+                        if OnScreen and Position.Z > 0 then
+                            local Distance = (NewVector(Position.X, Position.Y) - Center).Magnitude
+
+                            if Distance <= BestDistance then
+                                BestDistance = Distance
+                                BestTarget = Character
+                                PlayerTarget = Players:GetPlayerFromCharacter(Character)
+                                BestHitboxPart = Hitbox
+                            end
+                        end
+                    end
+                end
+            end
+        end
+
+        return BestTarget, BestHitboxPart, PlayerTarget
+    end
+
     for _, Player in PlayersCache do
         if Player == LocalPlayer then
             continue

@@ -435,4 +435,32 @@ if moehack.data.use_custom_silent_aim and moehack.data.game_name == "Arsenal" th
     end
 end
 
+if moehack.data.use_custom_silent_aim and moehack.data.game_name == "Killstreak" then
+    local MathUtil = filtergc("table", { Keys = { "randomUnitVectorInCone" } }, true)
+ 
+    local OldRandom; OldRandom = hookfunction(MathUtil.randomUnitVectorInCone, function(First, Second, Third)
+        local ActualDirection = First
+        local ActualSpread = Second
+        if type(First) == "table" then
+            ActualDirection = Second
+            ActualSpread = Third
+        end
+
+        if Toggles["combat/bulletredirection"].Value then
+            local Target, Hitbox = Combat.GetTarget(Options["combat/bulletredirection/fov"].Value, Toggles["combat/bulletredirection/usenearhitbox"].Value)
+
+            if Hitbox then
+                if Toggles["combat/bulletredirection/ignorebehindwalls"].Value and IsBehindWalls(Hitbox) then
+                    return OldRandom(ActualDirection, ActualSpread)
+                end
+
+                local NewDirection = (Hitbox.Position - Camera.CFrame.Position).Unit
+                return OldRandom(NewDirection, Toggles["combat/bulletredirection/removeinaccuracy"].Value and 0 or ActualSpread)
+            end
+        end
+
+        return OldRandom(ActualDirection, ActualSpread)
+    end)
+end
+
 return Hooks
