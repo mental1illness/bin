@@ -419,6 +419,9 @@ function Text.new(Parent, ZIndex)
     Object.RenderOptions = {}
     Object.X = 0
     Object.Y = 0
+    Object.XScalePos = 0
+    Object.YScalePos = 0
+    Object.AnchorPoint = Vector2.zero
     Object.Destroyed = false
     return Object
 end
@@ -469,6 +472,9 @@ function Text:Set(Runs, FontObject, Options)
     self.Transparency = Transparency
     self.X = Options.x or self.X or 0
     self.Y = Options.y or self.Y or 0
+    self.XScalePos = Options.xScalePos or self.XScalePos or 0
+    self.YScalePos = Options.yScalePos or self.YScalePos or 0
+    self.AnchorPoint = Options.anchorPoint or self.AnchorPoint or Vector2.zero
     self.Destroyed = false
 
     self:Destroy()
@@ -552,7 +558,13 @@ function Text:Set(Runs, FontObject, Options)
     ImageLabel.ImageContent = Content.fromObject(Image)
     ImageLabel.ImageTransparency = Transparency
     ImageLabel.ImageColor3 = Color3.new(1, 1, 1)
-    ImageLabel.Position = FromOffset(Options.x or 0, Options.y or 0)
+    ImageLabel.AnchorPoint = Options.anchorPoint or Vector2.zero
+    ImageLabel.Position = UDim2.new(
+        Options.xScalePos or 0,
+        Options.x or 0,
+        Options.yScalePos or 0,
+        Options.y or 0
+    )
     ImageLabel.Size = FromOffset(Width, FontObject.height)
     ImageLabel.ZIndex = self.ZIndex
     ImageLabel.Parent = self.Parent
@@ -591,8 +603,11 @@ function Text:Set(Runs, FontObject, Options)
                 ShadowLabel.ImageContent = ShadowContent
                 ShadowLabel.ImageTransparency = Transparency
                 ShadowLabel.ImageColor3 = Options.shadowColor or Color3.new(1, 1, 1)
-                ShadowLabel.Position = FromOffset(
+                ShadowLabel.AnchorPoint = Options.anchorPoint or Vector2.zero
+                ShadowLabel.Position = UDim2.new(
+                    Options.xScalePos or 0,
                     (Options.x or 0) + Offset[1],
+                    Options.yScalePos or 0,
                     (Options.y or 0) + Offset[2]
                 )
                 ShadowLabel.Size = FromOffset(ShadowWidth, FontObject.height)
@@ -611,6 +626,9 @@ function Text:Set(Runs, FontObject, Options)
 
     self.X = Options.x or self.X or 0
     self.Y = Options.y or self.Y or 0
+    self.XScalePos = Options.xScalePos or self.XScalePos or 0
+    self.YScalePos = Options.yScalePos or self.YScalePos or 0
+    self.AnchorPoint = Options.anchorPoint or self.AnchorPoint or Vector2.zero
     self.RenderOptions = table.clone(Options)
     self.Width = Width
     self.Height = FontObject.height
@@ -683,6 +701,16 @@ function Text:SetOptions(Options)
     self.X, self.Y = X, Y
     Next.x, Next.y = X, Y
 
+    if Options.XScalePos ~= nil then
+        Next.xScalePos = Options.XScalePos
+    end
+    if Options.YScalePos ~= nil then
+        Next.yScalePos = Options.YScalePos
+    end
+    if Options.AnchorPoint ~= nil then
+        Next.anchorPoint = Options.AnchorPoint
+    end
+
     local Shadow = Options.Shadow
     local Outline = Options.Outline
     if Shadow ~= nil then Next.shadow = Shadow == true; Rerender = true end
@@ -706,7 +734,13 @@ function Text:SetOptions(Options)
     else
         for _, Label in self.Labels do
             if not table.find(self.Shadows, Label) then
-                Label.Position = FromOffset(X, Y)
+                Label.AnchorPoint = Next.anchorPoint or Vector2.zero
+                Label.Position = UDim2.new(
+                    Next.xScalePos or 0,
+                    X,
+                    Next.yScalePos or 0,
+                    Y
+                )
             end
         end
         for _, Label in self.Shadows do
@@ -716,9 +750,21 @@ function Text:SetOptions(Options)
                 local CurrentPosition = Label.Position
                 local ExistingX = CurrentPosition.X.Offset - OldX
                 local ExistingY = CurrentPosition.Y.Offset - OldY
-                Label.Position = FromOffset(X + ExistingX, Y + ExistingY)
+                Label.AnchorPoint = Next.anchorPoint or Vector2.zero
+                Label.Position = UDim2.new(
+                    Next.xScalePos or 0,
+                    X + ExistingX,
+                    Next.yScalePos or 0,
+                    Y + ExistingY
+                )
             else
-                Label.Position = FromOffset(X + OffsetX, Y + OffsetY)
+                Label.AnchorPoint = Next.anchorPoint or Vector2.zero
+                Label.Position = UDim2.new(
+                    Next.xScalePos or 0,
+                    X + OffsetX,
+                    Next.yScalePos or 0,
+                    Y + OffsetY
+                )
             end
             if ShadowColor ~= nil then Label.ImageColor3 = ShadowColor end
         end
@@ -779,6 +825,9 @@ function SourceFont.CreateText(Parent, TextValue: string, Options)
     local SetOptions = {
         x = X,
         y = Y,
+        xScalePos = Options.XScalePos,
+        yScalePos = Options.YScalePos,
+        anchorPoint = Options.AnchorPoint,
         font = FontName,
         size = FontSize,
         color = Color,
