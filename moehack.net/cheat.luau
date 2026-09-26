@@ -764,8 +764,8 @@ if moehack.data.game_name == "Killstreak" then
         end)
     )
 
-    for _, PlayerViewmodel in workspace.Viewmodels:GetChildren() do
-        AddViewmodelTarget(PlayerViewmodel)
+    for _, PlayerViewmodel in workspace.GameLogic.Characters:GetChildren() do
+        AddToESP(PlayerViewmodel)
     end
 end
 
