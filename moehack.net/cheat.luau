@@ -12,7 +12,7 @@ local ForEach, Insert, RemoveTable, TableFind = table.foreach, table.insert, tab
 local FindFirstChild, WaitForChild = workspace.FindFirstChild, workspace.WaitForChild
 local WorldToViewportPoint = workspace.CurrentCamera.WorldToViewportPoint
 local Lower = string.lower
-local GetService = Game.GetServic
+local GetService = Game.GetService
 
 local GetThreadIdentity = getthreadidentity or get_thread_identity
 local SetThreadIdentity = setthreadidentity or set_thread_identity
