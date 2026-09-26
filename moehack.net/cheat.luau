@@ -741,9 +741,8 @@ if moehack.data.game_name == "Killstreak" then
         if not ESP then
             return
         end
-
-        local RealPlayer = Players:GetPlayerFromCharacter(RealCharacter)
-        local Humanoid = FindFirstChild(RealCharacter, "Humanoid")
+        
+        local Humanoid = FindFirstChild(PlayerViewmodel, "Humanoid")
 
         ESP.AddTarget(PlayerViewmodel, {
             Humanoid = Humanoid,
