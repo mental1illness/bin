@@ -735,6 +735,40 @@ if moehack.data.game_name == "Operation One" then
     end
 end
 
+if moehack.data.game_name == "Killstreak" then
+    local function AddToESP(PlayerViewmodel: Model)
+
+        if not ESP then
+            return
+        end
+
+        local RealPlayer = Players:GetPlayerFromCharacter(RealCharacter)
+        local Humanoid = FindFirstChild(RealCharacter, "Humanoid")
+
+        ESP.AddTarget(PlayerViewmodel, {
+            Humanoid = Humanoid,
+        })
+    end
+
+    Library:GiveSignal(
+        workspace.GameLogic.Characters.ChildAdded:Connect(function(PlayerViewmodel: Model)
+            if not PlayerViewmodel:GetAtttribute("BotPersonality") then return end
+            AddToESP(PlayerViewmodel)
+        end)
+    )
+
+    Library:GiveSignal(
+        workspace.GameLogic.Characters.ChildAdded:Connect(function(PlayerViewmodel: Model)
+            if not PlayerViewmodel:GetAtttribute("BotPersonality") then return end
+            pcall(ESP.RemoveTarget, PlayerViewmodel)
+        end)
+    )
+
+    for _, PlayerViewmodel in workspace.Viewmodels:GetChildren() do
+        AddViewmodelTarget(PlayerViewmodel)
+    end
+end
+
 --# Connections
 
 Library:GiveSignal(
