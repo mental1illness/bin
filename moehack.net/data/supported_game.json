@@ -7,12 +7,36 @@
     },
     "game_name": "Operation One"
   },
-  "286090429": {
+  "138485390344924": {
     "use_custom_silent_aim": true,
-    "run_on_actor": true,
+    "run_on_actor": false,
     "tab_to_remove": {
         
     },
-    "game_name": "Arsenal"
+    "game_name": "Killstreak"
+  },
+  "105401128498345": {
+    "use_custom_silent_aim": true,
+    "run_on_actor": false,
+    "tab_to_remove": {
+        
+    },
+    "game_name": "Killstreak"
+  },
+  "133256411240728": {
+    "use_custom_silent_aim": true,
+    "run_on_actor": false,
+    "tab_to_remove": {
+        
+    },
+    "game_name": "Killstreak"
+  },
+  "123989305784308": {
+    "use_custom_silent_aim": true,
+    "run_on_actor": false,
+    "tab_to_remove": {
+        
+    },
+    "game_name": "Killstreak"
   }
 }
