@@ -4,48 +4,41 @@
 --# Aliases
 
 local FromOffset, FromScale, UDim2New = UDim2.fromOffset, UDim2.fromScale, UDim2.new
-local Atan2, Rad, Pi, Abs, Minimum, Maximum, Floor, Clamp = math.atan2, math.rad, math.pi, math.abs, math.min, math.max, math.floor, math.clamp
-local NewVector, NewVector3, NewCFrame = vector.create, Vector3.new, CFrame.new
-local Create, IsA = Instance.new, workspace.IsA
-local Spawn, Wait = task.spawn, task.wait
-local ForEach, Insert, RemoveTable, Clear = table.foreach, table.insert, table.remove, table.clear
-local FindFirstChild, WaitForChild, FindFirstChildOfClass, Destroy, Clone, BulkMoveTo = workspace.FindFirstChild, workspace.WaitForChild, workspace.FindFirstChildOfClass, workspace.Destroy, workspace.Clone, workspace.BulkMoveTo
+local NewVector3 = Vector3.new
+local Create = Instance.new
+local Minimum, Maximum, Floor, Clamp = math.min, math.max, math.floor, math.clamp
+local Insert, RemoveTable, Clear = table.insert, table.remove, table.clear
 local WorldToViewportPoint = workspace.CurrentCamera.WorldToViewportPoint
 local GetService = Game.GetService
 
 --# Services
 
 local MarketplaceService = GetService(Game, "MarketplaceService")
-local ReplicatedStorage  = GetService(Game, "ReplicatedStorage")
-local RunService         = GetService(Game, "RunService")
-local Lighting           = GetService(Game, "Lighting")
-local Players            = GetService(Game, "Players")
+local ReplicatedStorage = GetService(Game, "ReplicatedStorage")
+local RunService = GetService(Game, "RunService")
+local Lighting = GetService(Game, "Lighting")
+local Players = GetService(Game, "Players")
+local LocalPlayer = Players.LocalPlayer
 
-local LocalPlayer        = Players.LocalPlayer
-
---# Helper Funcs (USELESS)
+--# Modules
 
 LoadModule = function(Path)
-    local FuckYouCacheBitch = getgenv().FuckYouCacheBitch
+    local Cache = getgenv().FuckYouCacheBitch
 
-    if not FuckYouCacheBitch then
-        FuckYouCacheBitch = {}
-        getgenv().FuckYouCacheBitch = FuckYouCacheBitch
+    if not Cache then
+        Cache = {}
+        getgenv().FuckYouCacheBitch = Cache
     end
 
-    if FuckYouCacheBitch[Path] ~= nil then
-        return FuckYouCacheBitch[Path]
+    if Cache[Path] ~= nil then
+        return Cache[Path]
     end
 
-    local url = "https://cats-cure-depression.vercel.app/" .. Path
-    local Result = loadstring(game:HttpGet(url))()
-
-    FuckYouCacheBitch[Path] = Result
+    local Result = loadstring(game:HttpGet("https://cats-cure-depression.vercel.app/" .. Path))()
+    Cache[Path] = Result
 
     return Result
 end
-
---# Modules
 
 local Fonts = LoadModule("globals/fonts.luau", true)
 local Utility = LoadModule("moehack.net/modules/utility.luau", true)
@@ -55,75 +48,78 @@ local CustomFontRenderer = LoadModule("globals/custom_font_renderer.luau", true)
 
 local Library = getgenv().Library
 local Toggles, Options = getgenv().Toggles, getgenv().Options
-local ScreenGui = Create("ScreenGui", gethui())
 
+local ScreenGui = Create("ScreenGui")
+ScreenGui.Parent = gethui()
+ScreenGui.ResetOnSpawn = true
+ScreenGui.IgnoreGuiInset = true
+ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+
+local CurrentCamera = workspace.CurrentCamera
 local ChamsPartBuffer = table.create(32)
 local ChamsCFrameBuffer = table.create(32)
-
 local EnumFireCFChange = Enum.BulkMoveMode.FireCFrameChanged
 
 local Corners = {
-    { 1,  1,  1},
-    {-1,  1,  1},
-    { 1,  1, -1},
-    {-1,  1, -1},
-    { 1, -1,  1},
-    {-1, -1,  1},
-    { 1, -1, -1},
-    {-1, -1, -1},
+    {1, 1, 1},
+    {-1, 1, 1},
+    {1, 1, -1},
+    {-1, 1, -1},
+    {1, -1, 1},
+    {-1, -1, 1},
+    {1, -1, -1},
+    {-1, -1, -1}
 }
-local LastHz = 0
 
-local CurrentCamera = workspace.CurrentCamera
-local PlayersCache = Players:GetPlayers()
+local CornerBoxes = {
+    {"TopLeft", 0},
+    {"TopRight", 90},
+    {"BottomLeft", -90},
+    {"BottomRight", 180}
+}
+
+local LastHz = 0
+local PlayersCache = {}
+
+for _, Player in Players:GetPlayers() do
+    PlayersCache[Player] = Player
+end
 
 if moehack.data.game_name == "Operation One" then
     StateObject = require(ReplicatedStorage.Modules.StateObject)
 end
 
-local ESP = { Entities = { } }
+local ESP = {
+    Entities = {}
+}
 
-ScreenGui.ResetOnSpawn = true
-ScreenGui.IgnoreGuiInset = true
-ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-
-Library:GiveSignal( Players.PlayerAdded:Connect(function(Player)
+Library:GiveSignal(Players.PlayerAdded:Connect(function(Player)
     PlayersCache[Player] = Player
-end) )
+end))
 
-Library:GiveSignal( Players.PlayerRemoving:Connect(function(Player)
+Library:GiveSignal(Players.PlayerRemoving:Connect(function(Player)
     PlayersCache[Player] = nil
-end) )
+end))
 
 --# Main
 
-local Viewport = Create("ViewportFrame", ScreenGui) do -- Viewport
-    Viewport.Size = UDim2New(1, 0, 1, 0)
-    Viewport.BackgroundTransparency = 1
-    Viewport.CurrentCamera = CurrentCamera
-    Viewport.BorderSizePixel = 0
-    Viewport.BackgroundColor3 = Color3.fromRGB(-5000, -5000, -5000)
-
-    --[[function _ViewportSync()
-        Viewport.Ambient = Lighting.Ambient
-        Viewport.LightColor = Lighting.ColorShift_Top
-        Viewport.LightDirection = -Lighting:GetSunDirection()
-    end
-
-    _ViewportSync()
-
-    for _, Property in { "Ambient", "ColorShift_Top", "ClockTime", "GeographicLatitude" } do
-        Library:GiveSignal(Lighting:GetPropertyChangedSignal(Property):Connect(_ViewportSync))
-    end]]
-end
+local Viewport = Create("ViewportFrame")
+Viewport.Parent = ScreenGui
+Viewport.Size = UDim2New(1, 0, 1, 0)
+Viewport.BackgroundTransparency = 1
+Viewport.CurrentCamera = CurrentCamera
+Viewport.BorderSizePixel = 0
+Viewport.BackgroundColor3 = Color3.fromRGB(-5000, -5000, -5000)
 
 function ESP.CreateElements(Entity: table)
     local Objects = {}
 
+    --# Holder
+
     Objects.Holder = Create("Frame")
     Objects.Holder.Parent = ScreenGui
     Objects.Holder.BackgroundTransparency = 1
-    
+
     --# Bounding Box
 
     Objects.BoundingBox = Create("CanvasGroup")
@@ -153,11 +149,10 @@ function ESP.CreateElements(Entity: table)
     Objects.BoundingBoxFill.BorderSizePixel = 0
     Objects.BoundingBoxFill.ZIndex = 1
 
-    --# Corner Box / Thank you claude i only had to jailbreak you twice just for  you to store them in objects table
+    --# Corner Box
 
     Objects.CornerBox = Create("CanvasGroup")
     Objects.CornerBox.BackgroundTransparency = 1
-    Objects.CornerBox.BorderColor3 = Color3.fromRGB(0, 0, 0)
     Objects.CornerBox.Size = UDim2New(1, 6, 1, 6)
     Objects.CornerBox.Position = UDim2New(0, -3, 0, -3)
     Objects.CornerBox.BorderSizePixel = 0
@@ -165,190 +160,76 @@ function ESP.CreateElements(Entity: table)
     Objects.CornerBox.Visible = false
     Objects.CornerBox.Parent = Objects.Holder
 
-    -- Bottom Right
-    Objects.BottomRight = Create("Frame")
-    Objects.BottomRight.BorderColor3 = Color3.fromRGB(0, 0, 0)
-    Objects.BottomRight.Rotation = 180
-    Objects.BottomRight.Name = "BottomRight"
-    Objects.BottomRight.BackgroundTransparency = 1
-    Objects.BottomRight.Position = UDim2.new(1, -1, 1, -1)
-    Objects.BottomRight.AnchorPoint = Vector2.new(1, 1)
-    Objects.BottomRight.Size = UDim2.new(0, 10, 0, 10)
-    Objects.BottomRight.BorderSizePixel = 0
-    Objects.BottomRight.BackgroundColor3 = Options["esp/box/color"].Value
-    Objects.BottomRight.Parent = Objects.CornerBox
+    for _, Corner in CornerBoxes do
+        local Name, Rotation = Corner[1], Corner[2]
+        local IsBottom = Name:find("Bottom") ~= nil
+        local IsRight = Name:find("Right") ~= nil
 
-    Objects.BottomRightInlineHorizontal = Create("Frame")
-    Objects.BottomRightInlineHorizontal.Name = "InlineHorizontal"
-    Objects.BottomRightInlineHorizontal.Size = UDim2.new(1, 0, 0, 1)
-    Objects.BottomRightInlineHorizontal.BorderSizePixel = 0
-    Objects.BottomRightInlineHorizontal.BackgroundColor3 = Options["esp/box/color"].Value
-    Objects.BottomRightInlineHorizontal.ZIndex = 2
-    Objects.BottomRightInlineHorizontal.Parent = Objects.BottomRight
+        local CornerPart = Create("Frame")
+        CornerPart.Name = Name
+        CornerPart.Rotation = Rotation
+        CornerPart.BackgroundTransparency = 1
+        CornerPart.BorderColor3 = Color3.fromRGB(0, 0, 0)
+        CornerPart.BorderSizePixel = 0
+        CornerPart.Size = UDim2New(0, 10, 0, 10)
+        CornerPart.AnchorPoint = Vector2.new(
+            IsRight and 1 or 0,
+            IsBottom and 1 or 0
+        )
+        CornerPart.Position = UDim2New(
+            IsRight and 1 or 0,
+            IsRight and -1 or 1,
+            IsBottom and 1 or 0,
+            IsBottom and -1 or 1
+        )
+        CornerPart.Parent = Objects.CornerBox
+        Objects[Name] = CornerPart
 
-    Objects.BottomRightInlineVertical = Create("Frame")
-    Objects.BottomRightInlineVertical.Name = "InlineVertical"
-    Objects.BottomRightInlineVertical.Size = UDim2.new(0, 1, 1, 0)
-    Objects.BottomRightInlineVertical.BorderSizePixel = 0
-    Objects.BottomRightInlineVertical.BackgroundColor3 = Options["esp/box/color"].Value
-    Objects.BottomRightInlineVertical.ZIndex = 5
-    Objects.BottomRightInlineVertical.Parent = Objects.BottomRight
+        local InlineHorizontal = Create("Frame")
+        InlineHorizontal.Name = "InlineHorizontal"
+        InlineHorizontal.Size = UDim2New(1, 0, 0, 1)
+        InlineHorizontal.BorderSizePixel = 0
+        InlineHorizontal.BackgroundColor3 = Options["esp/box/color"].Value
+        InlineHorizontal.ZIndex = 2
+        InlineHorizontal.Parent = CornerPart
+        Objects[Name .. "InlineHorizontal"] = InlineHorizontal
 
-    Objects.BottomRightOutlineHorizontal = Create("Frame")
-    Objects.BottomRightOutlineHorizontal.Name = "OutlineHorizontal"
-    Objects.BottomRightOutlineHorizontal.Position = UDim2.new(0, 0, 0, -1)
-    Objects.BottomRightOutlineHorizontal.Size = UDim2.new(1, 1, 0, 3)
-    Objects.BottomRightOutlineHorizontal.BorderSizePixel = 0
-    Objects.BottomRightOutlineHorizontal.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    Objects.BottomRightOutlineHorizontal.Parent = Objects.BottomRight
+        local InlineVertical = Create("Frame")
+        InlineVertical.Name = "InlineVertical"
+        InlineVertical.Size = UDim2New(0, 1, 1, 0)
+        InlineVertical.BorderSizePixel = 0
+        InlineVertical.BackgroundColor3 = Options["esp/box/color"].Value
+        InlineVertical.ZIndex = 5
+        InlineVertical.Parent = CornerPart
+        Objects[Name .. "InlineVertical"] = InlineVertical
 
-    Objects.BottomRightOutlineVertical = Create("Frame")
-    Objects.BottomRightOutlineVertical.Name = "OutlineVertical"
-    Objects.BottomRightOutlineVertical.Position = UDim2.new(0, -1, 0, -1)
-    Objects.BottomRightOutlineVertical.Size = UDim2.new(0, 3, 1, 2)
-    Objects.BottomRightOutlineVertical.BorderSizePixel = 0
-    Objects.BottomRightOutlineVertical.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    Objects.BottomRightOutlineVertical.Parent = Objects.BottomRight
+        local OutlineHorizontal = Create("Frame")
+        OutlineHorizontal.Name = "OutlineHorizontal"
+        OutlineHorizontal.Position = UDim2New(0, 0, 0, -1)
+        OutlineHorizontal.Size = UDim2New(1, 1, 0, 3)
+        OutlineHorizontal.BorderSizePixel = 0
+        OutlineHorizontal.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+        OutlineHorizontal.Parent = CornerPart
+        Objects[Name .. "OutlineHorizontal"] = OutlineHorizontal
 
-    -- Top Right
-    Objects.TopRight = Create("Frame")
-    Objects.TopRight.BorderColor3 = Color3.fromRGB(0, 0, 0)
-    Objects.TopRight.Rotation = 90
-    Objects.TopRight.Name = "TopRight"
-    Objects.TopRight.BackgroundTransparency = 1
-    Objects.TopRight.Position = UDim2.new(1, -1, 0, 1)
-    Objects.TopRight.AnchorPoint = Vector2.new(1, 0)
-    Objects.TopRight.Size = UDim2.new(0, 10, 0, 10)
-    Objects.TopRight.BorderSizePixel = 0
-    Objects.TopRight.Parent = Objects.CornerBox
-
-    Objects.TopRightInlineHorizontal = Create("Frame")
-    Objects.TopRightInlineHorizontal.Name = "InlineHorizontal"
-    Objects.TopRightInlineHorizontal.Size = UDim2.new(1, 0, 0, 1)
-    Objects.TopRightInlineHorizontal.BorderSizePixel = 0
-    Objects.TopRightInlineHorizontal.BackgroundColor3 = Options["esp/box/color"].Value
-    Objects.TopRightInlineHorizontal.ZIndex = 2
-    Objects.TopRightInlineHorizontal.Parent = Objects.TopRight
-
-    Objects.TopRightInlineVertical = Create("Frame")
-    Objects.TopRightInlineVertical.Name = "InlineVertical"
-    Objects.TopRightInlineVertical.Size = UDim2.new(0, 1, 1, 0)
-    Objects.TopRightInlineVertical.BorderSizePixel = 0
-    Objects.TopRightInlineVertical.BackgroundColor3 = Options["esp/box/color"].Value
-    Objects.TopRightInlineVertical.ZIndex = 5
-    Objects.TopRightInlineVertical.Parent = Objects.TopRight
-
-    Objects.TopRightOutlineHorizontal = Create("Frame")
-    Objects.TopRightOutlineHorizontal.Name = "OutlineHorizontal"
-    Objects.TopRightOutlineHorizontal.Position = UDim2.new(0, 0, 0, -1)
-    Objects.TopRightOutlineHorizontal.Size = UDim2.new(1, 1, 0, 3)
-    Objects.TopRightOutlineHorizontal.BorderSizePixel = 0
-    Objects.TopRightOutlineHorizontal.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    Objects.TopRightOutlineHorizontal.Parent = Objects.TopRight
-
-    Objects.TopRightOutlineVertical = Create("Frame")
-    Objects.TopRightOutlineVertical.Name = "OutlineVertical"
-    Objects.TopRightOutlineVertical.Position = UDim2.new(0, -1, 0, -1)
-    Objects.TopRightOutlineVertical.Size = UDim2.new(0, 3, 1, 2)
-    Objects.TopRightOutlineVertical.BorderSizePixel = 0
-    Objects.TopRightOutlineVertical.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    Objects.TopRightOutlineVertical.Parent = Objects.TopRight
-
-    -- Top Left
-    Objects.TopLeft = Create("Frame")
-    Objects.TopLeft.Name = "TopLeft"
-    Objects.TopLeft.BackgroundTransparency = 1
-    Objects.TopLeft.Position = UDim2.new(0, 1, 0, 1)
-    Objects.TopLeft.BorderColor3 = Color3.fromRGB(0, 0, 0)
-    Objects.TopLeft.Size = UDim2.new(0, 10, 0, 10)
-    Objects.TopLeft.BorderSizePixel = 0
-    Objects.TopLeft.Parent = Objects.CornerBox
-
-    Objects.TopLeftInlineHorizontal = Create("Frame")
-    Objects.TopLeftInlineHorizontal.Name = "InlineHorizontal"
-    Objects.TopLeftInlineHorizontal.Size = UDim2.new(1, 0, 0, 1)
-    Objects.TopLeftInlineHorizontal.BorderSizePixel = 0
-    Objects.TopLeftInlineHorizontal.BackgroundColor3 = Options["esp/box/color"].Value
-    Objects.TopLeftInlineHorizontal.ZIndex = 2
-    Objects.TopLeftInlineHorizontal.Parent = Objects.TopLeft
-
-    Objects.TopLeftInlineVertical = Create("Frame")
-    Objects.TopLeftInlineVertical.Name = "InlineVertical"
-    Objects.TopLeftInlineVertical.Size = UDim2.new(0, 1, 1, 0)
-    Objects.TopLeftInlineVertical.BorderSizePixel = 0
-    Objects.TopLeftInlineVertical.BackgroundColor3 = Options["esp/box/color"].Value
-    Objects.TopLeftInlineVertical.ZIndex = 5
-    Objects.TopLeftInlineVertical.Parent = Objects.TopLeft
-
-    Objects.TopLeftOutlineHorizontal = Create("Frame")
-    Objects.TopLeftOutlineHorizontal.Name = "OutlineHorizontal"
-    Objects.TopLeftOutlineHorizontal.Position = UDim2.new(0, 0, 0, -1)
-    Objects.TopLeftOutlineHorizontal.Size = UDim2.new(1, 1, 0, 3)
-    Objects.TopLeftOutlineHorizontal.BorderSizePixel = 0
-    Objects.TopLeftOutlineHorizontal.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    Objects.TopLeftOutlineHorizontal.Parent = Objects.TopLeft
-
-    Objects.TopLeftOutlineVertical = Create("Frame")
-    Objects.TopLeftOutlineVertical.Name = "OutlineVertical"
-    Objects.TopLeftOutlineVertical.Position = UDim2.new(0, -1, 0, -1)
-    Objects.TopLeftOutlineVertical.Size = UDim2.new(0, 3, 1, 2)
-    Objects.TopLeftOutlineVertical.BorderSizePixel = 0
-    Objects.TopLeftOutlineVertical.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    Objects.TopLeftOutlineVertical.Parent = Objects.TopLeft
-
-    -- Bottom Left
-    Objects.BottomLeft = Create("Frame")
-    Objects.BottomLeft.BorderColor3 = Color3.fromRGB(0, 0, 0)
-    Objects.BottomLeft.Rotation = -90
-    Objects.BottomLeft.Name = "BottomLeft"
-    Objects.BottomLeft.BackgroundTransparency = 1
-    Objects.BottomLeft.Position = UDim2.new(0, 1, 1, -1)
-    Objects.BottomLeft.AnchorPoint = Vector2.new(0, 1)
-    Objects.BottomLeft.Size = UDim2.new(0, 10, 0, 10)
-    Objects.BottomLeft.BorderSizePixel = 0
-    Objects.BottomLeft.Parent = Objects.CornerBox
-
-    Objects.BottomLeftInlineHorizontal = Create("Frame")
-    Objects.BottomLeftInlineHorizontal.Name = "InlineHorizontal"
-    Objects.BottomLeftInlineHorizontal.Size = UDim2.new(1, 0, 0, 1)
-    Objects.BottomLeftInlineHorizontal.BorderSizePixel = 0
-    Objects.BottomLeftInlineHorizontal.BackgroundColor3 = Options["esp/box/color"].Value
-    Objects.BottomLeftInlineHorizontal.ZIndex = 2
-    Objects.BottomLeftInlineHorizontal.Parent = Objects.BottomLeft
-
-    Objects.BottomLeftInlineVertical = Create("Frame")
-    Objects.BottomLeftInlineVertical.Name = "InlineVertical"
-    Objects.BottomLeftInlineVertical.Size = UDim2.new(0, 1, 1, 0)
-    Objects.BottomLeftInlineVertical.BorderSizePixel = 0
-    Objects.BottomLeftInlineVertical.BackgroundColor3 = Options["esp/box/color"].Value
-    Objects.BottomLeftInlineVertical.ZIndex = 5
-    Objects.BottomLeftInlineVertical.Parent = Objects.BottomLeft
-
-    Objects.BottomLeftOutlineHorizontal = Create("Frame")
-    Objects.BottomLeftOutlineHorizontal.Name = "OutlineHorizontal"
-    Objects.BottomLeftOutlineHorizontal.Position = UDim2.new(0, 0, 0, -1)
-    Objects.BottomLeftOutlineHorizontal.Size = UDim2.new(1, 1, 0, 3)
-    Objects.BottomLeftOutlineHorizontal.BorderSizePixel = 0
-    Objects.BottomLeftOutlineHorizontal.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    Objects.BottomLeftOutlineHorizontal.Parent = Objects.BottomLeft
-
-    Objects.BottomLeftOutlineVertical = Create("Frame")
-    Objects.BottomLeftOutlineVertical.Name = "OutlineVertical"
-    Objects.BottomLeftOutlineVertical.Position = UDim2.new(0, -1, 0, -1)
-    Objects.BottomLeftOutlineVertical.Size = UDim2.new(0, 3, 1, 2)
-    Objects.BottomLeftOutlineVertical.BorderSizePixel = 0
-    Objects.BottomLeftOutlineVertical.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    Objects.BottomLeftOutlineVertical.Parent = Objects.BottomLeft
+        local OutlineVertical = Create("Frame")
+        OutlineVertical.Name = "OutlineVertical"
+        OutlineVertical.Position = UDim2New(0, -1, 0, -1)
+        OutlineVertical.Size = UDim2New(0, 3, 1, 2)
+        OutlineVertical.BorderSizePixel = 0
+        OutlineVertical.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+        OutlineVertical.Parent = CornerPart
+        Objects[Name .. "OutlineVertical"] = OutlineVertical
+    end
 
     --# Health Bar
 
     Objects.HealthBar = Create("CanvasGroup")
     Objects.HealthBar.Parent = Objects.Holder
     Objects.HealthBar.Size = UDim2New(0, Options["esp/healthbar/thickness"].Value, 1, 4)
-    Objects.HealthBar.Position = UDim2New(0,-5 - Options["esp/healthbar/thickness"].Value, 0, -2)
+    Objects.HealthBar.Position = UDim2New(0, -5 - Options["esp/healthbar/thickness"].Value, 0, -2)
     Objects.HealthBar.BackgroundTransparency = 1
     Objects.HealthBar.BorderSizePixel = 0
-    Objects.HealthBar.GroupTransparency = 0
 
     local HealthBarOutline = Create("UIStroke")
     HealthBarOutline.LineJoinMode = Enum.LineJoinMode.Miter
@@ -392,7 +273,6 @@ function ESP.CreateElements(Entity: table)
     Objects.HealthTextHolder.Parent = Objects.Holder
     Objects.HealthTextHolder.Size = FromOffset(11, 10)
     Objects.HealthTextHolder.BackgroundTransparency = 1
-    Objects.HealthTextHolder.GroupTransparency = 0
     Objects.HealthTextHolder.AnchorPoint = Vector2.new(0, 0.5)
 
     Objects.HealthText = Create("TextLabel")
@@ -421,7 +301,6 @@ function ESP.CreateElements(Entity: table)
     Objects.NameHolder.Size = FromOffset(500, 15)
     Objects.NameHolder.AnchorPoint = Vector2.new(0.5, 1)
     Objects.NameHolder.Position = UDim2New(0.5, 0, 0, -2)
-    Objects.NameHolder.GroupTransparency = 0
     Objects.NameHolder.Visible = false
     Objects.NameHolder.ZIndex = 6
 
@@ -438,17 +317,20 @@ function ESP.CreateElements(Entity: table)
     Objects.Name.FontFace = Fonts.Tahoma
     Objects.Name.ZIndex = 6
 
-    Objects.RealName = CustomFontRenderer.CreateText(Objects.NameHolder, Entity.Player and Entity.Player.Name or Entity.Name, {
+    Objects.RealName = CustomFontRenderer.CreateText(
+        Objects.NameHolder,
+        Entity.Player and Entity.Player.Name or Entity.Name,
+        {
             Font = "HudDefault",
             Size = 12,
             Color = Options["esp/name/color"].Value,
             Center = true,
             Shadow = true,
-            Y      = 1,
+            Y = 1,
             ShadowColor = Color3.fromRGB(0, 0, 0),
             ShadowX = 1,
             ShadowY = 1,
-            ZIndex = 10,
+            ZIndex = 10
         }
     )
 
@@ -463,7 +345,6 @@ function ESP.CreateElements(Entity: table)
     Objects.Bottom = Create("CanvasGroup")
     Objects.Bottom.Size = UDim2New(0, 500, 0, 500)
     Objects.Bottom.BackgroundTransparency = 1
-    Objects.Bottom.GroupTransparency = 0
     Objects.Bottom.Parent = Objects.Holder
     Objects.Bottom.AnchorPoint = Vector2.new(0.5, 0)
     Objects.Bottom.Position = UDim2New(0.5, 0, 1, 0)
@@ -508,7 +389,7 @@ function ESP.CreateElements(Entity: table)
     Objects.Tool.Text = "none"
     Objects.Tool.TextXAlignment = Enum.TextXAlignment.Center
     Objects.Tool.FontFace = Fonts.SmallestPixel7
-    Objects.Tool.TextColor3 = Options["esp/distance/color"].Value
+    Objects.Tool.TextColor3 = Options["esp/tool/color"].Value
     Objects.Tool.TextSize = 9
     Objects.Tool.ZIndex = 5
 
@@ -521,75 +402,139 @@ function ESP.CreateElements(Entity: table)
     return Objects
 end
 
-do -- All the fucking helper funcs that looks extremely not clean do stay
-
+do
     function _ESPDisconnectTarget(Entity)
-        if Entity.TargetConnections then
-            for _, Connection in Entity.TargetConnections do
-                Connection:Disconnect()
+        for _, Connection in Entity.TargetConnections do
+            Connection:Disconnect()
+        end
+
+        Clear(Entity.TargetConnections)
+    end
+
+    function _ESPRemoveBodyPart(Entity, Part)
+        for Index = #Entity.BodyParts, 1, -1 do
+            if Entity.BodyParts[Index] == Part then
+                RemoveTable(Entity.BodyParts, Index)
+                break
             end
         end
-        Entity.TargetConnections = {}
+
+        if Entity.ChamsParts then
+            local ChamsPart = Entity.ChamsParts[Part]
+
+            if ChamsPart then
+                ChamsPart:Destroy()
+                Entity.ChamsParts[Part] = nil
+            end
+        end
     end
 
     function _ESPConnectTarget(Target, Entity)
         _ESPDisconnectTarget(Entity)
-        Entity.BodyParts = {}
-        if not Target or not Target.Parent then return end
 
-        if IsA(Target, "BasePart") then
-            Insert(Entity.BodyParts, Target)
+        Entity.Target = Target
+        Clear(Entity.BodyParts)
+
+        if not Target then
+            Entity.Humanoid = nil
+            return
+        end
+
+        if Target:IsA("BasePart") then
+            Entity.BodyParts[1] = Target
+
+            if not Entity.Humanoid then
+                Entity.Humanoid = Target:FindFirstChildWhichIsA("Humanoid", true)
+            end
+
+            Insert(Entity.TargetConnections, Target.AncestryChanged:Connect(function(_, Parent)
+                if not Parent then
+                    ESP.RemoveTarget(Entity)
+                end
+            end))
+
             return
         end
 
         for _, Object in Target:GetDescendants() do
-            if IsA(Object, "BasePart") then
+            if Object:IsA("BasePart") then
                 Insert(Entity.BodyParts, Object)
             end
         end
 
+        if not Entity.Humanoid or not Entity.Humanoid:IsDescendantOf(Target) then
+            Entity.Humanoid = Target:FindFirstChildWhichIsA("Humanoid", true)
+        end
+
         Insert(Entity.TargetConnections, Target.DescendantAdded:Connect(function(Object)
-            if IsA(Object, "BasePart") then
+            if Object:IsA("BasePart") then
                 Insert(Entity.BodyParts, Object)
+            elseif Object:IsA("Humanoid") and not Entity.Humanoid then
+                Entity.Humanoid = Object
             end
         end))
+
         Insert(Entity.TargetConnections, Target.DescendantRemoving:Connect(function(Object)
-            for i, Part in Entity.BodyParts do
-                if Part == Object then
-                    RemoveTable(Entity.BodyParts, i)
-                    break
-                end
+            if Object:IsA("BasePart") then
+                _ESPRemoveBodyPart(Entity, Object)
+            elseif Object == Entity.Humanoid then
+                Entity.Humanoid = nil
+            end
+        end))
+
+        Insert(Entity.TargetConnections, Target.AncestryChanged:Connect(function(_, Parent)
+            if not Parent then
+                ESP.RemoveTarget(Entity)
             end
         end))
     end
 
     function _ESPConnectCharacter(Player, Entity)
-        _ESPConnectTarget(Utility.GetCharacter(Player), Entity)
-    end
+        local Character = Utility.GetCharacter(Player)
 
+        Entity.Target = Character
+        Entity.Humanoid = Character and Character:FindFirstChildWhichIsA("Humanoid", true) or nil
+
+        _ESPConnectTarget(Character, Entity)
+    end
 end
 
 function ESP.AddTarget(Target, Settings)
     Settings = Settings or {}
 
-    if ESP.Entities[Target] then
-        ESP.RemoveTarget(Target)
+    if not Target or not Target:IsA("Instance") then
+        return
+    end
+
+    local Existing = ESP.Entities[Target]
+
+    if Existing then
+        ESP.RemoveTarget(Existing)
+    end
+
+    local Humanoid = Settings.Humanoid
+
+    if not Humanoid and not Target:IsA("BasePart") then
+        Humanoid = Target:FindFirstChildWhichIsA("Humanoid", true)
+    end
+
+    if not Humanoid and Target:IsA("BasePart") then
+        Humanoid = Target:FindFirstChildWhichIsA("Humanoid", true)
     end
 
     local Entity = {
         Target = Target,
         Player = Settings.Player,
         Name = Settings.Name or Target.Name,
-        Humanoid = Settings.Humanoid,
+        Humanoid = Humanoid,
         BodyParts = {},
         TargetConnections = {},
         ChamsModel = nil,
         ChamsParts = {},
-        IsCustom = true,
+        IsCustom = true
     }
 
-    Entity["Objects"] = ESP.CreateElements(Entity)
-
+    Entity.Objects = ESP.CreateElements(Entity)
     ESP.Entities[Target] = Entity
 
     _ESPConnectTarget(Target, Entity)
@@ -599,33 +544,42 @@ end
 
 function ESP.RemoveTarget(TargetOrEntity)
     local Entity = ESP.Entities[TargetOrEntity] or TargetOrEntity
-    if not Entity then return end
+
+    if not Entity then
+        return
+    end
+
     for Key, Value in ESP.Entities do
         if Value == Entity then
             ESP.Entities[Key] = nil
             break
         end
     end
+
     _ESPDisconnectTarget(Entity)
+
+    if Entity.ChamsModel then
+        Entity.ChamsModel:Destroy()
+        Entity.ChamsModel = nil
+    end
+
+    Clear(Entity.ChamsParts)
+    Clear(Entity.BodyParts)
+
     if Entity.Objects and Entity.Objects.Holder then
         Entity.Objects.Holder:Destroy()
     end
 end
 
 function ESP.ApplyAllPlayer()
-
-    if moehack.data.game_name == "Operation One" then -- we use custom players instead
+    if moehack.data.game_name == "Operation One" then
         return
     end
 
-
-	for _, Player in PlayersCache do
-
-        if Player == LocalPlayer then continue end
-
-		if ESP.Entities[Player] then
-			continue
-		end
+    for _, Player in PlayersCache do
+        if Player == LocalPlayer or ESP.Entities[Player] then
+            continue
+        end
 
         local Entity = {
             Player = Player,
@@ -633,28 +587,40 @@ function ESP.ApplyAllPlayer()
             ChamsModel = nil,
             ChamsParts = {},
             BodyParts = {},
+            TargetConnections = {},
+            IsCustom = false
         }
-        Entity["Objects"] = ESP.CreateElements(Entity)
-		ESP.Entities[Player] = Entity
 
-		local Character = Player.Character
-		if Character then
-			_ESPConnectCharacter(Player, Entity)
-		end
+        Entity.Objects = ESP.CreateElements(Entity)
+        ESP.Entities[Player] = Entity
 
-		Library:GiveSignal(
-			Player.CharacterAdded:Connect(function(Character)
-				_ESPConnectCharacter(Player, Entity)
-			end)
-		)
+        if Player.Character then
+            _ESPConnectCharacter(Player, Entity)
+        end
 
-		Library:GiveSignal(
-			Player.CharacterRemoving:Connect(function(Character)
-                Entity.BodyParts = {}
-			end)
-		)
-	end
+        Library:GiveSignal(Player.CharacterAdded:Connect(function()
+            if ESP.Entities[Player] ~= Entity then
+                return
+            end
+
+            _ESPConnectCharacter(Player, Entity)
+        end))
+
+        Library:GiveSignal(Player.CharacterRemoving:Connect(function()
+            if ESP.Entities[Player] ~= Entity then
+                return
+            end
+
+            _ESPDisconnectTarget(Entity)
+            Entity.Target = nil
+            Entity.Humanoid = nil
+            Clear(Entity.BodyParts)
+            ESP.ChamsRemove(Entity)
+        end))
+    end
 end
+
+--# Bounding Box
 
 function ESP.GetBoundingBox(Model: {})
     local LowestX, HighestX = 1e6, -1e6
@@ -662,14 +628,19 @@ function ESP.GetBoundingBox(Model: {})
     local OnScreen = false
 
     for _, Part in Model do
-        if Part.Transparency < 0.99 then
+        if Part.Parent and Part.Transparency < 0.99 then
             local PartCFrame = Part.CFrame
             local HalfSize = Part.Size * 0.5
-            local X, Y, Z = HalfSize.X, HalfSize.Y, HalfSize.Z
 
-            for i = 1, 8 do
-                local Signs = Corners[i]
-                local ScreenPoint, Visible = WorldToViewportPoint(CurrentCamera, PartCFrame * NewVector3(X * Signs[1], Y * Signs[2], Z * Signs[3]))
+            for _, Signs in Corners do
+                local ScreenPoint, Visible = WorldToViewportPoint(
+                    CurrentCamera,
+                    PartCFrame * NewVector3(
+                        HalfSize.X * Signs[1],
+                        HalfSize.Y * Signs[2],
+                        HalfSize.Z * Signs[3]
+                    )
+                )
 
                 OnScreen = OnScreen or Visible
                 LowestX = Minimum(LowestX, ScreenPoint.X)
@@ -683,57 +654,74 @@ function ESP.GetBoundingBox(Model: {})
     return LowestX, HighestX, LowestY, HighestY, OnScreen
 end
 
+--# Chams
+
 function ESP.ChamsRemove(Entity: {})
     if Entity.ChamsModel then
-        Destroy(Entity.ChamsModel)
+        Entity.ChamsModel:Destroy()
         Entity.ChamsModel = nil
     end
-    Entity.ChamsParts = {}
+
+    Clear(Entity.ChamsParts)
 end
 
 function ESP.ChamsRender(Entity: {})
     if not Toggles["esp/chams"].Value then
-        if Viewport.Visible then ESP.ChamsRemove(Entity); Viewport.Visible = false end
+        ESP.ChamsRemove(Entity)
+        Viewport.Visible = false
         return
     end
-    if not Viewport.Visible then Viewport.Visible = true end
+
+    Viewport.Visible = true
 
     local Model = Entity.ChamsModel
+
     if not Model then
-        Model = Create("Model", Viewport)
+        Model = Create("Model")
         Model.Name = "\0"
+        Model.Parent = Viewport
+
         Entity.ChamsModel = Model
-        Entity.ChamsParts = Entity.ChamsParts or {}
+        Entity.ChamsParts = {}
 
         Create("Humanoid", Model)
-
     end
 
     local ChamsParts = Entity.ChamsParts
-    
+
     Clear(ChamsPartBuffer)
     Clear(ChamsCFrameBuffer)
+
     local Count = 0
+    local Material = Enum.Material[Options["esp/chams/material"].Value]
+    local Picker = Options["esp/chams/color"]
+    local Color = Picker.Value
 
     for _, Value in Entity.BodyParts do
+        if not Value.Parent then
+            continue
+        end
+
         local Part = ChamsParts[Value]
 
         if not Part then
-            Part = Clone(Value)
-            if Part.Transparency >= 1 then
+            if Value.Transparency >= 1 then
                 continue
             end
-            if not Part then continue end
 
-            if IsA(Part, "MeshPart") then
+            Part = Value:Clone()
+
+            if Part:IsA("MeshPart") then
                 Part.TextureID = ""
             end
 
-            for _, V in Part:GetDescendants() do
-                if IsA(V, "Decal") or V:IsA(V, "Texture") or V:IsA(V, "SurfaceAppearance") then
-                    Destroy(V)
-                elseif IsA(V, "SpecialMesh") then
-                    V.TextureId = ""
+            for _, Object in Part:GetDescendants() do
+                if Object:IsA("Decal")
+                    or Object:IsA("Texture")
+                    or Object:IsA("SurfaceAppearance") then
+                    Object:Destroy()
+                elseif Object:IsA("SpecialMesh") then
+                    Object.TextureId = ""
                 end
             end
 
@@ -742,65 +730,92 @@ function ESP.ChamsRender(Entity: {})
         end
 
         local TargetCFrame = Value.CFrame
+
         if Part.CFrame ~= TargetCFrame then
             Count += 1
             ChamsPartBuffer[Count] = Part
             ChamsCFrameBuffer[Count] = TargetCFrame
         end
-
     end
 
     if Count > 0 then
-        BulkMoveTo(workspace, ChamsPartBuffer, ChamsCFrameBuffer, EnumFireCFChange)
+        workspace:BulkMoveTo(
+            ChamsPartBuffer,
+            ChamsCFrameBuffer,
+            EnumFireCFChange
+        )
     end
 
-    for RealPart, Idx in ChamsParts do
-
-        local Material = Enum.Material[Options["esp/chams/material"].Value]
-
-        local Picker = Options['esp/chams/color']
-        if Picker.Value ~= Idx.Color then
-            Idx.Color = Picker.Value
+    for RealPart, ChamsPart in ChamsParts do
+        if not RealPart.Parent then
+            ChamsPart:Destroy()
+            ChamsParts[RealPart] = nil
+            continue
         end
 
-        if Idx.Material ~= Material then
-            Idx.Material = Material
+        if ChamsPart.Color ~= Color then
+            ChamsPart.Color = Color
         end
 
-        if Picker.Value ~= Viewport.BackgroundColor3 then
-            Viewport.BackgroundColor3 = Picker.Value
-        end
-        if Picker.Transparency ~= Idx.Transparency and RealPart.Transparency < 1 then
-            Idx.Transparency = Picker.Transparency
+        if ChamsPart.Material ~= Material then
+            ChamsPart.Material = Material
         end
 
+        if ChamsPart.Transparency ~= Picker.Transparency and RealPart.Transparency < 1 then
+            ChamsPart.Transparency = Picker.Transparency
+        end
     end
 
+    if Viewport.BackgroundColor3 ~= Color then
+        Viewport.BackgroundColor3 = Color
+    end
 end
+
+--# Render
 
 function ESP.Render(Entity: {})
     local Player = Entity.Player
     local Objects = Entity.Objects
 
-    local RealCharacter = Entity.IsCustom and Entity.Target or (Player and Player.Character)
-    local Character = Entity.IsCustom and Entity.Target or (Player and Utility.GetCharacter(Player))
+    local RealCharacter
+    local Character
+
+    if Entity.IsCustom then
+        RealCharacter = Entity.Target
+        Character = Entity.Target
+    else
+        RealCharacter = Player and Player.Character
+        Character = Player and Utility.GetCharacter(Player)
+    end
+
     if Entity.IsCustom and (not RealCharacter or not RealCharacter.Parent) then
         ESP.RemoveTarget(Entity)
         return
     end
 
-    local ClientCharacter = LocalPlayer.Character
-    local ClientRoot = ClientCharacter and ClientCharacter.PrimaryPart
-    local Distance = 0
-
-	if not RealCharacter then
-		Objects.Holder.Visible = false
+    if not RealCharacter then
+        Objects.Holder.Visible = false
         ESP.ChamsRemove(Entity)
-		return
-	end
+        return
+    end
 
-    local MaxHealth, Health = Utility.GetHealth(Player, RealCharacter)
-    local Humanoid = Utility.GetHumanoid(Entity)
+    local Humanoid = Entity.Humanoid
+
+    if not Humanoid and not Entity.IsCustom then
+        Humanoid = Utility.GetHumanoid(Entity)
+        Entity.Humanoid = Humanoid
+    end
+
+    local MaxHealth = 100
+    local Health = 100
+
+    if Humanoid then
+        MaxHealth = Humanoid.MaxHealth
+        Health = Humanoid.Health
+    elseif Player then
+        MaxHealth, Health = Utility.GetHealth(Player, RealCharacter)
+    end
+
     local IsTeammate = Player and Utility.IsTeammate(Player, LocalPlayer) or false
 
     if Humanoid and moehack.data.game_name == "Blox Strike" then
@@ -809,20 +824,12 @@ function ESP.Render(Entity: {})
         return
     end
 
-    if Entity.IsCustom then
-        if Humanoid then
-            MaxHealth = Humanoid.MaxHealth
-            Health = Humanoid.Health
-        end
-    end
-
     if IsTeammate and not Toggles["esp/settings/renderteam"].Value then
         Objects.Holder.Visible = false
         ESP.ChamsRemove(Entity)
         return
     end
 
-    
     if Health <= 0 then
         Objects.Holder.Visible = false
         ESP.ChamsRemove(Entity)
@@ -831,15 +838,26 @@ function ESP.Render(Entity: {})
 
     local LowX, HighX, LowY, HighY, OnScreen = ESP.GetBoundingBox(Entity.BodyParts)
 
-    if not OnScreen then
+    if not OnScreen or LowX == 1e6 or HighX == -1e6 then
         Objects.Holder.Visible = false
         return
     end
 
-    local TargetRoot = RealCharacter.PrimaryPart or Character.PrimaryPart
-    if TargetRoot then
-        Distance = (CurrentCamera.CFrame.Position - TargetRoot.Position).Magnitude
+    local TargetRoot
+
+    if RealCharacter:IsA("BasePart") then
+        TargetRoot = RealCharacter
+    elseif RealCharacter:IsA("Model") then
+        TargetRoot = RealCharacter.PrimaryPart or RealCharacter:FindFirstChild("HumanoidRootPart")
     end
+
+    if not TargetRoot and Character and Character:IsA("Model") then
+        TargetRoot = Character.PrimaryPart or Character:FindFirstChild("HumanoidRootPart")
+    end
+
+    local Distance = TargetRoot
+        and (CurrentCamera.CFrame.Position - TargetRoot.Position).Magnitude
+        or 0
 
     if Distance > Options["esp/settings/renderdist"].Value then
         Objects.Holder.Visible = false
@@ -847,84 +865,74 @@ function ESP.Render(Entity: {})
         return
     end
 
+    --# Box
 
     if Toggles["esp/box"].Value then
-        if not Objects.BoundingBox.Visible and Options["esp/box/type"].Value ~= "Corner" then
-            if Objects.CornerBox.Visible then
-                Objects.CornerBox.Visible = false
-            end
-            Objects.BoundingBox.Visible = true
-        end
+        local BoxType = Options["esp/box/type"].Value
+        local BoxColor = Options["esp/box/color"].Value
 
-        if Options["esp/box/type"].Value == "Corner" then
-            if Objects.BoundingBox.Visible then
-                Objects.BoundingBox.Visible = false
-            end
-
-            if not Objects.CornerBox.Visible then
-                Objects.CornerBox.Visible = true
-            end
+        if BoxType == "Corner" then
+            Objects.BoundingBox.Visible = false
+            Objects.CornerBox.Visible = true
 
             local CornerSize = Clamp(160 / Maximum(Distance, 1), 3.25, 10)
             local CornerUDim = UDim2New(0, CornerSize, 0, CornerSize)
 
-            Objects.BottomRight.Size = CornerUDim
-            Objects.TopRight.Size = CornerUDim
             Objects.TopLeft.Size = CornerUDim
+            Objects.TopRight.Size = CornerUDim
             Objects.BottomLeft.Size = CornerUDim
-
+            Objects.BottomRight.Size = CornerUDim
+        else
+            Objects.CornerBox.Visible = false
+            Objects.BoundingBox.Visible = true
         end
 
-        if Objects.BoundingBoxInline.Color ~= Options["esp/box/color"].Value then
-            Objects.BoundingBoxInline.Color = Options["esp/box/color"].Value
+        if Objects.BoundingBoxInline.Color ~= BoxColor then
+            Objects.BoundingBoxInline.Color = BoxColor
 
-            Objects.BottomRightInlineHorizontal.BackgroundColor3 = Options["esp/box/color"].Value
-            Objects.BottomRightInlineVertical.BackgroundColor3 = Options["esp/box/color"].Value
+            Objects.TopLeftInlineHorizontal.BackgroundColor3 = BoxColor
+            Objects.TopLeftInlineVertical.BackgroundColor3 = BoxColor
 
-            Objects.TopRightInlineHorizontal.BackgroundColor3 = Options["esp/box/color"].Value
-            Objects.TopRightInlineVertical.BackgroundColor3 = Options["esp/box/color"].Value
+            Objects.TopRightInlineHorizontal.BackgroundColor3 = BoxColor
+            Objects.TopRightInlineVertical.BackgroundColor3 = BoxColor
 
-            Objects.TopLeftInlineHorizontal.BackgroundColor3 = Options["esp/box/color"].Value
-            Objects.TopLeftInlineVertical.BackgroundColor3 = Options["esp/box/color"].Value
+            Objects.BottomLeftInlineHorizontal.BackgroundColor3 = BoxColor
+            Objects.BottomLeftInlineVertical.BackgroundColor3 = BoxColor
 
-            Objects.BottomLeftInlineHorizontal.BackgroundColor3 = Options["esp/box/color"].Value
-            Objects.BottomLeftInlineVertical.BackgroundColor3 = Options["esp/box/color"].Value
+            Objects.BottomRightInlineHorizontal.BackgroundColor3 = BoxColor
+            Objects.BottomRightInlineVertical.BackgroundColor3 = BoxColor
         end
 
         if Toggles["esp/box/fill"].Value then
-            if not Objects.BoundingBoxFill.Visible then
-                Objects.BoundingBoxFill.Visible = true
+            Objects.BoundingBoxFill.Visible = true
+
+            local FillColor = Options["esp/box/fillcolor"].Value
+            local FillTransparency = Options["esp/box/fillcolor"].Transparency
+
+            if Objects.BoundingBoxFill.BackgroundColor3 ~= FillColor then
+                Objects.BoundingBoxFill.BackgroundColor3 = FillColor
             end
-            if Objects.BoundingBoxFill.BackgroundColor3 ~= Options["esp/box/fillcolor"].Value or Objects.BoundingBoxFill.BackgroundTransparency ~= Options["esp/box/fillcolor"].Transparency then
-                Objects.BoundingBoxFill.BackgroundColor3 = Options["esp/box/fillcolor"].Value
-                Objects.BoundingBoxFill.BackgroundTransparency = Options["esp/box/fillcolor"].Transparency
+
+            if Objects.BoundingBoxFill.BackgroundTransparency ~= FillTransparency then
+                Objects.BoundingBoxFill.BackgroundTransparency = FillTransparency
             end
         else
-            if Objects.BoundingBoxFill.Visible then
-                Objects.BoundingBoxFill.Visible = false
-            end
+            Objects.BoundingBoxFill.Visible = false
         end
     else
-        if Objects.BoundingBox.Visible then
-            Objects.BoundingBox.Visible = false
-        end
-
-        if Objects.CornerBox.Visible then
-            Objects.CornerBox.Visible = false
-        end
+        Objects.BoundingBox.Visible = false
+        Objects.CornerBox.Visible = false
     end
 
-    if Toggles["esp/name"].Value then
-        if not Objects.NameHolder.Visible then
-            Objects.NameHolder.Visible = true
-        end
+    --# Name
 
-        local Name = Entity.Name
-        if Player then
-            Name = Player.DisplayName
-            if Name == "" then
-                Name = Player.Name
-            end
+    if Toggles["esp/name"].Value then
+        Objects.NameHolder.Visible = true
+
+        local Name = Player and Player.DisplayName or Entity.Name
+
+        if Name == "" then
+            Name = Entity.Name
         end
 
         if Objects.Name.Text ~= Name then
@@ -932,153 +940,176 @@ function ESP.Render(Entity: {})
         end
 
         local NameColor = Options["esp/name/color"].Value
+
         if Objects.Name.TextColor3 ~= NameColor then
             Objects.Name.TextColor3 = NameColor
             Objects.RealName:SetColor(NameColor)
         end
-    elseif Objects.NameHolder.Visible then
+    else
         Objects.NameHolder.Visible = false
     end
 
+    --# Tool
+
     if Toggles["esp/tool"].Value then
-        if not Objects.Tool.Visible then
-            Objects.Tool.Visible = true
-        end
+        Objects.Tool.Visible = true
+
         local ToolName = Player and Utility.GetTool(Player, RealCharacter) or "none"
 
-        if Objects.Tool.Text ~= ToolName then Objects.Tool.Text = ToolName end
+        if Objects.Tool.Text ~= ToolName then
+            Objects.Tool.Text = ToolName
+        end
+
         local ToolColor = Options["esp/tool/color"].Value
+
         if Objects.Tool.TextColor3 ~= ToolColor then
             Objects.Tool.TextColor3 = ToolColor
         end
     else
-        if Objects.Tool.Visible then Objects.Tool.Visible = false end
+        Objects.Tool.Visible = false
     end
 
+    --# Health
+
     if Toggles["esp/healthbar"].Value and (not Entity.IsCustom or Humanoid) then
-        if not Objects.HealthBar.Visible then
-            Objects.HealthBar.Visible = true
+        Objects.HealthBar.Visible = true
+
+        local HealthPercent = MaxHealth > 0
+            and Clamp(Health / MaxHealth, 0, 1)
+            or 1
+
+        local HealthBarThickness = Options["esp/healthbar/thickness"].Value
+
+        if Objects.HealthBar.Size.X.Offset ~= HealthBarThickness then
+            Objects.HealthBar.Size = UDim2New(0, HealthBarThickness, 1, 4)
+            Objects.HealthBar.Position = UDim2New(
+                0,
+                -5 - HealthBarThickness,
+                0,
+                -2
+            )
         end
 
-        local HealthPercent = MaxHealth > 0 and Clamp(Health / MaxHealth, 0, 1) or 1
-        local HealthHeight = (HighY - LowY) * HealthPercent
+        Objects.HealthBarCover.Size = UDim2New(
+            1,
+            0,
+            1 - HealthPercent,
+            0
+        )
 
-        if Objects.HealthBar.Size.X.Offset ~= Options["esp/healthbar/thickness"].Value then
-            Objects.HealthBar.Size = UDim2New(0, Options["esp/healthbar/thickness"].Value, 1, 4)
-            Objects.HealthBar.Position = UDim2New(0,-5 - Options["esp/healthbar/thickness"].Value, 0, -2)
-        end
-        
-        if Objects.HealthBarCover.Size.Y.Scale ~= (1 - HealthPercent) then
-            Objects.HealthBarCover.Size = UDim2New(1, 0, 1 - HealthPercent, 0)
-        end
-
-        if Toggles["esp/healthtext"].Value  then
-
-            if not Objects.HealthTextHolder.Visible then
-                Objects.HealthTextHolder.Visible = true
-            end
-
-            if Objects.HealthText.TextColor3 ~= Options["esp/healthtext/color"].Value then
-                Objects.HealthText.TextColor3 = Options["esp/healthtext/color"].Value
-            end
-
-            if Objects.HealthText.Text ~= tostring(Floor(Health)) then
-                Objects.HealthText.Text = tostring(Floor(Health))
-            end
+        if Toggles["esp/healthtext"].Value then
+            local HealthText = tostring(Floor(Health))
+            local HealthColor = Options["esp/healthtext/color"].Value
 
             if Health == MaxHealth then
-                if Objects.HealthTextHolder.Visible then
-                    Objects.HealthTextHolder.Visible = false
-                end
+                Objects.HealthTextHolder.Visible = false
             else
-                local HealthTextY = (HighY - LowY) * (1 - HealthPercent)
+                Objects.HealthTextHolder.Visible = true
 
-                if not Objects.HealthTextHolder.Visible then
-                    Objects.HealthTextHolder.Visible = true
-                end
-                Objects.HealthTextHolder.Position = UDim2New(0, -10 - Options["esp/healthbar/thickness"].Value, 0, HealthTextY)
+                Objects.HealthTextHolder.Position = UDim2New(
+                    0,
+                    -10 - HealthBarThickness,
+                    0,
+                    (HighY - LowY) * (1 - HealthPercent)
+                )
+            end
+
+            if Objects.HealthText.Text ~= HealthText then
+                Objects.HealthText.Text = HealthText
+            end
+
+            if Objects.HealthText.TextColor3 ~= HealthColor then
+                Objects.HealthText.TextColor3 = HealthColor
             end
         else
-            if Objects.HealthTextHolder.Visible then
-                Objects.HealthTextHolder.Visible = false
-            end
+            Objects.HealthTextHolder.Visible = false
         end
 
-        if Objects.HealthBarGradient.Color.Keypoints[1].Value ~= Options["esp/healthbar/colora"].Value or Objects.HealthBarGradient.Color.Keypoints[2].Value ~= Options["esp/healthbar/colorb"].Value then
+        local ColorA = Options["esp/healthbar/colora"].Value
+        local ColorB = Options["esp/healthbar/colorb"].Value
+        local Keypoints = Objects.HealthBarGradient.Color.Keypoints
+
+        if Keypoints[1].Value ~= ColorA or Keypoints[2].Value ~= ColorB then
             Objects.HealthBarGradient.Color = ColorSequence.new({
-                ColorSequenceKeypoint.new(0, Options["esp/healthbar/colora"].Value),
-                ColorSequenceKeypoint.new(1, Options["esp/healthbar/colorb"].Value)
+                ColorSequenceKeypoint.new(0, ColorA),
+                ColorSequenceKeypoint.new(1, ColorB)
             })
         end
     else
-        if Objects.HealthBar.Visible then
-            Objects.HealthBar.Visible = false
-        end
-        if Objects.HealthTextHolder.Visible then
-            Objects.HealthTextHolder.Visible = false
-        end
+        Objects.HealthBar.Visible = false
+        Objects.HealthTextHolder.Visible = false
     end
+
+    --# Distance
 
     if Toggles["esp/distance"].Value then
-        if not Objects.Distance.Visible then
-            Objects.Distance.Visible = true
+        Objects.Distance.Visible = true
+
+        local DistanceText = tostring(Floor(Distance)) .. "st"
+        local DistanceColor = Options["esp/distance/color"].Value
+
+        if Objects.Distance.Text ~= DistanceText then
+            Objects.Distance.Text = DistanceText
         end
 
-        if ClientRoot and TargetRoot then
-            local DistanceText = tostring(Floor(Distance)) .. "st"
-
-            if Objects.Distance.Text ~= DistanceText then
-                Objects.Distance.Text = DistanceText
-            end
-
-            local DistanceColor = Options["esp/distance/color"].Value
-            if Objects.Distance.TextColor3 ~= DistanceColor then
-                Objects.Distance.TextColor3 = DistanceColor
-            end
+        if Objects.Distance.TextColor3 ~= DistanceColor then
+            Objects.Distance.TextColor3 = DistanceColor
         end
     else
-        if Objects.Distance.Visible then
-            Objects.Distance.Visible = false
-        end
+        Objects.Distance.Visible = false
     end
-    
+
+    --# Chams
+
     ESP.ChamsRender(Entity)
 
     Objects.Holder.Position = FromOffset(LowX, LowY)
-    Objects.Holder.Size = FromOffset(HighX - LowX, HighY - LowY)
+    Objects.Holder.Size = FromOffset(
+        HighX - LowX,
+        HighY - LowY
+    )
     Objects.Holder.Visible = true
-
 end
 
 function ESP.Update(DeltaTime)
-
     if not Toggles["esp/enabled"].Value then
         LastHz = 0
+
         if ScreenGui.Enabled then
-            for _, Entity in ESP.Entities do ESP.ChamsRemove(Entity) end
+            for _, Entity in ESP.Entities do
+                ESP.ChamsRemove(Entity)
+                Entity.Objects.Holder.Visible = false
+            end
+
+            Viewport.Visible = false
             ScreenGui.Enabled = false
         end
+
         return
-    else
-        if not ScreenGui.Enabled then
-            ScreenGui.Enabled = true
-        end
     end
+
+    ScreenGui.Enabled = true
 
     ESP.ApplyAllPlayer()
 
-    do
-        local Hertz = Maximum(1, Options["esp/settings/renderhz"].Value)
-        local Interval = 1 / Hertz
+    local Hertz = Maximum(
+        1,
+        Options["esp/settings/renderhz"].Value
+    )
 
-        LastHz += DeltaTime
-        if LastHz < Interval then
-            return
-        end
-        LastHz -= Interval
+    local Interval = 1 / Hertz
+
+    LastHz += DeltaTime
+
+    if LastHz < Interval then
+        return
     end
 
-    for _, Entity in ESP.Entities do ESP.Render(Entity) end
-end 
+    LastHz -= Interval
+
+    for _, Entity in ESP.Entities do
+        ESP.Render(Entity)
+    end
+end
 
 return ESP
