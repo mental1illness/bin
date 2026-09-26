@@ -12,7 +12,7 @@ local UtilityRegistry = require(Shared:WaitForChild("UtilityRegistry"))
 local UnlockAll = {}
 UnlockAll.__index = UnlockAll
 
-local ScriptVersion = 5
+local ScriptVersion = 6
 
 function UnlockAll.new()
     local self = setmetatable({}, UnlockAll)
@@ -86,6 +86,10 @@ function UnlockAll.new()
     self.DesiredEquipped = {}
     self.DesiredSkins = {}
     self.DesiredObserver = nil
+
+    self.ExcludedSkins = {
+        ["Bayonet_GunGame_Gold"] = true,
+    }
 
     return self
 end
@@ -416,6 +420,102 @@ function UnlockAll:IsServerOwned(WeaponName)
     return self.ServerOwnedWeapons[WeaponName] == true
 end
 
+function UnlockAll:IsExcludedSkinId(CosmeticId)
+    if type(CosmeticId) ~= "string" then
+        return false
+    end
+
+    if self.ExcludedSkins[CosmeticId] == true then
+        return true
+    end
+
+    return string.find(CosmeticId, "Bayonet_GunGame_Gold", 1, true) ~= nil
+end
+
+function UnlockAll:GetCosmeticIdForUuid(Uuid)
+    if type(Uuid) ~= "string" then
+        return nil
+    end
+
+    if self.PlayerDataClient == nil then
+        return nil
+    end
+
+    local Data = self.PlayerDataClient.Data
+
+    if type(Data) ~= "table" or type(Data.CosmeticInventory) ~= "table" then
+        return nil
+    end
+
+    local Entry = Data.CosmeticInventory[Uuid]
+
+    if type(Entry) == "table" and type(Entry.CosmeticId) == "string" then
+        return Entry.CosmeticId
+    end
+
+    return nil
+end
+
+function UnlockAll:GetEquippedSkinUuid(WeaponName)
+    if type(WeaponName) ~= "string" then
+        return nil
+    end
+
+    local Uuid = self.DesiredSkins[WeaponName]
+
+    if Uuid ~= nil then
+        return Uuid
+    end
+
+    if self.PlayerDataClient ~= nil then
+        local Data = self.PlayerDataClient.Data
+
+        if type(Data) == "table" and type(Data.EquippedCosmetics) == "table" and type(Data.EquippedCosmetics.WeaponSkins) == "table" then
+            Uuid = Data.EquippedCosmetics.WeaponSkins[WeaponName]
+
+            if Uuid ~= nil then
+                return Uuid
+            end
+        end
+    end
+
+    if self.MenuLoadout ~= nil and type(self.MenuLoadout.EquippedCosmetics) == "table" then
+        Uuid = self.MenuLoadout.EquippedCosmetics[WeaponName]
+
+        if Uuid ~= nil then
+            return Uuid
+        end
+    end
+
+    return self.ServerSkins[WeaponName]
+end
+
+function UnlockAll:HasExcludedSkin(Weapon)
+    if type(Weapon) ~= "table" or type(Weapon.Name) ~= "string" then
+        return false
+    end
+
+    for _, Value in pairs(Weapon) do
+        if type(Value) == "string" and self:IsExcludedSkinId(Value) then
+            return true
+        end
+    end
+
+    local SkinUuid = self:GetEquippedSkinUuid(Weapon.Name)
+
+    if type(SkinUuid) == "string" then
+        if self:IsExcludedSkinId(SkinUuid) then
+            return true
+        end
+
+        if self:IsExcludedSkinId(self:GetCosmeticIdForUuid(SkinUuid)) then
+            return true
+        end
+    end
+
+    return false
+end
+
 function UnlockAll:ResolveReportId(Weapon)
     if type(Weapon) ~= "table" or type(Weapon.Name) ~= "string" then
         return nil
@@ -424,6 +524,10 @@ function UnlockAll:ResolveReportId(Weapon)
     local RealId = WeaponRegistry:getIdByName(Weapon.Name)
 
     if Weapon.SlotType ~= "Melee" then
+        return RealId
+    end
+
+    if self:HasExcludedSkin(Weapon) then
         return RealId
     end
 
@@ -470,6 +574,42 @@ function UnlockAll:EnsureCosmeticInventory(Data)
 
     local AddedCount = 0
 
+    for Uuid, Entry in CosmeticInventory do
+        if type(Uuid) == "string" and string.sub(Uuid, 1, #self.FakePrefix) == self.FakePrefix then
+            local CosmeticId = nil
+
+            if type(Entry) == "table" then
+                CosmeticId = Entry.CosmeticId
+            end
+
+            if self:IsExcludedSkinId(Uuid) or self:IsExcludedSkinId(CosmeticId) then
+                CosmeticInventory[Uuid] = nil
+            end
+        end
+    end
+
+    if type(Data.EquippedCosmetics) == "table" and type(Data.EquippedCosmetics.WeaponSkins) == "table" then
+        for WeaponName, SkinUuid in Data.EquippedCosmetics.WeaponSkins do
+            if type(SkinUuid) == "string" and string.sub(SkinUuid, 1, #self.FakePrefix) == self.FakePrefix and self:IsExcludedSkinId(SkinUuid) then
+                Data.EquippedCosmetics.WeaponSkins[WeaponName] = "DEFAULT_" .. WeaponName
+            end
+        end
+    end
+
+    for WeaponName, SkinUuid in self.DesiredSkins do
+        if type(SkinUuid) == "string" and string.sub(SkinUuid, 1, #self.FakePrefix) == self.FakePrefix and self:IsExcludedSkinId(SkinUuid) then
+            self.DesiredSkins[WeaponName] = "DEFAULT_" .. WeaponName
+        end
+    end
+
+    if self.MenuLoadout ~= nil and type(self.MenuLoadout.EquippedCosmetics) == "table" then
+        for WeaponName, SkinUuid in self.MenuLoadout.EquippedCosmetics do
+            if type(SkinUuid) == "string" and string.sub(SkinUuid, 1, #self.FakePrefix) == self.FakePrefix and self:IsExcludedSkinId(SkinUuid) then
+                self.MenuLoadout.EquippedCosmetics[WeaponName] = "DEFAULT_" .. WeaponName
+            end
+        end
+    end
+
     for _, SkinData in SkinRegistry do
         if type(SkinData) ~= "table" then
             continue
@@ -478,6 +618,14 @@ function UnlockAll:EnsureCosmeticInventory(Data)
         local CosmeticId = SkinData.CosmeticId
 
         if type(CosmeticId) ~= "string" or CosmeticId == "" then
+            continue
+        end
+
+        if self:IsExcludedSkinId(CosmeticId) then
+            continue
+        end
+
+        if CosmeticId == "GunGame_Gold" and type(SkinData.AppliesTo) == "string" and string.find(SkinData.AppliesTo, "Bayonet", 1, true) ~= nil then
             continue
         end
 
