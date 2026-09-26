@@ -741,7 +741,7 @@ if moehack.data.game_name == "Killstreak" then
         if not ESP then
             return
         end
-        
+
         local Humanoid = FindFirstChild(PlayerViewmodel, "Humanoid")
 
         ESP.AddTarget(PlayerViewmodel, {
@@ -764,6 +764,7 @@ if moehack.data.game_name == "Killstreak" then
     )
 
     for _, PlayerViewmodel in workspace.GameLogic.Characters:GetChildren() do
+        if not PlayerViewmodel:GetAtttribute("BotPersonality") then continue end
         AddToESP(PlayerViewmodel)
     end
 end
