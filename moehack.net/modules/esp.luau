@@ -11,7 +11,6 @@ local Spawn, Wait = task.spawn, task.wait
 local ForEach, Insert, RemoveTable, Clear = table.foreach, table.insert, table.remove, table.clear
 local FindFirstChild, WaitForChild, FindFirstChildOfClass, Destroy, Clone, BulkMoveTo = workspace.FindFirstChild, workspace.WaitForChild, workspace.FindFirstChildOfClass, workspace.Destroy, workspace.Clone, workspace.BulkMoveTo
 local WorldToViewportPoint = workspace.CurrentCamera.WorldToViewportPoint
-local GetObjects = game.GetObjects
 local GetService = Game.GetService
 
 --# Services
@@ -536,7 +535,6 @@ do -- All the fucking helper funcs that looks extremely not clean do stay
     function _ESPConnectTarget(Target, Entity)
         _ESPDisconnectTarget(Entity)
         Entity.BodyParts = {}
-        Entity.CharacterMeshes = {}
         if not Target or not Target.Parent then return end
 
         if IsA(Target, "BasePart") then
@@ -547,16 +545,12 @@ do -- All the fucking helper funcs that looks extremely not clean do stay
         for _, Object in Target:GetDescendants() do
             if IsA(Object, "BasePart") then
                 Insert(Entity.BodyParts, Object)
-            elseif IsA(Object, "CharacterMesh") then
-                Insert(Entity.CharacterMeshes, Object)
             end
         end
 
         Insert(Entity.TargetConnections, Target.DescendantAdded:Connect(function(Object)
             if IsA(Object, "BasePart") then
                 Insert(Entity.BodyParts, Object)
-            elseif IsA(Object, "CharacterMesh") then
-                Insert(Entity.CharacterMeshes, Object)
             end
         end))
         Insert(Entity.TargetConnections, Target.DescendantRemoving:Connect(function(Object)
@@ -566,34 +560,7 @@ do -- All the fucking helper funcs that looks extremely not clean do stay
                     break
                 end
             end
-            for i, Mesh in Entity.CharacterMeshes do
-                if Mesh == Object then
-                    RemoveTable(Entity.CharacterMeshes, i)
-                    break
-                end
-            end
         end))
-    end
-
-
-    function _ESPSanitizeChamsObject(Object)
-        if IsA(Object, "BasePart") then
-            Object.Anchored = true
-            Object.CanCollide = false
-            Object.CanTouch = false
-            Object.CanQuery = false
-            Object.CastShadow = false
-            if IsA(Object, "MeshPart") then
-                Object.TextureID = ""
-            end
-        end
-        for _, V in Object:GetDescendants() do
-            if IsA(V, "Decal") or IsA(V, "Texture") or IsA(V, "SurfaceAppearance") then
-                Destroy(V)
-            elseif IsA(V, "SpecialMesh") then
-                V.TextureId = ""
-            end
-        end
     end
 
     function _ESPConnectCharacter(Player, Entity)
@@ -618,10 +585,6 @@ function ESP.AddTarget(Target, Settings)
         TargetConnections = {},
         ChamsModel = nil,
         ChamsParts = {},
-        ChamsCharacterMeshes = {},
-        ChamsCustomModel = nil,
-        ChamsCustomParts = {},
-        ChamsMesh = Settings.ChamsMesh or Settings.Mesh or Settings.ChamsMeshId or Settings.MeshId,
         IsCustom = true,
     }
 
@@ -644,7 +607,6 @@ function ESP.RemoveTarget(TargetOrEntity)
         end
     end
     _ESPDisconnectTarget(Entity)
-    ESP.ChamsRemove(Entity)
     if Entity.Objects and Entity.Objects.Holder then
         Entity.Objects.Holder:Destroy()
     end
@@ -670,9 +632,6 @@ function ESP.ApplyAllPlayer()
             Humanoid = nil,
             ChamsModel = nil,
             ChamsParts = {},
-            ChamsCharacterMeshes = {},
-            ChamsCustomModel = nil,
-            ChamsCustomParts = {},
             BodyParts = {},
         }
         Entity["Objects"] = ESP.CreateElements(Entity)
@@ -730,49 +689,54 @@ function ESP.ChamsRemove(Entity: {})
         Entity.ChamsModel = nil
     end
     Entity.ChamsParts = {}
-    Entity.ChamsCharacterMeshes = {}
-    Entity.ChamsCustomModel = nil
-    Entity.ChamsCustomParts = {}
 end
 
 function ESP.ChamsRender(Entity: {})
     if not Toggles["esp/chams"].Value then
-        if Entity.ChamsModel then ESP.ChamsRemove(Entity) end
+        if Viewport.Visible then ESP.ChamsRemove(Entity); Viewport.Visible = false end
         return
     end
+    if not Viewport.Visible then Viewport.Visible = true end
 
     local Model = Entity.ChamsModel
     if not Model then
         Model = Create("Model", Viewport)
         Model.Name = "\0"
         Entity.ChamsModel = Model
-        Entity.ChamsParts = {}
-        Entity.ChamsCharacterMeshes = {}
-        Entity.ChamsCustomParts = {}
+        Entity.ChamsParts = Entity.ChamsParts or {}
 
-        local Humanoid = Create("Humanoid", Model)
-        for _, CharacterMesh in Entity.CharacterMeshes or {} do
-            local Copy = Clone(CharacterMesh)
-            if Copy then
-                Copy.Parent = Model
-                Insert(Entity.ChamsCharacterMeshes, Copy)
-            end
-        end 
+        Create("Humanoid", Model)
+
     end
 
     local ChamsParts = Entity.ChamsParts
+    
     Clear(ChamsPartBuffer)
     Clear(ChamsCFrameBuffer)
     local Count = 0
 
     for _, Value in Entity.BodyParts do
         local Part = ChamsParts[Value]
-        if not Part or not Part.Parent then
+
+        if not Part then
             Part = Clone(Value)
-            if not Part or Part.Transparency >= 1 then
+            if Part.Transparency >= 1 then
                 continue
             end
-            _ESPSanitizeChamsObject(Part)
+            if not Part then continue end
+
+            if IsA(Part, "MeshPart") then
+                Part.TextureID = ""
+            end
+
+            for _, V in Part:GetDescendants() do
+                if IsA(V, "Decal") or V:IsA(V, "Texture") or V:IsA(V, "SurfaceAppearance") then
+                    Destroy(V)
+                elseif IsA(V, "SpecialMesh") then
+                    V.TextureId = ""
+                end
+            end
+
             Part.Parent = Model
             ChamsParts[Value] = Part
         end
@@ -783,42 +747,35 @@ function ESP.ChamsRender(Entity: {})
             ChamsPartBuffer[Count] = Part
             ChamsCFrameBuffer[Count] = TargetCFrame
         end
+
     end
 
     if Count > 0 then
         BulkMoveTo(workspace, ChamsPartBuffer, ChamsCFrameBuffer, EnumFireCFChange)
     end
 
-    -- Keep the custom mesh/OBJ aligned to the character root. The asset should
-    -- be authored around its origin; its scale/orientation is preserved.
-    if Entity.ChamsCustomModel then
-        local Character = Entity.IsCustom and Entity.Target or (Entity.Player and Entity.Player.Character)
-        local Root = Character and (Character.PrimaryPart or FindFirstChild(Character, "HumanoidRootPart"))
-        if Root then
-            Entity.ChamsCustomModel:PivotTo(Root.CFrame)
-        end
-    end
-
     for RealPart, Idx in ChamsParts do
-        if not RealPart or not RealPart.Parent then continue end
+
         local Material = Enum.Material[Options["esp/chams/material"].Value]
+
         local Picker = Options['esp/chams/color']
-        if Picker.Value ~= Idx.Color then Idx.Color = Picker.Value end
-        if Idx.Material ~= Material then Idx.Material = Material end
+        if Picker.Value ~= Idx.Color then
+            Idx.Color = Picker.Value
+        end
+
+        if Idx.Material ~= Material then
+            Idx.Material = Material
+        end
+
+        if Picker.Value ~= Viewport.BackgroundColor3 then
+            Viewport.BackgroundColor3 = Picker.Value
+        end
         if Picker.Transparency ~= Idx.Transparency and RealPart.Transparency < 1 then
             Idx.Transparency = Picker.Transparency
         end
+
     end
 
-    for _, Part in Entity.ChamsCustomParts do
-        if Part and Part.Parent then
-            local Material = Enum.Material[Options["esp/chams/material"].Value]
-            local Picker = Options['esp/chams/color']
-            Part.Color = Picker.Value
-            Part.Material = Material
-            Part.Transparency = Picker.Transparency
-        end
-    end
 end
 
 function ESP.Render(Entity: {})
