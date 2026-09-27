@@ -49,27 +49,56 @@ local Fonts: {[string]: any} = {}
 local FontSizes: {[string]: {number}} = {}
 local Loaded = false
 
+-- These caches only contain immutable Lua data. Roblox Instances and
+-- EditableImages are intentionally not cached because each Text object owns
+-- and destroys its own UI/image resources.
+local FontLookupCache: {[string]: any} = {}
+local GlyphCache: {[string]: {[number]: any}} = {}
+local ItemCache: {[string]: any} = {}
+local ItemCacheOrder: {string} = {}
 local RenderCache: {[string]: any} = {}
 local RenderCacheOrder: {string} = {}
-local RenderCacheLimit = 64
+local CacheLimit = 256
 
-local function ClearRenderCache()
-    table.clear(RenderCache)
-    table.clear(RenderCacheOrder)
+local function ClearCacheTable(Cache, Order)
+    table.clear(Cache)
+    if Order then
+        table.clear(Order)
+    end
 end
 
-local function AddRenderCache(Key: string, Value: any)
-    if RenderCache[Key] then
+local function ClearRenderCache()
+    ClearCacheTable(RenderCache, RenderCacheOrder)
+    ClearCacheTable(ItemCache, ItemCacheOrder)
+    table.clear(FontLookupCache)
+    table.clear(GlyphCache)
+end
+
+local function AddBoundedCache(
+    Cache,
+    Order,
+    Key: string,
+    Value
+)
+    if Cache[Key] then
         return
     end
 
-    RenderCache[Key] = Value
-    RenderCacheOrder[#RenderCacheOrder + 1] = Key
+    Cache[Key] = Value
+    Order[#Order + 1] = Key
 
-    if #RenderCacheOrder > RenderCacheLimit then
-        local OldestKey = table.remove(RenderCacheOrder, 1)
-        RenderCache[OldestKey] = nil
+    if #Order > CacheLimit then
+        local OldestKey = table.remove(Order, 1)
+        Cache[OldestKey] = nil
     end
+end
+
+local function AddRenderCache(Key: string, Value: any)
+    AddBoundedCache(RenderCache, RenderCacheOrder, Key, Value)
+end
+
+local function AddItemCache(Key: string, Value: any)
+    AddBoundedCache(ItemCache, ItemCacheOrder, Key, Value)
 end
 
 local function ColorKey(Color)
@@ -80,13 +109,10 @@ local function ColorKey(Color)
     return string.format("%.6f,%.6f,%.6f", Color.R, Color.G, Color.B)
 end
 
-local function MakeRenderCacheKey(Runs, FontObject, DefaultColor, Transparency, UseShadow, UseOutline)
+local function MakeItemsCacheKey(Runs, FontObject, DefaultColor)
     local Parts = {
         FontObject.key or tostring(FontObject),
         ColorKey(DefaultColor),
-        string.format("%.6f", Transparency),
-        UseShadow and "1" or "0",
-        UseOutline and "1" or "0",
     }
 
     for Index, Run in Runs do
@@ -96,6 +122,18 @@ local function MakeRenderCacheKey(Runs, FontObject, DefaultColor, Transparency, 
         Parts[#Parts + 1] = Text
         Parts[#Parts + 1] = ColorKey(Color)
     end
+
+    return table.concat(Parts, "\31")
+end
+
+local function MakeRenderCacheKey(Runs, FontObject, DefaultColor, Transparency, UseShadow, UseOutline)
+    local Parts = {
+        MakeItemsCacheKey(Runs, FontObject, DefaultColor),
+        string.format("%.6f", Transparency),
+        UseShadow and "1" or "0",
+        UseOutline and "1" or "0",
+    }
+
 
     return table.concat(Parts, "\31")
 end
@@ -193,8 +231,15 @@ function SourceFont.Get(Name: string, Size: number)
         return nil
     end
 
-    local Exact = Fonts[Name .. "@" .. Size]
+    local LookupKey = Name .. "@" .. tostring(Size)
+    local Cached = FontLookupCache[LookupKey]
+    if Cached ~= nil then
+        return Cached or nil
+    end
+
+    local Exact = Fonts[LookupKey]
     if Exact then
+        FontLookupCache[LookupKey] = Exact
         return Exact
     end
 
@@ -207,11 +252,10 @@ function SourceFont.Get(Name: string, Size: number)
         end
     end
 
-    if NearestSize then
-        return Fonts[Name .. "@" .. NearestSize]
-    end
-
-    return nil
+    local Result = if NearestSize then Fonts[Name .. "@" .. NearestSize] else nil
+    -- false is used as a negative-cache sentinel because nil would mean miss.
+    FontLookupCache[LookupKey] = Result or false
+    return Result
 end
 
 function SourceFont.Supports(FontObject, Text: string): boolean
@@ -240,8 +284,22 @@ function SourceFont.Width(FontObject, Text: string): number
 end
 
 local function GetGlyph(FontObject, Codepoint: number)
-    return FontObject.glyphs[Codepoint]
+    local FontKey = FontObject.key or tostring(FontObject)
+    local CachedGlyphs = GlyphCache[FontKey]
+    if not CachedGlyphs then
+        CachedGlyphs = {}
+        GlyphCache[FontKey] = CachedGlyphs
+    end
+
+    local Cached = CachedGlyphs[Codepoint]
+    if Cached ~= nil then
+        return Cached or nil
+    end
+
+    local Glyph = FontObject.glyphs[Codepoint]
         or FontObject.glyphs[63]
+    CachedGlyphs[Codepoint] = Glyph or false
+    return Glyph
 end
 
 
@@ -496,7 +554,13 @@ function Text:Set(Runs, FontObject, Options)
         ShadowOutput = CachedRender.shadowOutput
         ShadowWidth = CachedRender.shadowWidth
     else
-        local Items = MakeItems(Runs, FontObject, DefaultColor)
+        local ItemsKey = MakeItemsCacheKey(Runs, FontObject, DefaultColor)
+        local Items = ItemCache[ItemsKey]
+        if not Items then
+            Items = MakeItems(Runs, FontObject, DefaultColor)
+            AddItemCache(ItemsKey, Items)
+        end
+
         Output, Width = DrawRow(
             Items,
             FontObject,
