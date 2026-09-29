@@ -60,14 +60,6 @@ local Camera = workspace.CurrentCamera
 local RaycastParams = RaycastParams.new()
 local PlayersCache = Players:GetPlayers()
 
-Library:GiveSignal( Players.PlayerAdded:Connect(function(Player)
-    PlayersCache[Player] = Player
-end) )
-
-Library:GiveSignal( Players.PlayerRemoving:Connect(function(Player)
-    PlayersCache[Player] = nil
-end) )
-
 local HitboxCache = {}
 local HitboxConnections = {}
 
@@ -125,68 +117,87 @@ function Combat.IsBehindWalls(Target, Hitbox)
 end
 
 function Combat.GetHitboxes(Character)
-    local Cached = HitboxCache[Character]
+	if not Character or not Character.Parent then
+		return {}
+	end
 
-    if Cached then
-        return Cached
-    end
+	local Cached = HitboxCache[Character]
 
-    Cached = {}
-    HitboxCache[Character] = Cached
+	if Cached then
+		return Cached.List
+	end
 
-    for _, Part in QueryDescendants(Character, "BasePart") do
-        if Part.Transparency < 1 then
-            Cached[#Cached + 1] = Part
-        end
-    end
+	local List = {}
+	local Lookup = {}
 
-    local DescendantAdded = Character.DescendantAdded:Connect(function(Descendant)
-        if not IsA(Descendant, "BasePart") then
-            return
-        end
+	for _, Part in QueryDescendants(Character, "BasePart") do
+		if Part.Parent and Part.Transparency < 1 then
+			List[#List + 1] = Part
+			Lookup[Part] = true
+		end
+	end
 
-        if Descendant.Transparency >= 1 then
-            return
-        end
+	Cached = {
+		List = List,
+		Lookup = Lookup
+	}
 
-        for _, Part in Cached do
-            if Part == Descendant then
-                return
-            end
-        end
+	HitboxCache[Character] = Cached
 
-        Cached[#Cached + 1] = Descendant
-    end)
+	local DescendantAdded = Character.DescendantAdded:Connect(function(Descendant)
+		if not Descendant.Parent or not IsA(Descendant, "BasePart") then
+			return
+		end
 
-    local DescendantRemoving = Character.DescendantRemoving:Connect(function(Descendant)
-        for Index = #Cached, 1, -1 do
-            if Cached[Index] == Descendant then
-                Remove(Cached, Index)
-                break
-            end
-        end
-    end)
+		if Descendant.Transparency >= 1 or Lookup[Descendant] then
+			return
+		end
 
-    HitboxConnections[Character] = {
-        DescendantAdded,
-        DescendantRemoving
-    }
+		Lookup[Descendant] = true
+		List[#List + 1] = Descendant
+	end)
 
-    return Cached
+	local DescendantRemoving = Character.DescendantRemoving:Connect(function(Descendant)
+		if not Lookup[Descendant] then
+			return
+		end
+
+		Lookup[Descendant] = nil
+
+		for Index = #List, 1, -1 do
+			if List[Index] == Descendant then
+				Remove(List, Index)
+				break
+			end
+		end
+	end)
+
+	HitboxConnections[Character] = {
+		DescendantAdded,
+		DescendantRemoving
+	}
+
+	return List
 end
 
 function Combat.ClearHitboxCache(Character)
-    HitboxCache[Character] = nil
+	if not Character then
+		return
+	end
 
-    local Connections = HitboxConnections[Character]
+	HitboxCache[Character] = nil
 
-    if Connections then
-        for _, Connection in Connections do
-            Connection:Disconnect()
-        end
+	local Connections = HitboxConnections[Character]
 
-        HitboxConnections[Character] = nil
-    end
+	if Connections then
+		for _, Connection in Connections do
+			if Connection.Connected then
+				Connection:Disconnect()
+			end
+		end
+
+		HitboxConnections[Character] = nil
+	end
 end
 
 function Combat.GetTarget(FOV: number, NearestHitbox: boolean)
@@ -572,9 +583,20 @@ function Combat.Tick(Delta)
         Combat.RCSRecoil = 0
         Combat.RCSCorrection = 0
     end
-
-
-    
 end
+
+Library:GiveSignal( Players.PlayerAdded:Connect(function(Player)
+    PlayersCache[Player] = Player
+end) )
+
+Library:GiveSignal(Players.PlayerRemoving:Connect(function(Player)
+	PlayersCache[Player] = nil
+
+	local Character = Player.Character
+
+	if Character then
+		Combat.ClearHitboxCache(Character)
+	end
+end))
 
 return Combat
