@@ -328,7 +328,7 @@ function ESP.CreateElements(Entity: table)
             XScalePos = 0.5,
             YScalePos = 0.5,
             Shadow = true,
-            Y = 1,
+            Y = 0,
             ShadowColor = Color3.fromRGB(0, 0, 0),
             ShadowX = 1,
             ShadowY = 1,
