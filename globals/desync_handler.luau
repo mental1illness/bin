@@ -92,6 +92,9 @@ local Desync = {
         "ImGoingToDesyncNow",
         Enum.RenderPriority.First.Value,
         function()
+
+            if Toggles and Toggles["misc/desync"] and not Toggles["misc/desync"].Value then return end
+
             local Root = Client.Root
 
             if Root == "doesn't exist" then
@@ -107,6 +110,8 @@ local Desync = {
     RunService.Heartbeat:Connect(function()
         local Root = Client.Root
         local Humanoid = Client.Humanoid
+
+        if Toggles and Toggles["misc/desync"] and not Toggles["misc/desync"].Value then return end
 
         if Root == "doesn't exist" then
             return
