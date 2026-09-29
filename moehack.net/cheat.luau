@@ -461,9 +461,9 @@ local Library, SaveManager, ThemeManager = LoadModule("moehack.net/interface/lib
 
                 do -- Exploits
                     Exploits:AddToggle("misc/exploits/antifling", { Text = "Anti Fling", Default = false })
-                    if moehack.data.game_name == "Killstreak" then
+                    if moehack.data.game_name == "Killstreak" or moehack.data.game_name == "Arsenal" then
                         Exploits:AddToggle("misc/exploits/unlockall", {Text = "Unlock All", Default = false, Callback = function(Valorant)
-                            local Controller = LoadModule("moehack.net/modules/games/killstreak/unlockall.luau")
+                            local Controller = LoadModule("moehack.net/modules/games/" .. string.lower(moehack.data.game_name) .. "/unlockall.luau")
 
                             if Valorant then
                                 Controller:Enable()
