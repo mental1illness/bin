@@ -578,7 +578,8 @@ function UnlockAll:HookRagdoll()
 
 			if self.KillEffect and self.KillEffect ~= "None" then
 				local Target = Arguments[2]
-				if Target ~= self.Player then
+                local KillerName = Arguments[11]
+				if Target ~= self.Player and KillerName == self.Player.Name then
 					Arguments[12] = self.KillEffect
 				end
 			end
