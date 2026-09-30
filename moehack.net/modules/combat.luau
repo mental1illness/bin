@@ -166,7 +166,10 @@ function Combat.GetHitboxes(Character)
 
 		for Index = #List, 1, -1 do
 			if List[Index] == Descendant then
-				Remove(List, Index)
+
+                if List and Index then
+                    RemoveTable(List, Index)
+                end
 				break
 			end
 		end

@@ -285,13 +285,7 @@ function Utility.GetHealth(Player, Character)
     end
 
 	if moehack.data.game_name == "Arsenal" then
-		local NRPBS = FindFirstChild(Player, "NRPBS")
-		local MaxHealth = NRPBS and FindFirstChild(NRPBS, "MaxHealth")
-		local Health = NRPBS and FindFirstChild(NRPBS, "Health")
-
-		if MaxHealth and Health then
-			return MaxHealth.Value, Health.Value
-		end
+		return Player.NRPBS.MaxHealth.Value, Player.NRPBS.Health.Value
 	end
 
     local MaxHealth, Health = 0, 0
