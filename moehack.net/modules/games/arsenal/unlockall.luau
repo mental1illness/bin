@@ -30,6 +30,9 @@ function UnlockAll.new()
 		WeaponSkin = nil,
 		MeleeSkin = nil,
 		MeleeMetaCache = {},
+		SoundHooked = false,
+		OrigPlaysound = nil,
+		OrigRplaysound = nil,
 		Categories = {
 			"Skins",
 			"Melees",
@@ -55,6 +58,7 @@ function UnlockAll.new()
 	self:HookRagdoll()
 	self:HookCharacterAdded()
 	self:HookMeleeMeta()
+	self:HookMeleeSounds()
 
 	if not self.Disabled then
 		self:UnlockAll()
@@ -593,6 +597,209 @@ function UnlockAll:HookMeleeMeta()
 
 		return table.unpack(Results)
 	end)
+end
+
+function UnlockAll:RemapMeleeSound(SoundVal)
+	if self.Disabled then
+		return SoundVal
+	end
+
+	local OkInst, IsInst = pcall(function()
+		return typeof(SoundVal) == "Instance"
+	end)
+
+	if not OkInst or not IsInst then
+		return SoundVal
+	end
+
+	local OkClass, IsStr = pcall(function()
+		return SoundVal:IsA("StringValue")
+	end)
+
+	if not OkClass or not IsStr then
+		return SoundVal
+	end
+
+	local Slot = nil
+
+	pcall(function()
+		Slot = SoundVal.Name
+	end)
+
+	if type(Slot) ~= "string" then
+		return SoundVal
+	end
+
+	local Allowed = {
+		Hit1 = true,
+		Hit2 = true,
+		Hit3 = true,
+		Hit4 = true,
+		Hit5 = true,
+		Shoot = true,
+		Shoot2 = true,
+		On = true,
+		Idle = true,
+		World1 = true,
+		World2 = true,
+		Taunt = true,
+		Equip = true,
+	}
+
+	if not Allowed[Slot] then
+		return SoundVal
+	end
+
+	local IsMeleeView = false
+
+	pcall(function()
+		IsMeleeView = self.State.equipped == "melee"
+			and (self.State.meleeslot == "Knife" or self.State.meleeslot == "Golden Knife")
+	end)
+
+	if not IsMeleeView then
+		return SoundVal
+	end
+
+	local RealName = nil
+
+	pcall(function()
+		local Folder = self.Player:FindFirstChild("Data")
+		local MeleeValue = Folder and Folder:FindFirstChild("Melee")
+		RealName = MeleeValue and string.split(MeleeValue.Value or "", "_")[1]
+	end)
+
+	local Spoof = self.MeleeSkin
+
+	if not self:IsValidMelee(Spoof) then
+		return SoundVal
+	end
+
+	if type(RealName) ~= "string" or RealName == "" or RealName == Spoof then
+		return SoundVal
+	end
+
+	local Model = nil
+
+	pcall(function()
+		Model = SoundVal.Parent
+	end)
+
+	if typeof(Model) ~= "Instance" or Model.Name ~= "Model" then
+		return SoundVal
+	end
+
+	local HolderName = nil
+
+	pcall(function()
+		HolderName = Model.Parent and Model.Parent.Name
+	end)
+
+	local Melees = ReplicatedStorage:FindFirstChild("Melees")
+
+	if not Melees then
+		return SoundVal
+	end
+
+	if HolderName == RealName then
+		local SpoofModel = nil
+
+		pcall(function()
+			local SpoofFolder = Melees:FindFirstChild(Spoof)
+			SpoofModel = SpoofFolder and SpoofFolder:FindFirstChild("Model")
+		end)
+
+		local SpoofSlot = SpoofModel and SpoofModel:FindFirstChild(Slot)
+
+		if SpoofSlot then
+			return SpoofSlot
+		end
+
+		return SoundVal
+	end
+
+	local RealValue, CurValue = nil, nil
+
+	pcall(function()
+		local RealFolder = Melees:FindFirstChild(RealName)
+		local RealModel = RealFolder and RealFolder:FindFirstChild("Model")
+		local RealSlot = RealModel and RealModel:FindFirstChild(Slot)
+		RealValue = RealSlot and RealSlot.Value
+	end)
+
+	pcall(function()
+		CurValue = SoundVal.Value
+	end)
+
+	if RealValue ~= nil and CurValue ~= nil and RealValue == CurValue then
+		local SpoofSlot = nil
+
+		pcall(function()
+			local SpoofFolder = Melees:FindFirstChild(Spoof)
+			local SpoofModel = SpoofFolder and SpoofFolder:FindFirstChild("Model")
+			SpoofSlot = SpoofModel and SpoofModel:FindFirstChild(Slot)
+		end)
+
+		if SpoofSlot then
+			return SpoofSlot
+		end
+	end
+
+	return SoundVal
+end
+
+function UnlockAll:HookMeleeSounds()
+	if self.SoundHooked then
+		return
+	end
+
+	local Ok, SoundTable = pcall(function()
+		return require(ReplicatedStorage:WaitForChild("Modules"):WaitForChild("Sound"))
+	end)
+
+	if not Ok or type(SoundTable) ~= "table" then
+		return
+	end
+
+	local OrigPlay, OrigRPlay = nil, nil
+
+	pcall(function()
+		OrigPlay = SoundTable.playsound
+	end)
+
+	pcall(function()
+		OrigRPlay = SoundTable.rplaysound
+	end)
+
+	if type(OrigPlay) ~= "function" then
+		return
+	end
+
+	self.OrigPlaysound = OrigPlay
+	self.OrigRplaysound = OrigRPlay
+	self.SoundHooked = true
+
+	SoundTable.playsound = function(A, B, ...)
+		if A == SoundTable then
+			local Remapped = self:RemapMeleeSound(B)
+			return OrigPlay(A, Remapped, ...)
+		end
+
+		local Remapped = self:RemapMeleeSound(A)
+		return OrigPlay(Remapped, B, ...)
+	end
+
+	if type(OrigRPlay) == "function" then
+		SoundTable.rplaysound = function(A, B, ...)
+			if A == SoundTable then
+				local Remapped = self:RemapMeleeSound(B)
+				return OrigRPlay(A, Remapped, ...)
+			end
+
+			local Remapped = self:RemapMeleeSound(A)
+			return OrigRPlay(Remapped, B, ...)
+		end
+	end
 end
 
 function UnlockAll:HookViewmodel()
