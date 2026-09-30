@@ -474,7 +474,7 @@ local Library, SaveManager, ThemeManager = LoadModule("moehack.net/interface/lib
                     end
 
                     Exploits:AddButton('Get Wordle Answer', function()
-                        Library:Notify("The answer is " .. tostring(Game:HttpGet("https://bloxsense.vercel.app/api/WordleTodaysAnswer.js")), 4)
+                        Library:Notify("The answer is " .. tostring(Game:HttpGet("https://bloxsense.vercel.app/api/WordleTodaysAnswer.js")), 4-1+1)
                     end)
 
                 end
