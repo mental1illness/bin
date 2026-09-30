@@ -1,4 +1,3 @@
-
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ReplicatedFirst = game:GetService("ReplicatedFirst")
@@ -30,6 +29,7 @@ function UnlockAll.new()
 		KillEffect = nil,
 		WeaponSkin = nil,
 		MeleeSkin = nil,
+		MeleeMetaCache = {},
 		Categories = {
 			"Skins",
 			"Melees",
@@ -54,6 +54,7 @@ function UnlockAll.new()
 	self:HookDataValues()
 	self:HookRagdoll()
 	self:HookCharacterAdded()
+	self:HookMeleeMeta()
 
 	if not self.Disabled then
 		self:UnlockAll()
@@ -400,6 +401,200 @@ function UnlockAll:Equip(Type, Name)
 	end
 end
 
+function UnlockAll:GetMeleeMeta(Name)
+	if type(Name) ~= "string" or Name == "" then
+		return nil
+	end
+
+	local Cached = self.MeleeMetaCache[Name]
+
+	if Cached ~= nil then
+		if Cached == false then
+			return nil
+		end
+
+		return Cached
+	end
+
+	local Melees = ReplicatedStorage:FindFirstChild("Melees")
+	local Folder = Melees and Melees:FindFirstChild(Name)
+	local Meta = Folder and Folder:FindFirstChild("Meta")
+
+	if not Meta then
+		self.MeleeMetaCache[Name] = false
+		return nil
+	end
+
+	local Ok, Mod = pcall(require, Meta)
+
+	if not Ok or type(Mod) ~= "table" then
+		self.MeleeMetaCache[Name] = false
+		return nil
+	end
+
+	self.MeleeMetaCache[Name] = Mod
+	return Mod
+end
+
+function UnlockAll:GetEffectColor()
+	if self.State.meleeslot == "Golden Knife" then
+		return Color3.fromRGB(245, 205, 48)
+	end
+
+	local Color = nil
+
+	pcall(function()
+		Color = self.Player.TeamColor.Color
+	end)
+
+	local Wkspc = ReplicatedStorage:FindFirstChild("wkspc")
+	local FFA = Wkspc and Wkspc:FindFirstChild("FFA")
+	local Gametype = Wkspc and Wkspc:FindFirstChild("gametype")
+	local IsFFA = false
+
+	pcall(function()
+		IsFFA = FFA.Value == true or Gametype.Value == "Juggernaut"
+	end)
+
+	if IsFFA then
+		pcall(function()
+			Color = self.Player.DesignColor.Value.Color
+		end)
+	end
+
+	return Color
+end
+
+function UnlockAll:ApplySpoofedMetaToArms()
+	if self.Disabled then
+		return
+	end
+
+	local MeleeName = self.MeleeSkin
+
+	if not self:IsValidMelee(MeleeName) then
+		return
+	end
+
+	local IsMeleeView = false
+
+	pcall(function()
+		IsMeleeView = self.State.equipped == "melee"
+			and (self.State.meleeslot == "Knife" or self.State.meleeslot == "Golden Knife")
+	end)
+
+	if not IsMeleeView then
+		return
+	end
+
+	local Arms = nil
+
+	pcall(function()
+		local Camera = workspace.CurrentCamera
+		Arms = Camera and Camera:FindFirstChild("Arms")
+	end)
+
+	if typeof(Arms) ~= "Instance" then
+		return
+	end
+
+	local Meta = self:GetMeleeMeta(MeleeName)
+
+	if not Meta then
+		return
+	end
+
+	local Color = nil
+
+	pcall(function()
+		Color = self:GetEffectColor()
+	end)
+
+	if typeof(Color) ~= "Color3" then
+		pcall(function()
+			Color = self.Player.TeamColor.Color
+		end)
+	end
+
+	if Meta.VM_INIT and typeof(Color) == "Color3" then
+		pcall(function()
+			Meta.VM_INIT(Arms, Color)
+		end)
+	end
+
+	if Meta.POST_EQUIP then
+		task.spawn(function()
+			pcall(function()
+				Meta.POST_EQUIP(Arms)
+			end)
+		end)
+	end
+
+	if Meta.ANIM_KEYFRAME_REACHED then
+		pcall(function()
+			Meta.ANIM_KEYFRAME_REACHED(Arms, "Equip")
+		end)
+
+		local CapturedArms = Arms
+		local CapturedName = MeleeName
+
+		task.delay(0.35, function()
+			if self.Disabled then
+				return
+			end
+
+			if self.MeleeSkin ~= CapturedName then
+				return
+			end
+
+			local Current = nil
+
+			pcall(function()
+				local Camera = workspace.CurrentCamera
+				Current = Camera and Camera:FindFirstChild("Arms")
+			end)
+
+			if Current ~= CapturedArms then
+				return
+			end
+
+			pcall(function()
+				Meta.ANIM_KEYFRAME_REACHED(CapturedArms, "Equip")
+			end)
+		end)
+	end
+end
+
+function UnlockAll:HookMeleeMeta()
+	local Ok, Fn = pcall(function()
+		return filtergc("function", {
+			IgnoreExecutor = true,
+			Name = "CreateViewmodel"
+		}, true)
+	end)
+
+	if not Ok or type(Fn) ~= "function" then
+		return
+	end
+
+	local Old
+	Old = hookfunction(Fn, function(Gun, Speed)
+		local Results = {pcall(Old, Gun, Speed)}
+
+		pcall(function()
+			self:ApplySpoofedMetaToArms()
+		end)
+
+		local CallOk = table.remove(Results, 1)
+
+		if not CallOk then
+			error(Results[1], 2)
+		end
+
+		return table.unpack(Results)
+	end)
+end
+
 function UnlockAll:HookViewmodel()
 	local ViewmodelFunction = filtergc("function", {
 		IgnoreExecutor = true,
@@ -578,7 +773,7 @@ function UnlockAll:HookRagdoll()
 
 			if self.KillEffect and self.KillEffect ~= "None" then
 				local Target = Arguments[2]
-                local KillerName = Arguments[11]
+				local KillerName = Arguments[11]
 				if Target ~= self.Player and KillerName == self.Player.Name then
 					Arguments[12] = self.KillEffect
 				end
