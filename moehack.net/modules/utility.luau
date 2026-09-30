@@ -272,10 +272,21 @@ function Utility.GetCharacter(Player)
 end
 
 function Utility.IsTeammate(Player1, Player2)
+    local Team1, Team2
+
     if moehack.data.game_name == "Blox Strike" then
-        return Player1:GetAttribute("Team") == Player2:GetAttribute("Team")
+        Team1 = Player1:GetAttribute("Team")
+        Team2 = Player2:GetAttribute("Team")
+    else
+        Team1 = Player1.Team
+        Team2 = Player2.Team
     end
-    return Player1.Team == Player2.Team
+
+    if Team1 == nil or Team2 == nil then
+        return false
+    end
+
+    return Team1 == Team2
 end
 
 function Utility.GetHealth(Player, Character)
