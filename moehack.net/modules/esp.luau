@@ -811,7 +811,7 @@ function ESP.Render(Entity: {})
     local MaxHealth = 100
     local Health = 100
 
-    if Humanoid then
+    if Humanoid and Entity.IsCustom then
         MaxHealth = Humanoid.MaxHealth
         Health = Humanoid.Health
     elseif Player then
