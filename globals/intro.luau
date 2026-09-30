@@ -42,8 +42,8 @@ local Fonts = LoadModule("globals/fonts.luau")
 
 local Intro = {
     Messages = {
-        { Text = "This cheat is not suitable for children that are easily beatable.", Weight = 80 },
-        { Text = "This cheat is not suitable for children that are easily breedable?", Weight = 50 },
+        { Text = "This cheat is not suitable for children or those that are easily beatable", Weight = 80 },
+        -- { Text = "This cheat is not suitable for children that are easily breedable?", Weight = 50 },
         { Text = "Moehack is a yuri.love revival", Weight = 15 },
         { Text = "Fuck you", Weight = 50 },
     }
