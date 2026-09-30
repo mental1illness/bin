@@ -23,6 +23,14 @@
     },
     "game_name": "Killstreak"
   },
+  "118419815459168": {
+    "use_custom_silent_aim": true,
+    "run_on_actor": false,
+    "tab_to_remove": {
+        
+    },
+    "game_name": "Killstreak"
+  },
   "105401128498345": {
     "use_custom_silent_aim": true,
     "run_on_actor": false,
