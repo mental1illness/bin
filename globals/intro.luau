@@ -75,7 +75,7 @@ function Intro.Create()
     ScreenGui.ResetOnSpawn = false
     ScreenGui.DisplayOrder = 9e9
 
-    writefile("DDLCMainFuckingThemeDude.mp3", Game:HttpGet("https://cats-cure-depression.vercel.app/assets/audio/DDLCMainTheme.mp3"))
+    writefile("GGEZ.mp3", Game:HttpGet("https://cats-cure-depression.vercel.app/assets/audio/Kaien,%20Sugar%20&%20M.Sasuke%20'GGEZ'%20Official%20MV.mp3"))
 
     local Sound = Create("Sound", ScreenGui)
     Sound.SoundId = getcustomasset("DDLCMainFuckingThemeDude.mp3")
