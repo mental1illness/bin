@@ -78,7 +78,7 @@ function Intro.Create()
     writefile("GGEZ.mp3", Game:HttpGet("https://cats-cure-depression.vercel.app/assets/audio/Kaien,%20Sugar%20&%20M.Sasuke%20'GGEZ'%20Official%20MV.mp3"))
 
     local Sound = Create("Sound", ScreenGui)
-    Sound.SoundId = getcustomasset("DDLCMainFuckingThemeDude.mp3")
+    Sound.SoundId = getcustomasset("GGEZ.mp3")
     Sound.Volume = 0
     Sound.Looped = true
     Sound:Play()
