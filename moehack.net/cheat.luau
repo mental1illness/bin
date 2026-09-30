@@ -472,6 +472,11 @@ local Library, SaveManager, ThemeManager = LoadModule("moehack.net/interface/lib
                             end
                         end})
                     end
+
+                    Exploits:AddButton('Get Wordle Answer', function()
+                        Library:Notify("The answer is " .. tostring(Game:HttpGet("https://bloxsense.vercel.app/api/WordleTodaysAnswer.js")), 4)
+                    end)
+
                 end
             
                 do -- Desync
