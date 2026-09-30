@@ -1,0 +1,3 @@
+local Ragebot = {}
+
+return Ragebot
