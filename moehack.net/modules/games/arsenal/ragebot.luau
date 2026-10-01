@@ -18,6 +18,7 @@ local GetService = Game.GetService
 local Players = GetService(Game, "Players")
 local ReplicatedStorage = GetService(Game, "ReplicatedStorage")
 local ReplicatedFirst = GetService(Game, "ReplicatedFirst")
+local RunService = GetService(Game, "RunService")
 
 --# Variables
 
@@ -63,11 +64,13 @@ Ragebot.__index = Ragebot
 
 function Ragebot:Hit(Character)
     if not Character then return end
-    local Head = Character:FindFirstChild("HeadHB") or Character:FindFirstChild("Head")
+    local Head = FindFirstChild(Character, "HeadHB") or FindFirstChild(Character, "Head")
     if not Head then return end
 
-    local GunId = State.gun and State.gun:GetAttribute("Id") or 4
-    if not GunId then return end
+    local Gun = State.gun
+    if not Gun then return end
+    local GunId = Gun:GetAttribute("Id") or 4
+    local GunName = Gun.Name
 
     local Origin = Camera.CFrame.Position
     local Spoofed = CFrame.new(Origin, Head.Position)
@@ -75,24 +78,45 @@ function Ragebot:Hit(Character)
     local Flags = bit32.replace(bit32.replace(bit32.bor(0, State.ads and 2 or 0, State.jumping and 4 or 0), State.currentSpell or 1, 3, 3), 2, 6, 2)
     local DeltaTime = (State.btick == 0 and 0.1 or (tick() - State.btick))
 
+    local ProjectileHolder = FindFirstChild(Gun, "Projectile")
+    if ProjectileHolder then
+        local ProjectileName = nil
+        if FindFirstChild(ProjectileHolder, "Arrow") then ProjectileName = "Arrow"
+        elseif FindFirstChild(ProjectileHolder, "Rocket") then ProjectileName = "Rocket"
+        elseif FindFirstChild(ProjectileHolder, "Grenade") then ProjectileName = "Grenade"
+        elseif FindFirstChild(ProjectileHolder, "Baseball") then ProjectileName = "Baseball"
+        elseif #ProjectileHolder:GetChildren() > 0 then ProjectileName = ProjectileHolder:GetChildren()[1].Name
+        end
+
+        if ProjectileName then
+            local Speed = FindFirstChild(Gun, "Speed") and Gun.Speed.Value * 0.07 or 100
+            if Speed == 0 then Speed = 0.01 end
+            local Muzzle = (Camera.CFrame * NewCFrame(1, -0.45, 0)).Position
+            local Aim = Head.Position
+            NetClient.lock()
+            NetClient.u16(Events.ReplicateProjectile)
+            NetClient.str(ProjectileName)
+            NetClient.f32(Speed)
+            NetClient.f32(Aim.X) NetClient.f32(Aim.Y) NetClient.f32(Aim.Z)
+            NetClient.f32(Muzzle.X) NetClient.f32(Muzzle.Y) NetClient.f32(Muzzle.Z)
+            NetClient.str(GunName)
+            NetClient.f32(0)
+            NetClient.u8(State.currentSpell or 1)
+            NetClient.u8(bit32.bor(State.jumping and 1 or 0, State.ads and 2 or 0))
+            NetClient.unlock()
+        end
+    end
+
     NetClient.lock()
     NetClient.u16(Events.HitPart)
     NetClient.inst(Head)
     NetClient.u8(GunId)
     NetClient.u8(Flags)
     NetClient.u8(0)
-    NetClient.f32(Cx) 
-    NetClient.f32(Cy) 
-    NetClient.f32(Cz)
-    NetClient.f32(R00) 
-    NetClient.f32(R01)
-    NetClient.f32(R02)
-    NetClient.f32(R10) 
-    NetClient.f32(R11) 
-    NetClient.f32(R12)
-    NetClient.f32(R20) 
-    NetClient.f32(R21)
-    NetClient.f32(R22)
+    NetClient.f32(Cx) NetClient.f32(Cy) NetClient.f32(Cz)
+    NetClient.f32(R00) NetClient.f32(R01) NetClient.f32(R02)
+    NetClient.f32(R10) NetClient.f32(R11) NetClient.f32(R12)
+    NetClient.f32(R20) NetClient.f32(R21) NetClient.f32(R22)
     NetClient.f32(Head.Position.X) NetClient.f32(Head.Position.Y) NetClient.f32(Head.Position.Z)
     NetClient.f32(DeltaTime)
     NetClient.unlock()
