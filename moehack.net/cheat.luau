@@ -151,6 +151,14 @@ local Library, SaveManager, ThemeManager = LoadModule("moehack.net/interface/lib
                     
                 end
 
+                do -- Ragebot
+                    if moehack.data.game_name == "Arsenal" then
+                        local Ragebot = Tabs.Combat:AddGroupbox({ Side = 2, Name = "Rage bot (extremely risky)" })
+                        LoadModule("moehack.net/modules/games/arsenal/ragebot.luau")
+                        Ragebot:AddToggle("combat/ragebot", { Text = "Enabled", Default = false })
+                    end
+                end
+
                 do -- Settings
                     Settings:AddToggle("combat/settings/targetteammates", { Text = "Target Teammates", Default = false })
                 end

@@ -91,7 +91,7 @@ function Ragebot:Hit(Character)
         if ProjectileName then
             local Speed = FindFirstChild(Gun, "Speed") and Gun.Speed.Value * 0.07 or 100
             if Speed == 0 then Speed = 0.01 end
-            local Muzzle = (Camera.CFrame * NewCFrame(1, -0.45, 0)).Position
+            local Muzzle = Camera.CFrame.Position
             local Aim = Head.Position
             NetClient.lock()
             NetClient.u16(Events.ReplicateProjectile)
@@ -123,6 +123,9 @@ function Ragebot:Hit(Character)
 end
 
 function Ragebot:Scan()
+
+    if not Toggles["combat/ragebot"].Value then return end
+
     local Gun = State.gun
     if not Gun then return end
     local FireRate = Gun and Gun:FindFirstChild("FireRate") and Gun.FireRate.Value or nil
@@ -130,8 +133,9 @@ function Ragebot:Scan()
 
     local Target = nil
     for _, Player in PlayersCache do
+        if Player == LocalPlayer then continue end
         local Character = Player.Character
-        if Character then
+        if Character and not Utility.IsTeammate(LocalPlayer, Player) then
             local MaxHealth, Health = Utility.GetHealth(Player, Character)
             if Health and Health > 0 then
                 local Head = Character:FindFirstChild("HeadHB") or Character:FindFirstChild("Head")
@@ -152,16 +156,16 @@ function Ragebot:Scan()
     end
 end
 
-RunService.Stepped:Connect(function()
+Library:GiveSignal(RunService.Stepped:Connect(function()
     Ragebot:Scan()
-end)
+end))
 
-Players.PlayerAdded:Connect(function(Player)
+Library:GiveSignal( Players.PlayerAdded:Connect(function(Player)
     PlayersCache = Players:GetPlayers()
-end) 
+end) )
 
-Players.PlayerRemoving:Connect(function(Player)
+Library:GiveSignal(Players.PlayerRemoving:Connect(function(Player)
 	PlayersCache = Players:GetPlayers()
-end)
+end))
 
 return Ragebot
