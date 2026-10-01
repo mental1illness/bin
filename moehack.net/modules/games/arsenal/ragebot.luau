@@ -58,7 +58,7 @@ local Combat = LoadModule("moehack.net/modules/combat.luau")
 local Utility = LoadModule("moehack.net/modules/utility.luau")
 
 --# Main
-local Ragebot = {}
+local Ragebot = { LastTimeFired = 0 }
 Ragebot.__index = Ragebot
 
 function Ragebot:Hit(Character)
@@ -99,28 +99,45 @@ function Ragebot:Hit(Character)
 end
 
 function Ragebot:Scan()
-    local Targets = {}
+    local Gun = State.gun
+    if not Gun then return end
+    local FireRate = Gun and Gun:FindFirstChild("FireRate") and Gun.FireRate.Value or nil
+    if not FireRate then return end
+
+    local Target = nil
     for _, Player in PlayersCache do
-        if Player.Character then
-            local MaxHealth, Health = Utility.GetHealth(Player, Player.Character)
+        local Character = Player.Character
+        if Character then
+            local MaxHealth, Health = Utility.GetHealth(Player, Character)
             if Health and Health > 0 then
                 local Head = Character:FindFirstChild("HeadHB") or Character:FindFirstChild("Head")
                 if not Head then continue end
 
                 if not Combat.IsBehindWalls(Player.Character, Head) then
-                    
+                    Target = Player.Character
+                    break
                 end
             end
         end
     end
+
+    local Now = tick()
+    if Target and Now - (self.LastTimeFired or 0) >= FireRate then
+        self.LastTimeFired = Now
+        self:Hit(Target)
+    end
 end
 
-Library:GiveSignal( Players.PlayerAdded:Connect(function(Player)
-    PlayersCache[Player] = Player
-end) )
+RunService.Stepped:Connect(function()
+    Ragebot:Scan()
+end)
 
-Library:GiveSignal(Players.PlayerRemoving:Connect(function(Player)
-	PlayersCache[Player] = nil
-end))
+Players.PlayerAdded:Connect(function(Player)
+    PlayersCache = Players:GetPlayers()
+end) 
+
+Players.PlayerRemoving:Connect(function(Player)
+	PlayersCache = Players:GetPlayers()
+end)
 
 return Ragebot
