@@ -74,6 +74,11 @@ function Ragebot:Hit(Character)
     local GunId = Gun:GetAttribute("Id") or 4
     local GunName = Gun.Name
 
+    if Gun == nil or FindFirstChild(Gun, "Projectile") ~= nil then return end
+    if FindFirstChild(Gun, "Melee") ~= nil then return end
+    if State.ammocount ~= nil and State.ammocount <= 0 then return end
+    if State.DISABLED == true then return end
+
     local Origin = Camera.CFrame.Position
     local Spoofed = CFrame.new(Origin, Head.Position)
     local Cx, Cy, Cz, R00, R01, R02, R10, R11, R12, R20, R21, R22 = Spoofed:GetComponents()
@@ -193,6 +198,10 @@ function Ragebot:Scan()
     if not Gun then return end
     local FireRate = Gun and FindFirstChild(Gun, "FireRate") and Gun.FireRate.Value or 0
     if not FireRate then return end
+    if FindFirstChild(Gun, "Projectile") ~= nil then return end
+    if FindFirstChild(Gun, "Melee") ~= nil then return end
+    if State.ammocount ~= nil and State.ammocount <= 0 then return end
+    if State.DISABLED == true then return end
 
     local Target = nil
     for _, Player in PlayersCache do
