@@ -518,7 +518,7 @@ if moehack.data.game_name == "Rivals" then
             local RootPart = Character and FindFirstChild(Character, "HumanoidRootPart")
             local Target, Hitbox = Combat.GetTarget(Options["combat/bulletredirection/fov"].Value, Toggles["combat/bulletredirection/usenearhitbox"].Value)
 
-            if RootPart then
+            if RootPart and Hitbox then
                 CameraData = CreateCameraData(RootPart.Position, Hitbox)
             end
         end
