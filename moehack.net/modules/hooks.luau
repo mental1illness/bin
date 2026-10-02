@@ -483,7 +483,7 @@ if moehack.data.game_name == "Rivals" then
         end
     end
 
-    function CameraData(Origin, Part)
+    function CreateCameraData(Origin, Part)
         local PartCFrame = Part.CFrame
         local Data = {}
 
@@ -519,7 +519,7 @@ if moehack.data.game_name == "Rivals" then
             local Target, Hitbox = Combat.GetTarget(Options["combat/bulletredirection/fov"].Value, Toggles["combat/bulletredirection/usenearhitbox"].Value)
 
             if RootPart then
-                CameraData = CameraData(RootPart.Position, Hitbox)
+                CameraData = CreateCameraData(RootPart.Position, Hitbox)
             end
         end
 
