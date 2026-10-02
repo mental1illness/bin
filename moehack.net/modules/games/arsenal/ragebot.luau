@@ -128,7 +128,7 @@ function Ragebot:Scan()
 
     local Gun = State.gun
     if not Gun then return end
-    local FireRate = Gun and Gun:FindFirstChild("FireRate") and Gun.FireRate.Value or nil
+    local FireRate = Gun and FindFirstChild(Gun, "FireRate") and Gun.FireRate.Value or nil
     if not FireRate then return end
 
     local Target = nil
