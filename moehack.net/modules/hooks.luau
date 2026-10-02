@@ -499,8 +499,8 @@ if moehack.data.game_name == "Rivals" then
 
     local EntityCast; EntityCast = hookfunction(GameplayUtility.GetEntitiesFromRaycast, function(self, EnvironmentID, Params, Origin, Direction, MaxDistance, ...)
         local Target, Hitbox = Combat.GetTarget(Options["combat/bulletredirection/fov"].Value, Toggles["combat/bulletredirection/usenearhitbox"].Value)
-
-        if Hitbox then
+        
+        if Hitbox and Toggles["combat/bulletredirection"].Value and not IsBehindWalls(Hitbox) then
             local Distance = (Hitbox.Position - Origin).Magnitude
             Direction = (Hitbox.Position - Origin).Unit
 
@@ -513,12 +513,12 @@ if moehack.data.game_name == "Rivals" then
     end)
     
     local Old; Old = hookfunction(UseItem.FireServer, newcclosure(function(self, ObjectID, EnumValue, CameraData, Extra)
-        if EnumValue == EnumLibrary:ToEnum("StartShooting") then
+        if EnumValue == EnumLibrary:ToEnum("StartShooting") and Toggles["combat/bulletredirection"].Value then
             local Character = LocalPlayer.Character
             local RootPart = Character.PrimaryPart
             local Target, Hitbox = Combat.GetTarget(Options["combat/bulletredirection/fov"].Value, Toggles["combat/bulletredirection/usenearhitbox"].Value)
 
-            if RootPart and Hitbox then
+            if RootPart and Hitbox and not IsBehindWalls(Hitbox) then
                 CameraData = CreateCameraData(RootPart.Position, Hitbox)
             end
         end
