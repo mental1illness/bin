@@ -28,6 +28,8 @@ local Camera = workspace.CurrentCamera
 local NetClient = require(ReplicatedFirst.Client.Utility.NetClient)
 local Events = require(ReplicatedStorage.Modules.Events)
 local State = require(ReplicatedFirst.Client.Utility.State)
+local Particles = require(game.ReplicatedFirst.Client.Game.Particles)
+local HumanoidInstanceWrapper = require(game.ReplicatedStorage.Modules.HumanoidInstanceWrapper)
 
 local PlayersCache = Players:GetPlayers()
 
@@ -122,13 +124,74 @@ function Ragebot:Hit(Character)
     NetClient.unlock()
 end
 
+function Ragebot:ReplicateShoot()
+    local Character = LocalPlayer.Character
+    if Character == nil then
+        return
+    end
+
+    local Gun = HumanoidInstanceWrapper.Get(Character, "Gun")
+    if Gun == nil then
+        return
+    end
+
+    local Anims = State.anims
+    local FireTrack = Anims.fireani or Anims.afireani or Anims.gfireani or Anims.efireani or Anims.cfireani or Anims.fire2ani or Anims.fire
+    if FireTrack ~= nil then
+        FireTrack:Play()
+    end
+
+    local Camera = workspace.CurrentCamera
+    local Arms = Camera ~= nil and Camera:FindFirstChild("Arms") or nil
+    if Arms ~= nil then
+        local Flash = Arms:FindFirstChild("Flash")
+        if Flash ~= nil then
+            Particles.CreateMuzzleFlash(Flash)
+        end
+
+        local SecondFlash = Arms:FindFirstChild("2Flash")
+        if SecondFlash ~= nil then
+            Particles.CreateMuzzleFlash(SecondFlash)
+        end
+    end
+
+    local FlashAttachment = Gun:FindFirstChild("Flash")
+    NetClient.lock()
+    NetClient.u16(Events.MuzzleParticleBounce)
+    NetClient.inst(FlashAttachment ~= nil and FlashAttachment or Gun)
+    NetClient.unlock()
+
+    local SecondGun = HumanoidInstanceWrapper.Get(Character, "Gun2")
+    if SecondGun ~= nil then
+        local SecondModel = SecondGun:FindFirstChild("Model2")
+        local SecondAttachment = nil
+        if SecondModel ~= nil then
+            SecondAttachment = SecondModel:FindFirstChild("Flash")
+        end
+        if SecondAttachment == nil then
+            SecondAttachment = SecondGun:FindFirstChild("Flash")
+        end
+
+        NetClient.lock()
+        NetClient.u16(Events.MuzzleParticleBounce)
+        if SecondModel ~= nil and SecondAttachment ~= nil then
+            NetClient.inst(SecondAttachment)
+        elseif SecondAttachment ~= nil then
+            NetClient.inst(SecondAttachment)
+        else
+            NetClient.inst(SecondGun)
+        end
+        NetClient.unlock()
+    end
+end
+
 function Ragebot:Scan()
 
     if not Toggles["combat/ragebot"].Value then return end
 
     local Gun = State.gun
     if not Gun then return end
-    local FireRate = Gun and FindFirstChild(Gun, "FireRate") and Gun.FireRate.Value or nil
+    local FireRate = Gun and FindFirstChild(Gun, "FireRate") and Gun.FireRate.Value or 0
     if not FireRate then return end
 
     local Target = nil
@@ -138,7 +201,7 @@ function Ragebot:Scan()
         if Character and not Utility.IsTeammate(LocalPlayer, Player) then
             local MaxHealth, Health = Utility.GetHealth(Player, Character)
             if Health and Health > 0 then
-                local Head = Character:FindFirstChild("HeadHB") or Character:FindFirstChild("Head")
+                local Head = FindFirstChild(Character, "HeadHB") or FindFirstChild(Character, "Head")
                 if not Head then continue end
 
                 if not Combat.IsBehindWalls(Player.Character, Head) then
@@ -153,6 +216,7 @@ function Ragebot:Scan()
     if Target and Now - (self.LastTimeFired or 0) >= FireRate then
         self.LastTimeFired = Now
         self:Hit(Target)
+        self:ReplicateShoot()
     end
 end
 
