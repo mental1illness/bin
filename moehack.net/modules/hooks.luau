@@ -512,7 +512,7 @@ if moehack.data.game_name == "Rivals" then
         return EntityCast(self, EnvironmentID, Params, Origin, Direction, MaxDistance, ...)
     end)
 
-    local Old; Old = hookfunction(UseItem.FireServer, newcclosure(function(self, ObjectID, EnumValue, CameraData, Extra)
+    --[[local Old; Old = hookfunction(UseItem.FireServer, newcclosure(function(self, ObjectID, EnumValue, CameraData, Extra)
         if EnumValue == EnumLibrary:ToEnum("StartShooting") then
             local Character = LocalPlayer.Character
             local RootPart = Character and FindFirstChild(Character, "HumanoidRootPart")
@@ -524,7 +524,7 @@ if moehack.data.game_name == "Rivals" then
         end
 
         return Old(self, ObjectID, EnumValue, CameraData, Extra)
-    end))
+    end))]]
 end
 
 return Hooks
