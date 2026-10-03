@@ -46,7 +46,6 @@
 --# Aliases
 
 local GetService = Game.GetService
-local QueueOnTeleport = queueonteleport or queue_on_teleport -- ik this shit has scuffed variables name
 
 --# Services
 
@@ -63,10 +62,18 @@ local GameData = HttpService:JSONDecode(
     tab_to_remove = {},
 }
 
+local Commit = HttpService:JSONDecode(request({
+	Url = "https://api.github.com/repos/mental1illness/bin/commits?per_page=1",
+	Method = "GET",
+}).Body)[1]
+
 --# Main
 
+
+
 getgenv().moehack = {
-    data = GameData
+    data = GameData,
+    current_sha = Commit.SHA
 }
 
 if GameData["run_on_actor"] then 
