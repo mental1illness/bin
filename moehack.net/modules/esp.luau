@@ -624,10 +624,39 @@ end
 
 --# Bounding Box
 
-function ESP.GetBoundingBox(Model: {})
+function ESP.GetBoundingBox(Model: {}, Character)
     local LowestX, HighestX = 1e6, -1e6
     local LowestY, HighestY = 1e6, -1e6
     local OnScreen = false
+
+    if Toggles["esp/settings/custombound"].Value then
+        local Root = Character.PrimaryPart
+        if Root and Root.Parent then
+            local Width = Options["esp/settings/custombound/width"].Value
+            local Height = Options["esp/settings/custombound/height"].Value
+            local HalfSize = NewVector3(Width, Height, Width) * 0.5
+            local RootCFrame = Root.CFrame
+
+            for _, Signs in Corners do
+                local ScreenPoint, Visible = WorldToViewportPoint(
+                    CurrentCamera,
+                    RootCFrame * NewVector3(
+                        HalfSize.X * Signs[1],
+                        HalfSize.Y * Signs[2],
+                        HalfSize.Z * Signs[3]
+                    )
+                )
+
+                OnScreen = OnScreen or Visible
+                LowestX = Minimum(LowestX, ScreenPoint.X)
+                HighestX = Maximum(HighestX, ScreenPoint.X)
+                LowestY = Minimum(LowestY, ScreenPoint.Y)
+                HighestY = Maximum(HighestY, ScreenPoint.Y)
+            end
+
+            return LowestX, HighestX, LowestY, HighestY, OnScreen
+        end
+    end
 
     for _, Part in Model do
         if Part.Parent and Part.Transparency < 0.99 then
@@ -838,7 +867,7 @@ function ESP.Render(Entity: {})
         return
     end
 
-    local LowX, HighX, LowY, HighY, OnScreen = ESP.GetBoundingBox(Entity.BodyParts)
+    local LowX, HighX, LowY, HighY, OnScreen = ESP.GetBoundingBox(Entity.BodyParts, Character)
 
     if not OnScreen or LowX == 1e6 or HighX == -1e6 then
         Objects.Holder.Visible = false
