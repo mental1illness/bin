@@ -73,7 +73,8 @@ local Commit = HttpService:JSONDecode(request({
 
 getgenv().moehack = {
     data = GameData,
-    current_sha = Commit.sha
+    current_sha = Commit.sha,
+    old_sha = readfile("current_sha_moehack.txt")
 }
 
 if GameData["run_on_actor"] then 

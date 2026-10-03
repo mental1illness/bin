@@ -42,8 +42,10 @@ LoadModule = function(Path)
     local url = "https://cats-cure-depression.vercel.app/" .. Path
     local CleanedPath = string.gsub(Path, "/", "")
 
-    if readfile("current_sha_moehack.txt") ~= moehack.current_sha then
-        writefile("current_sha_moehack.txt", moehack.current_sha)
+    if moehack.old_sha ~= moehack.current_sha then
+        if readfile("current_sha_moehack.txt") ~= moehack.old_sha then
+            writefile("current_sha_moehack.txt", moehack.current_sha)
+        end
 
         if isfile(CleanedPath) then
             delfile(CleanedPath)
