@@ -62,5 +62,13 @@
         
     },
     "game_name": "Rivals"
+  },
+  "117398147513099": {
+    "use_custom_silent_aim": true,
+    "run_on_actor": false,
+    "tab_to_remove": {
+        
+    },
+    "game_name": "Rivals"
   }
 }

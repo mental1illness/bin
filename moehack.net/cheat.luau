@@ -653,7 +653,7 @@ local Library, SaveManager, ThemeManager = LoadModule("moehack.net/interface/lib
     SaveManager:SetIgnoreIndexes({ 'MenuKeybind' })
 
     ThemeManager:SetFolder('moehack')
-    SaveManager:SetFolder('moehack/' .. makeKebabPls(MarketplaceService:GetProductInfo(Game.PlaceId).Name))
+    SaveManager:SetFolder('moehack/' .. makeKebabPls(moehack.game_name))
 
     SaveManager:BuildConfigSection(Tabs.Settings)
     ThemeManager:ApplyToTab(Tabs.Settings)
