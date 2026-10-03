@@ -60,6 +60,10 @@ LoadModule = function(Path)
         writefile(CleanedPath, Game:HttpGet(url))
     end
 
+    if not isfile(CleanedPath) then
+        writefile(CleanedPath, Game:HttpGet(url))
+    end
+
     local Result = loadstring(readfile(CleanedPath))()
     FuckYouCacheBitch[Path] = Result
 
