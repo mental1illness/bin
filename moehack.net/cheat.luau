@@ -37,7 +37,7 @@ LoadModule = function(Path)
 
 
     if not isfile("current_sha_moehack.txt") then
-        writefile("current_sha_moehack.txt", tostring(moehack.current_sha))
+        writefile("current_sha_moehack.txt", moehack.current_sha)
     end
 
     if not FuckYouCacheBitch then
@@ -53,6 +53,7 @@ LoadModule = function(Path)
     local CleanedPath = string.gsub(Path, "/", "")
 
     if readfile("current_sha_moehack.txt") ~= moehack.current_sha then
+        writefile("current_sha_moehack.txt", moehack.current_sha)
         writefile(CleanedPath, Game:HttpGet(url))
     end
 
