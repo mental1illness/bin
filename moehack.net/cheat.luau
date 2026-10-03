@@ -175,9 +175,10 @@ local Library, SaveManager, ThemeManager = LoadModule("moehack.net/interface/lib
 
                 do -- Ragebot
                     if moehack.data.game_name == "Arsenal" then
-                        local Ragebot = Tabs.Combat:AddGroupbox({ Side = 2, Name = "Rage bot (extremely risky)" })
+                        local Ragebot = Tabs.Combat:AddGroupbox({ Side = 2, Name = "Ragebot" })
                         LoadModule("moehack.net/modules/games/arsenal/ragebot.luau")
                         Ragebot:AddToggle("combat/ragebot", { Text = "Enabled", Default = false })
+                        Ragebot:AddToggle("combat/knifebot", { Text = "Knifebot", Default = false })
                     end
                 end
 

@@ -83,6 +83,12 @@ end
 local Combat = LoadModule("moehack.net/modules/combat.luau")
 local Utility = LoadModule("moehack.net/modules/utility.luau")
 
+--# Cache
+
+local KnifebotOverlapParams = OverlapParams.new()
+KnifebotOverlapParams.FilterType = Enum.RaycastFilterType.Exclude
+KnifebotOverlapParams.FilterDescendantsInstances = { Character }
+
 --# Main
 local Ragebot = { LastTimeFired = 0 }
 Ragebot.__index = Ragebot
@@ -251,6 +257,80 @@ function Ragebot:ReplicateShoot()
         if ShootVal then
             General.PlayLocalSound(ShootVal)
         end
+    end
+end
+
+function Ragebot:Stab(Character)
+    if not Character then return end
+    local Head = FindFirstChild(Character, "HeadHB") or FindFirstChild(Character, "Head")
+        or FindFirstChild(Character, "Hitbox")
+    if not Head then return end
+
+    local Gun = State.gun
+    if not Gun then return end
+    if FindFirstChild(Gun, "Melee") == nil then return end
+    if State.DISABLED == true then return end
+    if State.equipping == true then return end
+
+    local Range = FindFirstChild(Gun, "Range") and Gun.Range.Value + 1 or 7
+    local Origin = Camera.CFrame.Position
+    if (Head.Position - Origin).Magnitude > Range + 1 then return end
+
+    local GunId = Gun:GetAttribute("Id") or 125
+    local Spoofed = CFrame.new(Origin, Head.Position)
+    local Cx, Cy, Cz, R00, R01, R02, R10, R11, R12, R20, R21, R22 = Spoofed:GetComponents()
+    local Flags = bit32.replace(bit32.replace(bit32.bor(0, State.ads and 2 or 0, State.jumping and 4 or 0), State.currentSpell or 1, 3, 3), 0, 6, 2)
+    local DeltaTime = (State.btick == 0 and 0 or (tick() - State.btick))
+
+    NetClient.lock()
+    NetClient.u16(Events.HitPart)
+    NetClient.inst(Head)
+    NetClient.u8(GunId)
+    NetClient.u8(Flags)
+    NetClient.u8(0)
+    NetClient.f32(Cx) NetClient.f32(Cy) NetClient.f32(Cz)
+    NetClient.f32(R00) NetClient.f32(R01) NetClient.f32(R02)
+    NetClient.f32(R10) NetClient.f32(R11) NetClient.f32(R12)
+    NetClient.f32(R20) NetClient.f32(R21) NetClient.f32(R22)
+    NetClient.f32(Head.Position.X) NetClient.f32(Head.Position.Y) NetClient.f32(Head.Position.Z)
+    NetClient.f32(DeltaTime)
+    NetClient.unlock()
+end
+
+function Ragebot:Knifebot()
+
+    if not Toggles["combat/knifebot"].Value then return end
+
+    local Gun = State.gun
+    if not Gun then return end
+    if FindFirstChild(Gun, "Melee") == nil then return end
+
+    local Character = LocalPlayer.Character
+    local RootPart = Character and Character.PrimaryPart
+    if not RootPart then return end
+
+    local Range = FindFirstChild(Gun, "Range") and Gun.Range.Value + 1 or 7
+
+    local Parts = workspace:GetPartBoundsInRadius(RootPart.Position, Range, KnifebotOverlapParams)
+
+    local Target = nil
+    for _, Part in Parts do
+        local TargetCharacter = Part:FindFirstAncestorOfClass("Model")
+        if not TargetCharacter then continue end
+
+        local Player = Players:GetPlayerFromCharacter(TargetCharacter)
+        if not Player or Player == LocalPlayer then continue end
+
+        local Humanoid = FindFirstChild(TargetCharacter, "Humanoid")
+        if not Humanoid or Humanoid.Health <= 0 then continue end
+
+        Target = TargetCharacter
+        break
+    end
+
+    if Target then
+        self:Stab(Target)
+        self:ReplicateShoot()
     end
 end
 
