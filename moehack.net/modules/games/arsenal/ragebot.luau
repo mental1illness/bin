@@ -375,6 +375,7 @@ end
 
 Library:GiveSignal(RunService.Stepped:Connect(function()
     Ragebot:Scan()
+    Ragebot:Knifebot()
 end))
 
 Library:GiveSignal( Players.PlayerAdded:Connect(function(Player)
