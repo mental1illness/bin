@@ -93,7 +93,6 @@ function Ragebot:Hit(Character)
     local Gun = State.gun
     if not Gun then return end
     if FindFirstChild(Gun, "Melee") ~= nil then return end
-    if FindFirstChild(Gun, "ThrowWeapon") ~= nil then return end
     if FindFirstChild(Gun, "DK") ~= nil then return end
     if FindFirstChild(Gun, "Lunchbox") ~= nil then return end
     if State.ammocount ~= nil and State.ammocount <= 0 then return end
@@ -134,6 +133,7 @@ function Ragebot:Hit(Character)
         NetClient.u8(bit32.bor(State.jumping and 1 or 0, State.ads and 2 or 0))
         NetClient.unlock()
 
+        local Travel = (Aim - Origin).Magnitude / Speed
         local FireOrigin = Camera.CFrame.Position
         local FireAds = State.ads
         local FireJump = State.jumping
@@ -170,25 +170,51 @@ function Ragebot:Hit(Character)
         return
     end
 
+    if FindFirstChild(Gun, "ThrowWeapon") then
+        local TSpeed = FindFirstChild(Gun, "Speed") and Gun.Speed.Value * 0.07 or 100
+        if TSpeed == 0 then TSpeed = 0.01 end
+        local TOrigin = Camera.CFrame.Position
+        local TTarget = TOrigin + Camera.CFrame.LookVector * 1000
+        local TMuzzle = (Camera.CFrame * CFrame.new(1.5, -0.65, 0)).Position
+        NetClient.lock()
+        NetClient.u16(Events.ReplicateProjectile)
+        NetClient.str("Baseball")
+        NetClient.f32(TSpeed)
+        NetClient.f32(TTarget.X) NetClient.f32(TTarget.Y) NetClient.f32(TTarget.Z)
+        NetClient.f32(TMuzzle.X) NetClient.f32(TMuzzle.Y) NetClient.f32(TMuzzle.Z)
+        NetClient.str(GunName)
+        NetClient.f32(0)
+        NetClient.u8(State.currentSpell or 1)
+        NetClient.u8(bit32.bor(State.jumping and 1 or 0, State.ads and 2 or 0))
+        NetClient.unlock()
+    end
+
     local GunId = Gun:GetAttribute("Id") or 4
     local Origin = Camera.CFrame.Position
     local Spoofed = CFrame.new(Origin, Head.Position)
     local Cx, Cy, Cz, R00, R01, R02, R10, R11, R12, R20, R21, R22 = Spoofed:GetComponents()
-    local Flags = bit32.replace(bit32.replace(bit32.bor(0, State.ads and 2 or 0, State.jumping and 4 or 0), State.currentSpell or 1, 3, 3), 2, 6, 2)
-    local DeltaTime = (State.btick == 0 and 0.1 or (tick() - State.btick))
-    NetClient.lock()
-    NetClient.u16(Events.HitPart)
-    NetClient.inst(Head)
-    NetClient.u8(GunId)
-    NetClient.u8(Flags)
-    NetClient.u8(0)
-    NetClient.f32(Cx) NetClient.f32(Cy) NetClient.f32(Cz)
-    NetClient.f32(R00) NetClient.f32(R01) NetClient.f32(R02)
-    NetClient.f32(R10) NetClient.f32(R11) NetClient.f32(R12)
-    NetClient.f32(R20) NetClient.f32(R21) NetClient.f32(R22)
-    NetClient.f32(Head.Position.X) NetClient.f32(Head.Position.Y) NetClient.f32(Head.Position.Z)
-    NetClient.f32(DeltaTime)
-    NetClient.unlock()
+    local IsCrit = FindFirstChild(Gun, "Scoped") or FindFirstChild(Gun, "Crit")
+    local HeadBits = IsCrit and 2 or 1
+    local Flags = bit32.replace(bit32.replace(bit32.bor(0, State.ads and 2 or 0, State.jumping and 4 or 0), State.currentSpell or 1, 3, 3), HeadBits, 6, 2)
+    local DeltaTime = (State.btick == 0 and 0 or (tick() - State.btick))
+    local Bullets = FindFirstChild(Gun, "Bullets") and Gun.Bullets.Value or 1
+    if Bullets < 1 then Bullets = 1 end
+    if Bullets > 10 then Bullets = 10 end
+    for _ = 1, Bullets do
+        NetClient.lock()
+        NetClient.u16(Events.HitPart)
+        NetClient.inst(Head)
+        NetClient.u8(GunId)
+        NetClient.u8(Flags)
+        NetClient.u8(0)
+        NetClient.f32(Cx) NetClient.f32(Cy) NetClient.f32(Cz)
+        NetClient.f32(R00) NetClient.f32(R01) NetClient.f32(R02)
+        NetClient.f32(R10) NetClient.f32(R11) NetClient.f32(R12)
+        NetClient.f32(R20) NetClient.f32(R21) NetClient.f32(R22)
+        NetClient.f32(Head.Position.X) NetClient.f32(Head.Position.Y) NetClient.f32(Head.Position.Z)
+        NetClient.f32(DeltaTime)
+        NetClient.unlock()
+    end
 end
 
 function Ragebot:ReplicateShoot()
