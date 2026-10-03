@@ -321,8 +321,10 @@ function Ragebot:Knifebot()
         local Player = Players:GetPlayerFromCharacter(TargetCharacter)
         if not Player or Player == LocalPlayer then continue end
 
-        local Humanoid = FindFirstChild(TargetCharacter, "Humanoid")
-        if not Humanoid or Humanoid.Health <= 0 then continue end
+        if Utility.IsTeammate(LocalPlayer, Player) then continue end
+
+        local MaxHealth, Health = Utility.GetHealth(Player, TargetCharacter)
+        if Health <= 0 then continue end
 
         Target = TargetCharacter
         break
