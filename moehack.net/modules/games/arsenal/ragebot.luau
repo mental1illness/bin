@@ -146,21 +146,20 @@ function Ragebot:ReplicateShoot()
         FireTrack:Play()
     end
 
-    local Camera = workspace.CurrentCamera
-    local Arms = Camera ~= nil and Camera:FindFirstChild("Arms") or nil
+    local Arms = Camera ~= nil and FindFirstChild(Camera, "Arms") or nil
     if Arms ~= nil then
-        local Flash = Arms:FindFirstChild("Flash")
+        local Flash = FindFirstChild(Arms, "Flash")
         if Flash ~= nil then
             Particles.CreateMuzzleFlash(Flash)
         end
 
-        local SecondFlash = Arms:FindFirstChild("2Flash")
+        local SecondFlash = FindFirstChild(Arms, "2Flash")
         if SecondFlash ~= nil then
             Particles.CreateMuzzleFlash(SecondFlash)
         end
     end
 
-    local FlashAttachment = Gun:FindFirstChild("Flash")
+    local FlashAttachment = FindFirstChild(Gun, "Flash")
     NetClient.lock()
     NetClient.u16(Events.MuzzleParticleBounce)
     NetClient.inst(FlashAttachment ~= nil and FlashAttachment or Gun)
@@ -168,13 +167,13 @@ function Ragebot:ReplicateShoot()
 
     local SecondGun = HumanoidInstanceWrapper.Get(Character, "Gun2")
     if SecondGun ~= nil then
-        local SecondModel = SecondGun:FindFirstChild("Model2")
+        local SecondModel = FindFirstChild(SecondGun, "Model2")
         local SecondAttachment = nil
         if SecondModel ~= nil then
-            SecondAttachment = SecondModel:FindFirstChild("Flash")
+            SecondAttachment = FindFirstChild(SecondModel, "Flash")
         end
         if SecondAttachment == nil then
-            SecondAttachment = SecondGun:FindFirstChild("Flash")
+            SecondAttachment = FindFirstChild(SecondGun, "Flash")
         end
 
         NetClient.lock()
