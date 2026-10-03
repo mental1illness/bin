@@ -233,11 +233,14 @@ local Library, SaveManager, ThemeManager = LoadModule("moehack.net/interface/lib
                     Settings:AddSlider("esp/settings/renderhz", { Text = "Render Hertz", Min = 10, Max = 240, Rounding = 0, Default = 60 })
                     Settings:AddSlider("esp/settings/renderdist", { Text = "Render Distance", Min = 10, Max = 1000, Rounding = 0, Default = 500 })
                     Settings:AddToggle("esp/settings/renderteam", { Text = "Render Teammates", Default = false })
-                    
+
                     Settings:AddToggle("esp/settings/custombound", { Text = "Custom Bounding", Default = false })
 
                     Settings:AddSlider("esp/settings/custombound/width",  { Text = "Bound Width",  Default = 4, Min = 1, Max = 10, Rounding = 1 })
                     Settings:AddSlider("esp/settings/custombound/height", { Text = "Bound Height", Default = 6, Min = 1, Max = 12, Rounding = 1 })
+
+                    Settings:AddSlider("esp/settings/custombound/offsetx", { Text = "Offset X", Default = 0, Min = -10, Max = 10, Rounding = 1 })
+                    Settings:AddSlider("esp/settings/custombound/offsety", { Text = "Offset Y", Default = 0, Min = -10, Max = 10, Rounding = 1 })
                 end
             end
         end

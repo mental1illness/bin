@@ -634,8 +634,11 @@ function ESP.GetBoundingBox(Model: {}, Character)
         if Root and Root.Parent then
             local Width = Options["esp/settings/custombound/width"].Value
             local Height = Options["esp/settings/custombound/height"].Value
+            local OffsetX = Options["esp/settings/custombound/offsetx"].Value
+            local OffsetY = Options["esp/settings/custombound/offsety"].Value
+
             local HalfSize = NewVector3(Width, Height, Width) * 0.5
-            local RootCFrame = Root.CFrame
+            local RootCFrame = Root.CFrame * CFrame.new(OffsetX, OffsetY, 0)
 
             for _, Signs in Corners do
                 local ScreenPoint, Visible = WorldToViewportPoint(
