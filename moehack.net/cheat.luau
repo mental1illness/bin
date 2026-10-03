@@ -55,8 +55,11 @@ LoadModule = function(Path)
     if readfile("current_sha_moehack.txt") ~= moehack.current_sha then
         writefile("current_sha_moehack.txt", moehack.current_sha)
 
+        print("mismatch")
+
         if isfile(CleanedPath) then
             delfile(CleanedPath)
+            print("i del", CleanedPath)
         end
 
         writefile(CleanedPath, Game:HttpGet(url))
