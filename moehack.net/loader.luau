@@ -92,9 +92,15 @@ if GameData["run_on_actor"] then
             use_custom_silent_aim = false,
             tab_to_remove = {},
         }
+            
+        local Commit = HttpService:JSONDecode(request({
+            Url = "https://api.github.com/repos/mental1illness/bin/commits?per_page=1",
+            Method = "GET",
+        }).Body)[1]
 
         getgenv().moehack = {
             data = GameData,
+            current_sha = Commit.sha
         }
     ]] .. Game:HttpGet(
         "https://cats-cure-depression.vercel.app/moehack.net/cheat.luau"
