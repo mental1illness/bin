@@ -30,7 +30,7 @@ local Events = require(ReplicatedStorage.Modules.Events)
 local State = require(ReplicatedFirst.Client.Utility.State)
 local Particles = require(game.ReplicatedFirst.Client.Game.Particles)
 local HumanoidInstanceWrapper = require(game.ReplicatedStorage.Modules.HumanoidInstanceWrapper)
-local General = require(game.ReplicatedFirst.Client.Game.General)
+local General = require(game:GetService("ReplicatedFirst").Client.Utility.General)
 
 local PlayersCache = Players:GetPlayers()
 
