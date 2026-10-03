@@ -58,6 +58,9 @@ LoadModule = function(Path)
 
     if readfile("current_sha_moehack.txt") ~= moehack.current_sha then
         writefile("current_sha_moehack.txt", moehack.current_sha)
+
+        
+
         writefile(CleanedPath, Game:HttpGet(url))
     end
 
