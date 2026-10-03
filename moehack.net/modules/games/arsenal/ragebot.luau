@@ -38,6 +38,11 @@ local PlayersCache = Players:GetPlayers()
 LoadModule = function(Path)
     local FuckYouCacheBitch = getgenv().FuckYouCacheBitch
 
+
+    if not isfile("current_sha_moehack.txt") then
+        writefile("current_sha_moehack.txt", moehack.current_sha)
+    end
+
     if not FuckYouCacheBitch then
         FuckYouCacheBitch = {}
         getgenv().FuckYouCacheBitch = FuckYouCacheBitch
@@ -48,8 +53,14 @@ LoadModule = function(Path)
     end
 
     local url = "https://cats-cure-depression.vercel.app/" .. Path
-    local Result = loadstring(game:HttpGet(url))()
+    local CleanedPath = string.gsub(Path, "/", "")
 
+    if readfile("current_sha_moehack.txt") ~= moehack.current_sha then
+        writefile("current_sha_moehack.txt", moehack.current_sha)
+        writefile(CleanedPath, Game:HttpGet(url))
+    end
+
+    local Result = loadstring(readfile(CleanedPath))()
     FuckYouCacheBitch[Path] = Result
 
     return Result
