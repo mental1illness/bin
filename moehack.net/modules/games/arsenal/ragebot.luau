@@ -67,7 +67,7 @@ function Ragebot:IsVisible(Target: BasePart, Origin: Vector3?): boolean
   VisibilityParams.IgnoreWater = true
 
   local Result = Raycast(workspace, Origin, Target.Position - Origin, VisibilityParams)
-  if not Result then return false end -- HeadHB is hittable, nil = Head (ignored) or sky
+  if not Result then return false end
   return Result.Instance == Target
 end
 
