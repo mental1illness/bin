@@ -1002,6 +1002,18 @@ function UnlockAll:HookCharacterAdded()
 	end)
 end
 
+function UnlockAll:RefreshInventoryUI()
+    if self.Disabled then return end
+    pcall(function() self:PushAll() end)
+    pcall(function() self:PaintMeleeIcon() end)
+    if self.WeaponSkin then
+        self:ScheduleWeaponSkinRebuild()
+    end
+
+    pcall(function() self.Bridge.UpdateInventory:Fire() end)
+    pcall(function() self.Bridge.UpdateTracker:Fire() end)
+end
+
 function UnlockAll:GetConfig()
 	return {
 		Disabled = self.Disabled and true or false,
@@ -1014,21 +1026,22 @@ function UnlockAll:GetConfig()
 end
 
 function UnlockAll:LoadConfig(Data)
-	if type(Data) ~= "table" then return end
-	if Data.Disabled then
-		if not self.Disabled then
-			self:Disable()
-		end
-		return
-	end
-	if self.Disabled then
-		self:Enable()
-	end
-	if type(Data.Skin) == "string" then self:Equip("Skin", Data.Skin) end
-	if type(Data.Announcer) == "string" then self:Equip("Announcer", Data.Announcer) end
-	if type(Data.KillEffect) == "string" then self:Equip("KillEffect", Data.KillEffect) end
-	if type(Data.WeaponSkin) == "string" then self:Equip("WeaponSkin", Data.WeaponSkin) end
-	if type(Data.MeleeSkin) == "string" then self:Equip("MeleeSkin", Data.MeleeSkin) end
+    if type(Data) ~= "table" then return end
+    if Data.Disabled then
+        if not self.Disabled then self:Disable() end
+        return
+    end
+    if self.Disabled then self:Enable() end
+    if type(Data.Skin) == "string" then self:Equip("Skin", Data.Skin) end
+    if type(Data.Announcer) == "string" then self:Equip("Announcer", Data.Announcer) end
+    if type(Data.KillEffect) == "string" then self:Equip("KillEffect", Data.KillEffect) end
+    if type(Data.WeaponSkin) == "string" then self:Equip("WeaponSkin", Data.WeaponSkin) end
+    if type(Data.MeleeSkin) == "string" then self:Equip("MeleeSkin", Data.MeleeSkin) end
+
+    task.defer(function() self:RefreshInventoryUI() end)
+    task.delay(0.2, function()
+        if not self.Disabled then self:RefreshInventoryUI() end
+    end)
 end
 
 return UnlockAll.new()
