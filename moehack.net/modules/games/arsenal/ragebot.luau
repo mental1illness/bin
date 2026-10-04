@@ -338,7 +338,9 @@ function Ragebot:Scan()
     if State.ammocount ~= nil and State.ammocount <= 0 then return end
     if State.DISABLED == true then return end
 
-    local Target = nil
+    local Origin = Camera.CFrame.Position
+    local Sorted = {}
+
     for _, Player in PlayersCache do
         if Player == LocalPlayer then continue end
         local Character = Player.Character
@@ -350,21 +352,30 @@ function Ragebot:Scan()
                 if Character:FindFirstChildOfClass("ForceField") then continue end
 
                 if self:IsVisible(Head) then
-                    Target = Player.Character
-
-                    local Now = tick()
-                    if Target and Now - (self.LastTimeFired or 0) >= FireRate then
-                        self.LastTimeFired = Now
-                        self:Hit(Target)
-                        self:ReplicateShoot()
-                        if not Toggles["combat/ragebot/multitarget"].Value then
-                            break
-                        end
-                    else
-                        continue
-                    end
+                    Insert(Sorted, { Character = Character, Dist = (Head.Position - Origin).Magnitude })
                 end
             end
+        end
+    end
+
+    table.sort(Sorted, function(A, B)
+        return A.Dist < B.Dist
+    end)
+
+    local Target = nil
+    for _, Entry in Sorted do
+        Target = Entry.Character
+
+        local Now = tick()
+        if Target and Now - (self.LastTimeFired or 0) >= FireRate then
+            self.LastTimeFired = Now
+            self:Hit(Target)
+            self:ReplicateShoot()
+            if not Toggles["combat/ragebot/multitarget"].Value then
+                break
+            end
+        else
+            continue
         end
     end
 end
