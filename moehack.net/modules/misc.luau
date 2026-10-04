@@ -276,16 +276,19 @@ Misc.Movement = {} do
 
             if not IsFlying then
                 IsFlying = true
-                RootPart.Anchored = true
+                Humanoid:ChangeState(Enum.HumanoidStateType.Physics)
             end
 
             if MoveDirection.Magnitude > 0 then
-                RootPart.CFrame += MoveDirection.Unit * FlySpeed * DeltaTime
+                RootPart.AssemblyLinearVelocity = MoveDirection.Unit * FlySpeed
+            else
+                RootPart.AssemblyLinearVelocity = EmptyVec3
             end
 
         elseif IsFlying then
             IsFlying = false
-            RootPart.Anchored = false
+            RootPart.AssemblyLinearVelocity = EmptyVec3
+            Humanoid:ChangeState(Enum.HumanoidStateType.GettingUp)
         end
 
     end
