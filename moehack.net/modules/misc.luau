@@ -274,10 +274,18 @@ Misc.Movement = {} do
 
             local FlySpeed = Options["misc/movement/flyspeed/value"].Value
 
-            if MoveDirection.Magnitude > 0 then
-                MoveDirection = MoveDirection.Unit
-                RootPart.CFrame += MoveDirection * FlySpeed * RunService.RenderStepped:Wait()
+            if not IsFlying then
+                IsFlying = true
+                RootPart.Anchored = true
             end
+
+            if MoveDirection.Magnitude > 0 then
+                RootPart.CFrame += MoveDirection.Unit * FlySpeed * DeltaTime
+            end
+
+        elseif IsFlying then
+            IsFlying = false
+            RootPart.Anchored = false
         end
 
     end
