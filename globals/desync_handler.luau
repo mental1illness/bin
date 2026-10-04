@@ -18,8 +18,6 @@ local Client = { -- this is us ;w; looks unnecessary but i dont wanna do a thous
     RootPos = EmptyVector3;
 }
 
-local BroPleaseWork = Instance.new("Part")
-
 setmetatable(Client, {
     __index = function(Self, Index)
         local LocalPlayer = Self.Player
@@ -84,8 +82,8 @@ local Desync = {
         end
 
         Desync.Fake.CFrame = Position
-        Desync.Fake.Velocity = Vector3.zero
-        Desync.Fake.RotVelocity = Vector3.zero
+        --Desync.Fake.Velocity = Vector3.zero
+        --Desync.Fake.RotVelocity = Vector3.zero
     end
 
     RunService:BindToRenderStep(
@@ -102,8 +100,8 @@ local Desync = {
             end
 
             Root.CFrame = Desync.Real.CFrame or Root.CFrame
-            Root.Velocity = Desync.Real.Velocity or Root.Velocity
-            Root.RotVelocity = Desync.Real.RotVelocity or Root.RotVelocity
+            --Root.Velocity = Desync.Real.Velocity or Root.Velocity
+            --Root.RotVelocity = Desync.Real.RotVelocity or Root.RotVelocity
         end
     )
 
@@ -125,9 +123,8 @@ local Desync = {
             sethiddenproperty(Root, "NetworkIsSleeping", false)
 
             Root.CFrame = Desync.Fake.CFrame
-            Root.Velocity = Desync.Fake.Velocity
-            Root.RotVelocity = Desync.Fake.RotVelocity
-            BroPleaseWork.CFrame = Desync.Fake.CFrame
+            --Root.Velocity = Desync.Fake.Velocity
+            --Root.RotVelocity = Desync.Fake.RotVelocity
 
             sethiddenproperty(Root, "NetworkIsSleeping", true)
         end

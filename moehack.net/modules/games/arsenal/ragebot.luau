@@ -289,8 +289,9 @@ function Ragebot:Knifebot()
         if Target then
             self:Stab(Target)
             self:ReplicateShoot()
-
-            break
+            if not Toggles["combat/ragebot/multitarget"].Value then
+                break
+            end
         end
     end
 
@@ -329,7 +330,9 @@ function Ragebot:Scan()
                         self.LastTimeFired = Now
                         self:Hit(Target)
                         self:ReplicateShoot()
-                        break
+                        if not Toggles["combat/ragebot/multitarget"].Value then
+                            break
+                        end
                     else
                         continue
                     end
