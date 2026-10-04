@@ -140,6 +140,8 @@ local Library, SaveManager, ThemeManager = moehack.load_module("moehack.net/inte
                         Ragebot:AddSlider("combat/ragebot/rapidfire/tick", { Text = "Rapid Fire Tick", Min = 0.05, Max = 0.1, Rounding = 2, Default = 0.1/2 })
                         Ragebot:AddSlider("combat/ragebot/projectilespeedmult", { Text = "Projectiles Speed Multipier", Min = 1, Max = 100, Rounding = 0, Default = 1 })
                         Ragebot:AddToggle("combat/ragebot/multitarget", { Text = "Multi Target", Default = false })
+                        Ragebot:AddToggle("combat/ragebot/tptoenemy", { Text = "Teleport To Enemy", Default = false })
+                        Ragebot:AddToggle("combat/ragebot/removeextrachecks", { Text = "Remove Extra Checks", Default = false })
                         Ragebot:AddToggle("combat/knifebot", { Text = "Knifebot", Default = false })
                     end
                 end

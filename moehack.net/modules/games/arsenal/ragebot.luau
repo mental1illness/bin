@@ -239,6 +239,10 @@ function Ragebot:Hit(Character, PenIndex, SharedCFrame)
     end
 end
 
+function Ragebot:TeleportScan()
+
+end
+
 function Ragebot:ReplicateShoot()
     local Character = LocalPlayer.Character
     if Character == nil then return end
@@ -314,6 +318,7 @@ end
 function Ragebot:Knifebot()
 
     if not Toggles["combat/knifebot"].Value then return end
+    if Toggles["combat/ragebot/removeextrachecks"].Value then return end
 
     local Gun = State.gun
     if not Gun then return end
@@ -368,9 +373,12 @@ function Ragebot:Scan()
 
     if not FireRate then return end
     --if FindFirstChild(Gun, "Projectile") ~= nil then return end
-    if FindFirstChild(Gun, "Melee") ~= nil then return end
-    if State.ammocount ~= nil and State.ammocount <= 0 then return end
-    if State.DISABLED == true then return end
+    if not Toggles["combat/ragebot/removeextrachecks"].Value then
+        if FindFirstChild(Gun, "Melee") ~= nil then return end
+        if State.ammocount ~= nil and State.ammocount <= 0 then return end
+        if State.DISABLED == true then return end
+    end
+
 
     local Origin = self:GetOrigin()
     local HasPen = FindFirstChild(Gun, "Penetration") ~= nil
@@ -423,13 +431,32 @@ function Ragebot:Scan()
                 end
 
                 for Pen, Pierce in Found do
-                    self:Hit(Pierce.Character, Pen, Shared)
+                    if FindFirstChild(Gun, "Melee") ~= nil then 
+                        self:Stab(Target)
+                    else
+                        self:Hit(Target)
+                    end
                 end
-                self:ReplicateShoot()
+                -- self:ReplicateShoot()
                 break
             else
-                self:Hit(Target)
+
+                if Toggles["combat/ragebot/tptoenemy"].Value then
+                    local PrimaryPart = LocalPlayer.PrimaryPart
+                    if PrimaryPart then
+                        local PrimaryPart2 = Target.PrimaryPart2
+                        if PrimaryPart2 then
+                            PrimaryPart.CFrame = PrimaryPart2.CFrame
+                        end
+                    end
+                end
+                if FindFirstChild(Gun, "Melee") ~= nil then 
+                    self:Stab(Target)
+                else
+                    self:Hit(Target)
+                end
                 self:ReplicateShoot()
+
                 if not Toggles["combat/ragebot/multitarget"].Value then
                     break
                 end
