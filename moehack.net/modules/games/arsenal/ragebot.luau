@@ -47,9 +47,40 @@ local KnifebotOverlapParams = OverlapParams.new()
 KnifebotOverlapParams.FilterType = Enum.RaycastFilterType.Exclude
 KnifebotOverlapParams.FilterDescendantsInstances = { Character }
 
+local VisibilityParams = RaycastParams.new()
+VisibilityParams.FilterType = Enum.RaycastFilterType.Exclude
+VisibilityParams.IgnoreWater = true
+
 --# Main
 local Ragebot = { LastTimeFired = 0 }
 Ragebot.__index = Ragebot
+
+function Ragebot:IsVisible(Target: BasePart, Origin: Vector3?): boolean
+    if not Target or not Target.Parent then
+        return false
+    end
+
+    Origin = Origin or Camera.CFrame.Position
+
+    local Character = Target:FindFirstAncestorOfClass("Model")
+    local LocalCharacter = LocalPlayer.Character
+
+    VisibilityParams.FilterDescendantsInstances = {
+        LocalCharacter,
+        Camera,
+        workspace.Ray_Ignore,
+        workspace.Debris,
+    }
+
+    local Direction = Target.Position - Origin
+    local Result = Raycast(workspace, Origin, Direction, VisibilityParams)
+
+    if not Result then
+        return true
+    end
+
+    return Character ~= nil and Result.Instance:IsDescendantOf(Character)
+end
 
 function Ragebot:Hit(Character)
     if not Character then return end
@@ -327,7 +358,7 @@ function Ragebot:Scan()
                 if not Head then continue end
                 if Character:FindFirstChildOfClass("ForceField") then continue end
 
-                if not Combat.IsBehindWalls(Player.Character, Head) then
+                if self:IsVisible(Head) then
                     Target = Player.Character
 
                     local Now = tick()
