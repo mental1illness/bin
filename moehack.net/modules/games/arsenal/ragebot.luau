@@ -286,8 +286,8 @@ function Ragebot:Knifebot()
 
         if TargetCharacter:FindFirstChildOfClass("ForceField") then continue end
 
-        if Target then
-            self:Stab(Target)
+        if TargetCharacter then
+            self:Stab(TargetCharacter)
             self:ReplicateShoot()
             if not Toggles["combat/ragebot/multitarget"].Value then
                 break
