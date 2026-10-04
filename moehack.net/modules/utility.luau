@@ -321,6 +321,14 @@ function Utility.GetHealth(Player, Character)
     return MaxHealth, Health
 end
 
+function Utility.Create(Obj, Prop)
+	local Object = Create(Obj)
+	for Index, Value in Prop do
+		Object[Index] = Value
+	end
+	return Object
+end
+
 function Utility.GetTool(Player, Character)
 
     if moehack.data.game_name == "Operation One" then
