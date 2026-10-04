@@ -63,7 +63,7 @@ function Ragebot:GetOrigin()
     local Root = Character and Character.PrimaryPart
     local Origin = Camera.CFrame.Position
     if Root then
-        local Vel = Root.Velocity
+        local Vel = Root.AssemblyLinearVelocity
         if Vel.Magnitude > 50 then
             local Ping = LocalPlayer:GetNetworkPing() or 0
             local Comp = Ping + 0.03
