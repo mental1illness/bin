@@ -18,9 +18,12 @@ return function(Path)
     local url = "https://cats-cure-depression.vercel.app/" .. Path
     local CleanedPath = string.gsub(Path, "/", "")
 
-    local Source = Game:HttpGet(url)
+    local Source = nil
 
     if moehack.old_sha ~= moehack.current_sha then
+
+        Source = Game:HttpGet(url)
+
         if readfile("current_sha_moehack.txt") ~= moehack.old_sha then
             writefile("current_sha_moehack.txt", moehack.current_sha)
         end
@@ -32,12 +35,12 @@ return function(Path)
         writefile(CleanedPath, Source)
     end
 
-    if readfile(CleanedPath) ~= Source then
+    if readfile(CleanedPath) ~= Source and Source then
         writefile(CleanedPath, Source)
     end
 
     if not isfile(CleanedPath) then
-        writefile(CleanedPath, Source)
+        writefile(CleanedPath, Game:HttpGet(url))
     end
 
     local Result = loadstring(readfile(CleanedPath))()
