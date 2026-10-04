@@ -183,25 +183,31 @@ Misc.Movement = {} do
                     local RightVector = Camera.CFrame.RightVector
 
                     if IsKeyDown(InputService, "W") then
-                        MoveDir += Vector3.new(LookVector.X, 0, LookVector.Z)
+                        MoveDir += NewVector3(LookVector.X, 0, LookVector.Z)
                     end
 
                     if IsKeyDown(InputService, "S") then
-                        MoveDir -= Vector3.new(LookVector.X, 0, LookVector.Z)
+                        MoveDir -= NewVector3(LookVector.X, 0, LookVector.Z)
                     end
 
                     if IsKeyDown(InputService, "D") then
-                        MoveDir += Vector3.new(RightVector.X, 0, RightVector.Z)
+                        MoveDir += NewVector3(RightVector.X, 0, RightVector.Z)
                     end
 
                     if IsKeyDown(InputService, "A") then
-                        MoveDir -= Vector3.new(RightVector.X, 0, RightVector.Z)
+                        MoveDir -= NewVector3(RightVector.X, 0, RightVector.Z)
                     end
                 end
 
                 if MoveDir.Magnitude > 0 then
                     local CurrentY = RootPart.AssemblyLinearVelocity.Y
-                    RootPart.AssemblyLinearVelocity = MoveDir.Unit * Speed + Vector3.new(0, CurrentY, 0)
+                    RootPart.AssemblyLinearVelocity = MoveDir.Unit * Speed + NewVector3(0, CurrentY, 0)
+                else
+                    if Toggles["misc/movement/speed/instantstop"].Value then
+                        local VelocityPaste = RootPart.AssemblyLinearVelocity
+                        RootPart.AssemblyLinearVelocity = NewVector3(VelocityPasteX * 0.5, VelocityPaste.Y, VelocityPaste.Z * 0.5)
+                    
+                    end
                 end
             end
         end
