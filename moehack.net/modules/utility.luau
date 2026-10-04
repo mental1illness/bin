@@ -283,12 +283,12 @@ function Utility.IsTeammate(Player1, Player2)
     end
 
 	if moehack.data.game_name == "Arsenal" then
-		if not TeamCheck then
-			TeamCheck = require(ReplicatedStorage.Modules.TeamCheck)
+		if not Wkspc then
+			Wkspc = ReplicatedStorage:FindFirstChild("wkspc")
 		end
-
-		if not Player2.Character then return true end
-		return TeamCheck.isteam(Player1, Player2.Character)
+		if Wkspc and FindFirstChild(Wkspc, "FFA") and Wkspc.FFA.Value == true then
+			return false
+		end
 	end
 
     if Team1 == nil or Team2 == nil then
