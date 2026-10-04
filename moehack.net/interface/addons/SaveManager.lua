@@ -3,6 +3,7 @@ local httpService = game.GetService(game,'HttpService')
 local SaveManager = {} do
 	SaveManager.Folder = 'LinoriaLibSettings'
 	SaveManager.Ignore = {}
+	SaveManager.UnlockAll = nil
 	SaveManager.Parser = {
 		Toggle = {
 			Save = function(idx, object) 
@@ -78,6 +79,10 @@ local SaveManager = {} do
 		self:BuildFolderTree()
 	end
 
+	function SaveManager:SetUnlockAll(unlockAll)
+		self.UnlockAll = unlockAll
+	end
+
 	function SaveManager:Save(name)
 		if (not name) then
 			return false, 'no config file is selected'
@@ -102,6 +107,25 @@ local SaveManager = {} do
 			table.insert(data.objects, self.Parser[option.Type].Save(idx, option))
 		end	
 
+		if self.UnlockAll and moehack.data.game_name == "Arsenal" then
+			local ok, ud = pcall(function()
+				if self.UnlockAll.GetConfig then
+					return self.UnlockAll:GetConfig()
+				end
+				return {
+					Disabled = self.UnlockAll.Disabled and true or false,
+					Skin = self.UnlockAll.Skin,
+					Announcer = self.UnlockAll.Announcer,
+					KillEffect = self.UnlockAll.KillEffect,
+					WeaponSkin = self.UnlockAll.WeaponSkin,
+					MeleeSkin = self.UnlockAll.MeleeSkin,
+				}
+			end)
+			if ok and type(ud) == 'table' then
+				data.unlockAll = ud
+			end
+		end
+
 		local success, encoded = pcall(httpService.JSONEncode, httpService, data)
 		if not success then
 			return false, 'failed to encode data'
@@ -124,8 +148,35 @@ local SaveManager = {} do
 
 		for _, option in next, decoded.objects do
 			if self.Parser[option.type] then
-				task.spawn(function() self.Parser[option.type].Load(option.idx, option) end) -- task.spawn() so the config loading wont get stuck.
+				task.spawn(function() self.Parser[option.type].Load(option.idx, option) end)
 			end
+		end
+
+		if decoded.unlockAll and self.UnlockAll and moehack.data.game_name == "Arsenal" then
+			local ud = decoded.unlockAll
+			local unlocker = self.UnlockAll
+			task.spawn(function()
+				pcall(function()
+					if unlocker.LoadConfig then
+						unlocker:LoadConfig(ud)
+						return
+					end
+					if ud.Disabled then
+						if not unlocker.Disabled then
+							unlocker:Disable()
+						end
+						return
+					end
+					if unlocker.Disabled then
+						unlocker:Enable()
+					end
+					if type(ud.Skin) == 'string' then unlocker:Equip('Skin', ud.Skin) end
+					if type(ud.Announcer) == 'string' then unlocker:Equip('Announcer', ud.Announcer) end
+					if type(ud.KillEffect) == 'string' then unlocker:Equip('KillEffect', ud.KillEffect) end
+					if type(ud.WeaponSkin) == 'string' then unlocker:Equip('WeaponSkin', ud.WeaponSkin) end
+					if type(ud.MeleeSkin) == 'string' then unlocker:Equip('MeleeSkin', ud.MeleeSkin) end
+				end)
+			end)
 		end
 
 		return true
@@ -133,8 +184,8 @@ local SaveManager = {} do
 
 	function SaveManager:IgnoreThemeSettings()
 		self:SetIgnoreIndexes({ 
-			"BackgroundColor", "MainColor", "AccentColor", "OutlineColor", "FontColor", -- themes
-			"ThemeManager_ThemeList", 'ThemeManager_CustomThemeList', 'ThemeManager_CustomThemeName', -- themes
+			"BackgroundColor", "MainColor", "AccentColor", "OutlineColor", "FontColor",
+			"ThemeManager_ThemeList", 'ThemeManager_CustomThemeList', 'ThemeManager_CustomThemeName',
 		})
 	end
 
@@ -160,8 +211,6 @@ local SaveManager = {} do
 		for i = 1, #list do
 			local file = list[i]
 			if file:sub(-5) == '.json' then
-				-- i hate this but it has to be done ...
-
 				local pos = file:find('.json', 1, true)
 				local start = pos
 

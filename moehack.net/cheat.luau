@@ -625,6 +625,10 @@ local Library, SaveManager, ThemeManager = moehack.load_module("moehack.net/inte
     ThemeManager:SetFolder('moehack')
     SaveManager:SetFolder('moehack/' .. string.lower(moehack.data.game_name or "universal"))
 
+    if moehack.data.game_name == "Arsenal" then
+        SaveManager:SetUnlockAll(moehack.load_module("moehack.net/modules/games/arsenal/unlockall.luau"))
+    end
+
     SaveManager:BuildConfigSection(Tabs.Settings)
     ThemeManager:ApplyToTab(Tabs.Settings)
 

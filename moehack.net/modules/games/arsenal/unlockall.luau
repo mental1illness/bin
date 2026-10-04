@@ -1002,4 +1002,33 @@ function UnlockAll:HookCharacterAdded()
 	end)
 end
 
+function UnlockAll:GetConfig()
+	return {
+		Disabled = self.Disabled and true or false,
+		Skin = self.Skin,
+		Announcer = self.Announcer,
+		KillEffect = self.KillEffect,
+		WeaponSkin = self.WeaponSkin,
+		MeleeSkin = self.MeleeSkin,
+	}
+end
+
+function UnlockAll:LoadConfig(Data)
+	if type(Data) ~= "table" then return end
+	if Data.Disabled then
+		if not self.Disabled then
+			self:Disable()
+		end
+		return
+	end
+	if self.Disabled then
+		self:Enable()
+	end
+	if type(Data.Skin) == "string" then self:Equip("Skin", Data.Skin) end
+	if type(Data.Announcer) == "string" then self:Equip("Announcer", Data.Announcer) end
+	if type(Data.KillEffect) == "string" then self:Equip("KillEffect", Data.KillEffect) end
+	if type(Data.WeaponSkin) == "string" then self:Equip("WeaponSkin", Data.WeaponSkin) end
+	if type(Data.MeleeSkin) == "string" then self:Equip("MeleeSkin", Data.MeleeSkin) end
+end
+
 return UnlockAll.new()
