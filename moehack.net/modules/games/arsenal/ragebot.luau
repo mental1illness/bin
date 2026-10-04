@@ -71,7 +71,7 @@ function Ragebot:IsVisible(Target: BasePart, Origin: Vector3?): boolean
   return Result.Instance == Target
 end
 
-function Ragebot:Hit(Character)
+function Ragebot:Hit(Character, PenIndex, SharedCFrame)
     if not Character then return end
     local Head = FindFirstChild(Character, "HeadHB") or FindFirstChild(Character, "Head")
     if not Head then return end
@@ -88,105 +88,27 @@ function Ragebot:Hit(Character)
     local GunName = Gun.Name
     local ProjectileHolder = FindFirstChild(Gun, "Projectile")
     if ProjectileHolder then
-        local ProjectileName = nil
-        if FindFirstChild(ProjectileHolder, "Arrow") then ProjectileName = "Arrow"
-        elseif FindFirstChild(ProjectileHolder, "Rocket") then ProjectileName = "Rocket"
-        elseif FindFirstChild(ProjectileHolder, "Grenade") then ProjectileName = "Grenade"
-        elseif FindFirstChild(ProjectileHolder, "Baseball") then ProjectileName = "Baseball"
-        elseif #ProjectileHolder:GetChildren() > 0 then ProjectileName = ProjectileHolder:GetChildren()[1].Name
-        end
-        if not ProjectileName then return end
-        if FindFirstChild(ProjectileHolder, "Rocket") and LocalPlayer:FindFirstChild("RocketDebounce") then return end
-
-        local GunId = Gun:GetAttribute("Id") or 4
-        local Speed = FindFirstChild(Gun, "Speed") and Gun.Speed.Value * 0.07 or 100
-        if Speed == 0 then Speed = 0.01 end
-
-        Speed *= Options["combat/ragebot/projectilespeedmult"].Value
-
-        local Origin = Camera.CFrame.Position
-        local Aim = Head.Position
-        local LegitTarget = Origin + Camera.CFrame.LookVector * 1000
-        local Muzzle = (Camera.CFrame * CFrame.new(1.5, -0.65, 0)).Position
-
-        NetClient.lock()
-        NetClient.u16(Events.ReplicateProjectile)
-        NetClient.str(ProjectileName)
-        NetClient.f32(Speed)
-        NetClient.f32(LegitTarget.X) NetClient.f32(LegitTarget.Y) NetClient.f32(LegitTarget.Z)
-        NetClient.f32(Muzzle.X) NetClient.f32(Muzzle.Y) NetClient.f32(Muzzle.Z)
-        NetClient.str(GunName)
-        NetClient.f32(0)
-        NetClient.u8(State.currentSpell or 1)
-        NetClient.u8(bit32.bor(State.jumping and 1 or 0, State.ads and 2 or 0))
-        NetClient.unlock()
-
-        local Travel = (Aim - Origin).Magnitude / Speed
-        local FireOrigin = Camera.CFrame.Position
-        local FireAds = State.ads
-        local FireJump = State.jumping
-        local FireSpell = State.currentSpell or 1
-        task.delay(Travel, function()
-            if Head.Parent == nil then return end
-            local Spoofed = CFrame.new(FireOrigin, Head.Position)
-            local Cx, Cy, Cz, R00, R01, R02, R10, R11, R12, R20, R21, R22 = Spoofed:GetComponents()
-            local HeadBits = ProjectileName == "Arrow" and 2 or 0
-            local Flags = bit32.replace(bit32.replace(bit32.bor(0, FireAds and 2 or 0, FireJump and 4 or 0), FireSpell, 3, 3), HeadBits, 6, 2)
-            local N = (Head.Position - FireOrigin).Unit
-            NetClient.lock()
-            NetClient.u16(Events.HitPart)
-            NetClient.inst(Head)
-            NetClient.u8(GunId)
-            NetClient.u8(Flags)
-            NetClient.u8(0)
-            NetClient.f32(Cx) NetClient.f32(Cy) NetClient.f32(Cz)
-            NetClient.f32(R00) NetClient.f32(R01) NetClient.f32(R02)
-            NetClient.f32(R10) NetClient.f32(R11) NetClient.f32(R12)
-            NetClient.f32(R20) NetClient.f32(R21) NetClient.f32(R22)
-            NetClient.f32(Head.Position.X) NetClient.f32(Head.Position.Y) NetClient.f32(Head.Position.Z)
-            NetClient.f32(0)
-            NetClient.unlock()
-
-            NetClient.lock()
-            NetClient.u16(Events.ImpactParticleBounce)
-            NetClient.u8(GunId)
-            NetClient.inst(Head)
-            NetClient.f32(Head.Position.X) NetClient.f32(Head.Position.Y) NetClient.f32(Head.Position.Z)
-            NetClient.f32(N.X) NetClient.f32(N.Y) NetClient.f32(N.Z)
-            NetClient.unlock()
-        end)
         return
     end
 
     if FindFirstChild(Gun, "ThrowWeapon") then
-        local TSpeed = FindFirstChild(Gun, "Speed") and Gun.Speed.Value * 0.07 or 100
-        if TSpeed == 0 then TSpeed = 0.01 end
-        local TOrigin = Camera.CFrame.Position
-        local TTarget = TOrigin + Camera.CFrame.LookVector * 1000
-        local TMuzzle = (Camera.CFrame * CFrame.new(1.5, -0.65, 0)).Position
-        NetClient.lock()
-        NetClient.u16(Events.ReplicateProjectile)
-        NetClient.str("Baseball")
-        NetClient.f32(TSpeed)
-        NetClient.f32(TTarget.X) NetClient.f32(TTarget.Y) NetClient.f32(TTarget.Z)
-        NetClient.f32(TMuzzle.X) NetClient.f32(TMuzzle.Y) NetClient.f32(TMuzzle.Z)
-        NetClient.str(GunName)
-        NetClient.f32(0)
-        NetClient.u8(State.currentSpell or 1)
-        NetClient.u8(bit32.bor(State.jumping and 1 or 0, State.ads and 2 or 0))
-        NetClient.unlock()
+        return
     end
 
     local GunId = Gun:GetAttribute("Id") or 4
     local Origin = Camera.CFrame.Position
-    local Spoofed = CFrame.new(Origin, Head.Position)
+    local Spoofed = SharedCFrame or CFrame.new(Origin, Head.Position)
     local Cx, Cy, Cz, R00, R01, R02, R10, R11, R12, R20, R21, R22 = Spoofed:GetComponents()
     local IsCrit = FindFirstChild(Gun, "Scoped") or FindFirstChild(Gun, "Crit")
     local HeadBits = IsCrit and 2 or 1
     local Flags = bit32.replace(bit32.replace(bit32.bor(0, State.ads and 2 or 0, State.jumping and 4 or 0), State.currentSpell or 1, 3, 3), HeadBits, 6, 2)
     local DeltaTime = (State.btick == 0 and 0 or (tick() - State.btick))
     local Bullets = FindFirstChild(Gun, "Bullets") and Gun.Bullets.Value or 1
-    Bullets = Clamp(Bullets, 1, 10)
+    if Bullets < 1 then Bullets = 1 end
+    if Bullets > 10 then Bullets = 10 end
+    local Pen = PenIndex or 1
+    if Pen < 1 then Pen = 1 end
+    if Pen > 3 then Pen = 3 end
 
     for _ = 1, Bullets do
         NetClient.lock()
@@ -194,7 +116,7 @@ function Ragebot:Hit(Character)
         NetClient.inst(Head)
         NetClient.u8(GunId)
         NetClient.u8(Flags)
-        NetClient.u8(0)
+        NetClient.u8(Pen)
         NetClient.f32(Cx) NetClient.f32(Cy) NetClient.f32(Cz)
         NetClient.f32(R00) NetClient.f32(R01) NetClient.f32(R02)
         NetClient.f32(R10) NetClient.f32(R11) NetClient.f32(R12)
@@ -339,6 +261,7 @@ function Ragebot:Scan()
     if State.DISABLED == true then return end
 
     local Origin = Camera.CFrame.Position
+    local HasPen = FindFirstChild(Gun, "Penetration") ~= nil
     local Sorted = {}
 
     for _, Player in PlayersCache do
@@ -352,7 +275,7 @@ function Ragebot:Scan()
                 if Character:FindFirstChildOfClass("ForceField") then continue end
 
                 if self:IsVisible(Head) then
-                    Insert(Sorted, { Character = Character, Dist = (Head.Position - Origin).Magnitude })
+                    Insert(Sorted, { Character = Character, Head = Head, Dist = (Head.Position - Origin).Magnitude })
                 end
             end
         end
@@ -369,10 +292,35 @@ function Ragebot:Scan()
         local Now = tick()
         if Target and Now - (self.LastTimeFired or 0) >= FireRate then
             self.LastTimeFired = Now
-            self:Hit(Target)
-            self:ReplicateShoot()
-            if not Toggles["combat/ragebot/multitarget"].Value then
+            if HasPen then
+                local Shared = CFrame.new(Origin, Entry.Head.Position)
+                local HitList = GeneralFunctions.gethitlist()
+                local Found = { Entry }
+
+                for Index = 2, #Sorted do
+                    if #Found >= 3 then break end
+                    local Behind = Sorted[Index]
+                    VisibilityParams.FilterType = Enum.RaycastFilterType.Exclude
+                    VisibilityParams.FilterDescendantsInstances = HitList
+                    VisibilityParams.IgnoreWater = true
+                    local Result = Raycast(workspace, Origin, Behind.Head.Position - Origin, VisibilityParams)
+                    if Result and Result.Instance:IsDescendantOf(Behind.Character) then
+                        Insert(Found, Behind)
+                        Insert(HitList, Behind.Character)
+                    end
+                end
+
+                for Pen, Pierce in Found do
+                    self:Hit(Pierce.Character, Pen, Shared)
+                end
+                self:ReplicateShoot()
                 break
+            else
+                self:Hit(Target)
+                self:ReplicateShoot()
+                if not Toggles["combat/ragebot/multitarget"].Value then
+                    break
+                end
             end
         else
             continue
