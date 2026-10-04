@@ -305,6 +305,11 @@ function Ragebot:Scan()
     local Gun = State.gun
     if not Gun then return end
     local FireRate = Gun and FindFirstChild(Gun, "FireRate") and Gun.FireRate.Value or 0
+
+    if Toggles["combat/ragebot/rapidfire"].Value then
+        FireRate = Options["combat/ragebot/rapidfire/tick"].Value
+    end
+
     if not FireRate then return end
     --if FindFirstChild(Gun, "Projectile") ~= nil then return end
     if FindFirstChild(Gun, "Melee") ~= nil then return end
