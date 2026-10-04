@@ -58,6 +58,23 @@ local NAN = 0/0
 local Ragebot = { LastTimeFired = 0 }
 Ragebot.__index = Ragebot
 
+function Ragebot:GetOrigin()
+    local Character = LocalPlayer.Character
+    local Root = Character and Character.PrimaryPart
+    local Origin = Camera.CFrame.Position
+    if Root then
+        local Vel = Root.Velocity
+        if Vel.Magnitude > 50 then
+            local Ping = LocalPlayer:GetNetworkPing() or 0
+            local Comp = Ping + 0.03
+            if Comp < 0.03 then Comp = 0.03 end
+            if Comp > 0.25 then Comp = 0.25 end
+            Origin = Camera.CFrame.Position + Vel * Comp
+        end
+    end
+    return Origin
+end
+
 function Ragebot:IsVisible(Target: BasePart, Origin: Vector3?): boolean
   if not Target or not Target.Parent then return false end
   Origin = Origin or Camera.CFrame.Position
@@ -96,7 +113,7 @@ function Ragebot:Hit(Character, PenIndex, SharedCFrame)
     end
 
     local GunId = Gun:GetAttribute("Id") or 4
-    local Origin = Camera.CFrame.Position
+    local Origin = self:GetOrigin()
 
     local Spoofed = SharedCFrame or CFrame.new(Origin, Head.Position)
     local Cx, Cy, Cz, R00, R01, R02, R10, R11, R12, R20, R21, R22 = Spoofed:GetComponents()
@@ -176,7 +193,7 @@ function Ragebot:Stab(Character)
     if State.equipping == true then return end
 
     local Range = FindFirstChild(Gun, "Range") and Gun.Range.Value + 1 or 7
-    local Origin = Camera.CFrame.Position
+    local Origin = self:GetOrigin()
     if (Head.Position - Origin).Magnitude > Range + 1 then return end
 
     local GunId = Gun:GetAttribute("Id") or 125
@@ -261,7 +278,7 @@ function Ragebot:Scan()
     if State.ammocount ~= nil and State.ammocount <= 0 then return end
     if State.DISABLED == true then return end
 
-    local Origin = Camera.CFrame.Position
+    local Origin = self:GetOrigin()
     local HasPen = FindFirstChild(Gun, "Penetration") ~= nil
     local Sorted = {}
 
