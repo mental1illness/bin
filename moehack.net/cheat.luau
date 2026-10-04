@@ -178,6 +178,7 @@ local Library, SaveManager, ThemeManager = LoadModule("moehack.net/interface/lib
                         local Ragebot = Tabs.Combat:AddGroupbox({ Side = 2, Name = "Ragebot" })
                         LoadModule("moehack.net/modules/games/arsenal/ragebot.luau")
                         Ragebot:AddToggle("combat/ragebot", { Text = "Enabled", Default = false })
+                        
                         Ragebot:AddToggle("combat/knifebot", { Text = "Knifebot", Default = false })
                     end
                 end
