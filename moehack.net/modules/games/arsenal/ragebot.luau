@@ -31,6 +31,7 @@ local State = require(ReplicatedFirst.Client.Utility.State)
 local Particles = require(game.ReplicatedFirst.Client.Game.Particles)
 local HumanoidInstanceWrapper = require(game.ReplicatedStorage.Modules.HumanoidInstanceWrapper)
 local General = require(game:GetService("ReplicatedFirst").Client.Utility.General)
+local GeneralFunctions = require(game.ReplicatedStorage.Modules.GeneralFunctions)
 
 local PlayersCache = Players:GetPlayers()
 
@@ -58,30 +59,16 @@ local Ragebot = { LastTimeFired = 0 }
 Ragebot.__index = Ragebot
 
 function Ragebot:IsVisible(Target: BasePart, Origin: Vector3?): boolean
-    if not Target or not Target.Parent then
-        return false
-    end
+  if not Target or not Target.Parent then return false end
+  Origin = Origin or Camera.CFrame.Position
 
-    Origin = Origin or Camera.CFrame.Position
+  VisibilityParams.FilterType = Enum.RaycastFilterType.Exclude
+  VisibilityParams.FilterDescendantsInstances = GeneralFunctions.gethitlist()
+  VisibilityParams.IgnoreWater = true
 
-    local Character = Target:FindFirstAncestorOfClass("Model")
-    local LocalCharacter = LocalPlayer.Character
-
-    VisibilityParams.FilterDescendantsInstances = {
-        LocalCharacter,
-        Camera,
-        workspace.Ray_Ignore,
-        workspace.Debris,
-    }
-
-    local Direction = Target.Position - Origin
-    local Result = Raycast(workspace, Origin, Direction, VisibilityParams)
-
-    if not Result then
-        return true
-    end
-
-    return Character ~= nil and Result.Instance:IsDescendantOf(Character)
+  local Result = Raycast(workspace, Origin, Target.Position - Origin, VisibilityParams)
+  if not Result then return false end -- HeadHB is hittable, nil = Head (ignored) or sky
+  return Result.Instance == Target
 end
 
 function Ragebot:Hit(Character)
@@ -197,10 +184,7 @@ function Ragebot:Hit(Character)
     local Flags = bit32.replace(bit32.replace(bit32.bor(0, State.ads and 2 or 0, State.jumping and 4 or 0), State.currentSpell or 1, 3, 3), HeadBits, 6, 2)
     local DeltaTime = (State.btick == 0 and 0 or (tick() - State.btick))
     local Bullets = FindFirstChild(Gun, "Bullets") and Gun.Bullets.Value or 1
-    if Bullets < 1 then Bullets = 1 end
-    if Bullets > 10 then Bullets = 10 end
-
-    Cx,Cy,Cz,R00,R01,R02,R10,R11,R12,R20,R21,R22 = NAN,NAN,NAN,NAN,NAN,NAN,NAN,NAN,NAN,NAN,NAN,NAN
+    Bullets = Clamp(Bullets, 1, 10)
 
     for _ = 1, Bullets do
         NetClient.lock()
