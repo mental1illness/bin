@@ -167,8 +167,7 @@ Misc.Movement = {} do
                 else
                     if Toggles["misc/movement/speed/instantstop"].Value then
                         local VelocityPaste = RootPart.AssemblyLinearVelocity
-                        RootPart.AssemblyLinearVelocity = NewVector3(VelocityPasteX * 0.5, VelocityPaste.Y, VelocityPaste.Z * 0.5)
-                    
+                        RootPart.AssemblyLinearVelocity = NewVector3(VelocityPasteX * 0, VelocityPaste.Y, VelocityPaste.Z * 0)
                     end
                 end
             end
