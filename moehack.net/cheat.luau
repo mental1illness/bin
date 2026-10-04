@@ -32,54 +32,12 @@ local LocalPlayer        = Players.LocalPlayer
 
 --# Helper Funcs (USELESS)
 
-LoadModule = function(Path)
-    local FuckYouCacheBitch = getgenv().FuckYouCacheBitch
-
-
-    if not isfile("current_sha_moehack.txt") then
-        writefile("current_sha_moehack.txt", moehack.current_sha)
-    end
-
-    if not FuckYouCacheBitch then
-        FuckYouCacheBitch = {}
-        getgenv().FuckYouCacheBitch = FuckYouCacheBitch
-    end
-
-    if FuckYouCacheBitch[Path] ~= nil then
-        return FuckYouCacheBitch[Path]
-    end
-
-    local url = "https://cats-cure-depression.vercel.app/" .. Path
-    local CleanedPath = string.gsub(Path, "/", "")
-
-    if moehack.old_sha ~= moehack.current_sha then
-        if readfile("current_sha_moehack.txt") ~= moehack.old_sha then
-            writefile("current_sha_moehack.txt", moehack.current_sha)
-        end
-
-        if isfile(CleanedPath) then
-            delfile(CleanedPath)
-        end
-
-        writefile(CleanedPath, Game:HttpGet(url))
-    end
-
-    if not isfile(CleanedPath) then
-        writefile(CleanedPath, Game:HttpGet(url))
-    end
-
-    local Result = loadstring(readfile(CleanedPath))()
-    FuckYouCacheBitch[Path] = Result
-
-    return Result
-end
-
 local makeKebabPls = function(name)
     local s = name:lower(); s = s:gsub("[^%a%s]", ""); s = s:gsub("^%s+", ""):gsub("%s+$", ""); s = s:gsub("%s+", "-")
     return s
 end
 
-local Intro = LoadModule("globals/intro.luau").Create()
+local Intro = moehack.load_module("globals/intro.luau").Create()
 Intro:FadeIn(0.5)
 
 --# Variables
@@ -87,10 +45,10 @@ Intro:FadeIn(0.5)
 local Identity = GetThreadIdentity()
 
 local FrameRate, Ping = 0, 0
-LoadModule("moehack.net/modules/bypass.luau")
+moehack.load_module("moehack.net/modules/bypass.luau")
 
 --# UI Library
-local Library, SaveManager, ThemeManager = LoadModule("moehack.net/interface/library.luau", true), LoadModule("moehack.net/interface/addons/SaveManager.lua", true), LoadModule("moehack.net/interface/addons/ThemeManager.lua", true) do
+local Library, SaveManager, ThemeManager = moehack.load_module("moehack.net/interface/library.luau", true), moehack.load_module("moehack.net/interface/addons/SaveManager.lua", true), moehack.load_module("moehack.net/interface/addons/ThemeManager.lua", true) do
     local Window = Library:CreateWindow({ Title = 'moehack.net', Center = true, AutoShow = false, TabPadding = 1, MenuFadeTime = 0.2, BackgroundImage = "https://cats-cure-depression.vercel.app/assets/images/izumi.png", BackgroundImageTransparency = 0.9, BackgroundImageScaleType = Enum.ScaleType.Fit })
     
     local Tabs = {}
@@ -176,9 +134,9 @@ local Library, SaveManager, ThemeManager = LoadModule("moehack.net/interface/lib
                 do -- Ragebot
                     if moehack.data.game_name == "Arsenal" then
                         local Ragebot = Tabs.Combat:AddGroupbox({ Side = 2, Name = "Ragebot" })
-                        LoadModule("moehack.net/modules/games/arsenal/ragebot.luau")
+                        moehack.load_module("moehack.net/modules/games/arsenal/ragebot.luau")
                         Ragebot:AddToggle("combat/ragebot", { Text = "Enabled", Default = false })
-                        
+
                         Ragebot:AddToggle("combat/knifebot", { Text = "Knifebot", Default = false })
                     end
                 end
@@ -409,7 +367,7 @@ local Library, SaveManager, ThemeManager = LoadModule("moehack.net/interface/lib
                     World:AddToggle("visuals/world/customskybox", { Text = "Custom Sky Box", Default = false }) do
                         local DepBox = World:AddDependencyBox()
 
-                        DepBox:AddDropdown("visuals/world/customskybox/type", { Text = "Type", Default = 1, Values = LoadModule("moehack.net/modules/skyboxes.luau").SkiesKeys }) -- now its in cache
+                        DepBox:AddDropdown("visuals/world/customskybox/type", { Text = "Type", Default = 1, Values = moehack.load_module("moehack.net/modules/skyboxes.luau").SkiesKeys }) -- now its in cache
 
                         DepBox:SetupDependencies({
                             { Toggles["visuals/world/customskybox"], true }
@@ -503,7 +461,7 @@ local Library, SaveManager, ThemeManager = LoadModule("moehack.net/interface/lib
                     Exploits:AddToggle("misc/exploits/antifling", { Text = "Anti Fling", Default = false })
                     if moehack.data.game_name == "Killstreak" or moehack.data.game_name == "Arsenal" then
                         Exploits:AddToggle("misc/exploits/unlockall", {Text = "Unlock All", Default = false, Callback = function(Valorant)
-                            local Controller = LoadModule("moehack.net/modules/games/" .. string.lower(moehack.data.game_name) .. "/unlockall.luau")
+                            local Controller = moehack.load_module("moehack.net/modules/games/" .. string.lower(moehack.data.game_name) .. "/unlockall.luau")
 
                             if Valorant then
                                 Controller:Enable()
@@ -709,23 +667,23 @@ local Misc
 local Desync
 
 if not TableFind(moehack.data.tab_to_remove   or {}, "esp") then
-    ESP = LoadModule("moehack.net/modules/esp.luau")
+    ESP = moehack.load_module("moehack.net/modules/esp.luau")
 end
 
 if not TableFind(moehack.data.tab_to_remove   or {}, "visuals") then
-    Visuals = LoadModule("moehack.net/modules/visuals.luau")
+    Visuals = moehack.load_module("moehack.net/modules/visuals.luau")
 end
 
 if not TableFind(moehack.data.tab_to_remove   or {}, "combat") then
-    Combat = LoadModule("moehack.net/modules/combat.luau")
+    Combat = moehack.load_module("moehack.net/modules/combat.luau")
 end
 
 if not TableFind(moehack.data.tab_to_remove   or {}, "misc") then
-    Misc = LoadModule("moehack.net/modules/misc.luau")
-    Desync = LoadModule("moehack.net/modules/desync.luau")
+    Misc = moehack.load_module("moehack.net/modules/misc.luau")
+    Desync = moehack.load_module("moehack.net/modules/desync.luau")
 end
 
-LoadModule("moehack.net/modules/hooks.luau", true)
+moehack.load_module("moehack.net/modules/hooks.luau", true)
 
 --# Game Support
 

@@ -69,12 +69,11 @@ local Commit = HttpService:JSONDecode(request({
 
 --# Main
 
-
-
 getgenv().moehack = {
     data = GameData,
+    load_module = loadstring(Game:HttpGet("https://cats-cure-depression.vercel.app/globals/load_module.luau"))(),
     current_sha = Commit.sha,
-    old_sha = isfile("current_sha_moehack.txt") and readfile("current_sha_moehack.txt") or "NO SHA"
+    old_sha = isfile("current_sha_moehack.txt") and readfile("current_sha_moehack.txt") or "NO SHA",
 }
 
 if GameData["run_on_actor"] then 

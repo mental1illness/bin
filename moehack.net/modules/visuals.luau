@@ -25,52 +25,10 @@ local LocalPlayer        = Players.LocalPlayer
 
 --# Helper Funcs (USELESS)
 
-LoadModule = function(Path)
-    local FuckYouCacheBitch = getgenv().FuckYouCacheBitch
-
-
-    if not isfile("current_sha_moehack.txt") then
-        writefile("current_sha_moehack.txt", moehack.current_sha)
-    end
-
-    if not FuckYouCacheBitch then
-        FuckYouCacheBitch = {}
-        getgenv().FuckYouCacheBitch = FuckYouCacheBitch
-    end
-
-    if FuckYouCacheBitch[Path] ~= nil then
-        return FuckYouCacheBitch[Path]
-    end
-
-    local url = "https://cats-cure-depression.vercel.app/" .. Path
-    local CleanedPath = string.gsub(Path, "/", "")
-
-    if moehack.old_sha ~= moehack.current_sha then
-        if readfile("current_sha_moehack.txt") ~= moehack.old_sha then
-            writefile("current_sha_moehack.txt", moehack.current_sha)
-        end
-
-        if isfile(CleanedPath) then
-            delfile(CleanedPath)
-        end
-
-        writefile(CleanedPath, Game:HttpGet(url))
-    end
-
-    if not isfile(CleanedPath) then
-        writefile(CleanedPath, Game:HttpGet(url))
-    end
-
-    local Result = loadstring(readfile(CleanedPath))()
-    FuckYouCacheBitch[Path] = Result
-
-    return Result
-end
-
 --# Modules
 
-local Utility = LoadModule("moehack.net/modules/utility.luau")
-local Skyboxes = LoadModule("moehack.net/modules/skyboxes.luau")
+local Utility = moehack.load_module("moehack.net/modules/utility.luau")
+local Skyboxes = moehack.load_module("moehack.net/modules/skyboxes.luau")
 local GifRenderer = loadstring(Game:HttpGet("https://raw.githubusercontent.com/mental1illness/modules/refs/heads/main/GifRenderer.luau"))()
 local GifDecoder = loadstring(Game:HttpGet("https://raw.githubusercontent.com/mental1illness/modules/refs/heads/main/GifDecoder.luau"))()
 
@@ -109,7 +67,7 @@ local DefaultLighting = {
     AtmosphereHaze = 0,
 }
 
-local Rain, IsRainEnabled = LoadModule("moehack.net/modules/rain.luau", true), false
+local Rain, IsRainEnabled = moehack.load_module("moehack.net/modules/rain.luau", true), false
 
 Rain:SetColor(Color3.fromRGB(220, 225, 235))
 Rain:SetTransparency(0.05)
