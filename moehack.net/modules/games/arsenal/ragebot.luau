@@ -57,6 +57,8 @@ local NAN = 0/0
 local LastRootPos = nil
 local LastRootTick = 0
 
+local Offset = NewCFrame(0, 0, -1)
+
 --# Main
 local Ragebot = { LastTimeFired = 0 }
 Ragebot.__index = Ragebot
@@ -446,7 +448,7 @@ function Ragebot:Scan()
                     if PrimaryPart then
                         local PrimaryPart2 = Target.PrimaryPart
                         if PrimaryPart2 then
-                            PrimaryPart.CFrame = PrimaryPart2.CFrame
+                            PrimaryPart.CFrame = PrimaryPart2.CFrame * Offset
                         end
                     end
                 end
