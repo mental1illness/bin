@@ -59,22 +59,16 @@ local Ragebot = { LastTimeFired = 0 }
 Ragebot.__index = Ragebot
 
 function Ragebot:IsVisible(Target: BasePart, Origin: Vector3?): boolean
-    if not Target or not Target.Parent then return false end
+  if not Target or not Target.Parent then return false end
+  Origin = Origin or Camera.CFrame.Position
 
-    local Character = LocalPlayer.Character
-    local Root = Character and FindFirstChild(Character, "HumanoidRootPart")
-    Origin = Origin or Camera.CFrame.Position
-    if Root and (Origin - Root.Position).Magnitude > 15 then
-        Origin = Root.Position + Vector3.new(0, 1.5, 0)
-    end
+  VisibilityParams.FilterType = Enum.RaycastFilterType.Exclude
+  VisibilityParams.FilterDescendantsInstances = GeneralFunctions.gethitlist()
+  VisibilityParams.IgnoreWater = true
 
-    VisibilityParams.FilterType = Enum.RaycastFilterType.Exclude
-    VisibilityParams.FilterDescendantsInstances = GeneralFunctions.gethitlist()
-    VisibilityParams.IgnoreWater = true
-
-    local Result = Raycast(workspace, Origin, Target.Position - Origin, VisibilityParams)
-    if not Result then return false end
-    return Result.Instance == Target
+  local Result = Raycast(workspace, Origin, Target.Position - Origin, VisibilityParams)
+  if not Result then return false end
+  return Result.Instance == Target
 end
 
 function Ragebot:Hit(Character, PenIndex, SharedCFrame)
@@ -103,12 +97,6 @@ function Ragebot:Hit(Character, PenIndex, SharedCFrame)
 
     local GunId = Gun:GetAttribute("Id") or 4
     local Origin = Camera.CFrame.Position
-
-    local Character = LocalPlayer.Character
-    local Root = Character and Character.PrimaryPart
-    if Root and (Origin - Root.Position).Magnitude > 15 then
-        Origin = Root.Position + Vector3.new(0, 1.5, 0)
-    end
 
     local Spoofed = SharedCFrame or CFrame.new(Origin, Head.Position)
     local Cx, Cy, Cz, R00, R01, R02, R10, R11, R12, R20, R21, R22 = Spoofed:GetComponents()
@@ -189,13 +177,6 @@ function Ragebot:Stab(Character)
 
     local Range = FindFirstChild(Gun, "Range") and Gun.Range.Value + 1 or 7
     local Origin = Camera.CFrame.Position
-
-    local Character = LocalPlayer.Character
-    local Root = Character and Character.PrimaryPart
-    if Root and (Origin - Root.Position).Magnitude > 15 then
-        Origin = Root.Position + Vector3.new(0, 1.5, 0)
-    end
-
     if (Head.Position - Origin).Magnitude > Range + 1 then return end
 
     local GunId = Gun:GetAttribute("Id") or 125
@@ -234,6 +215,7 @@ function Ragebot:Knifebot()
     local Range = FindFirstChild(Gun, "Range") and Gun.Range.Value + 1 or 7
 
     local Parts = workspace:GetPartBoundsInRadius(RootPart.Position, Range, KnifebotOverlapParams)
+
     local Target = nil
     for _, Part in Parts do
         local TargetCharacter = Part:FindFirstAncestorOfClass("Model")
