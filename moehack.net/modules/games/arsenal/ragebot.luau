@@ -442,9 +442,9 @@ function Ragebot:Scan()
             else
 
                 if Toggles["combat/ragebot/tptoenemy"].Value then
-                    local PrimaryPart = LocalPlayer.PrimaryPart
+                    local PrimaryPart = LocalPlayer.Character.PrimaryPart
                     if PrimaryPart then
-                        local PrimaryPart2 = Target.PrimaryPart2
+                        local PrimaryPart2 = Target.PrimaryPart
                         if PrimaryPart2 then
                             PrimaryPart.CFrame = PrimaryPart2.CFrame
                         end
