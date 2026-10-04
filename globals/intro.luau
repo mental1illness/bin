@@ -56,10 +56,10 @@ function Intro.Create()
     ScreenGui.ResetOnSpawn = false
     ScreenGui.DisplayOrder = 9e9
 
-    writefile("GGEZ.mp3", Game:HttpGet("https://cats-cure-depression.vercel.app/assets/audio/Kaien,%20Sugar%20&%20M.Sasuke%20'GGEZ'%20Official%20MV.mp3"))
+    writefile("SAYONARA.mp3", Game:HttpGet("https://cats-cure-depression.vercel.app/assets/audio/Doki%20Doki%20Literature%20Club!%20OST%20-%20Sayo-nara%20-%20Team%20Salvato.mp3"))
 
     local Sound = Create("Sound", ScreenGui)
-    Sound.SoundId = getcustomasset("GGEZ.mp3")
+    Sound.SoundId = getcustomasset("SAYONARA.mp3")
     Sound.Volume = 0
     Sound.Looped = true
     Sound:Play()

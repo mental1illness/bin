@@ -5,7 +5,8 @@ local ThemeManager = {} do
 
 	ThemeManager.Library = nil
 	ThemeManager.BuiltInThemes = {
-		['Default']  = { 1, httpService:JSONDecode('{"FontColor":"ffffff","MainColor":"241c22","AccentColor":"d94f8c","BackgroundColor":"180f14","OutlineColor":"3a2a33"}') },
+		--['Default']  = { 1, httpService:JSONDecode('{"FontColor":"ffffff","MainColor":"241c22","AccentColor":"d94f8c","BackgroundColor":"180f14","OutlineColor":"3a2a33"}') },
+		['Default'] = { 1, httpService:JSONDecode('{"FontColor":"fff1e0","MainColor":"2d1b3d","AccentColor":"ff8c2a","BackgroundColor":"1a1026","OutlineColor":"52386b"}') },
 		['Mint']     = { 2, httpService:JSONDecode('{"FontColor":"ffffff","MainColor":"242424","AccentColor":"3db488","BackgroundColor":"1c1c1c","OutlineColor":"373737"}') },
 		['Bubblegum']= { 3, httpService:JSONDecode('{"FontColor":"ffffff","MainColor":"241a24","AccentColor":"ff7ec9","BackgroundColor":"180f18","OutlineColor":"3a2838"}') },
 		['Peach']    = { 4, httpService:JSONDecode('{"FontColor":"ffffff","MainColor":"2a1f1a","AccentColor":"ffab7a","BackgroundColor":"1c1310","OutlineColor":"40302a"}') },
