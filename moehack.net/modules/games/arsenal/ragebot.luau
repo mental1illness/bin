@@ -51,6 +51,8 @@ local VisibilityParams = RaycastParams.new()
 VisibilityParams.FilterType = Enum.RaycastFilterType.Exclude
 VisibilityParams.IgnoreWater = true
 
+local NAN = 0/0
+
 --# Main
 local Ragebot = { LastTimeFired = 0 }
 Ragebot.__index = Ragebot
@@ -197,6 +199,9 @@ function Ragebot:Hit(Character)
     local Bullets = FindFirstChild(Gun, "Bullets") and Gun.Bullets.Value or 1
     if Bullets < 1 then Bullets = 1 end
     if Bullets > 10 then Bullets = 10 end
+
+    Cx,Cy,Cz,R00,R01,R02,R10,R11,R12,R20,R21,R22 = NAN,NAN,NAN,NAN,NAN,NAN,NAN,NAN,NAN,NAN,NAN,NAN
+
     for _ = 1, Bullets do
         NetClient.lock()
         NetClient.u16(Events.HitPart)
