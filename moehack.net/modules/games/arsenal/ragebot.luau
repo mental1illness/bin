@@ -326,14 +326,17 @@ function Ragebot:Knifebot()
         local MaxHealth, Health = Utility.GetHealth(Player, TargetCharacter)
         if Health <= 0 then continue end
 
-        Target = TargetCharacter
-        break
+        if TargetCharacter:FindFirstChildOfClass("ForceField") then continue end
+
+        if Target then
+            self:Stab(Target)
+            self:ReplicateShoot()
+
+            break
+        end
     end
 
-    if Target then
-        self:Stab(Target)
-        self:ReplicateShoot()
-    end
+
 end
 
 function Ragebot:Scan()
@@ -358,20 +361,23 @@ function Ragebot:Scan()
             if Health and Health > 0 then
                 local Head = FindFirstChild(Character, "HeadHB") or FindFirstChild(Character, "Head")
                 if not Head then continue end
+                if Character:FindFirstChildOfClass("ForceField") then continue end
 
                 if not Combat.IsBehindWalls(Player.Character, Head) then
                     Target = Player.Character
-                    break
+
+                    local Now = tick()
+                    if Target and Now - (self.LastTimeFired or 0) >= FireRate then
+                        self.LastTimeFired = Now
+                        self:Hit(Target)
+                        self:ReplicateShoot()
+                        break
+                    else
+                        continue
+                    end
                 end
             end
         end
-    end
-
-    local Now = tick()
-    if Target and Now - (self.LastTimeFired or 0) >= FireRate then
-        self.LastTimeFired = Now
-        self:Hit(Target)
-        self:ReplicateShoot()
     end
 end
 
