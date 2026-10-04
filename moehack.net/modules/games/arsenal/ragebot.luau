@@ -102,6 +102,8 @@ function Ragebot:Hit(Character)
         local Speed = FindFirstChild(Gun, "Speed") and Gun.Speed.Value * 0.07 or 100
         if Speed == 0 then Speed = 0.01 end
 
+        Speed *= Options["combat/ragebot/projectilespeedmult"].Value
+
         local Origin = Camera.CFrame.Position
         local Aim = Head.Position
         local LegitTarget = Origin + Camera.CFrame.LookVector * 1000
