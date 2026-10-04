@@ -54,16 +54,29 @@ VisibilityParams.IgnoreWater = true
 
 local NAN = 0/0
 
+local LastRootPos = nil
+local LastRootTick = 0
+
 --# Main
 local Ragebot = { LastTimeFired = 0 }
 Ragebot.__index = Ragebot
 
 function Ragebot:GetOrigin()
     local Character = LocalPlayer.Character
-    local Root = Character and Character.PrimaryPart
+    local Root = Character and (Character.PrimaryPart or FindFirstChild(Character, "HumanoidRootPart"))
     local Origin = Camera.CFrame.Position
     if Root then
+        local Now = tick()
+        local Delta = Now - LastRootTick
         local Vel = Root.AssemblyLinearVelocity
+        if LastRootPos and Delta > 0 and Delta < 1 then
+            local Measured = (Root.Position - LastRootPos) / Delta
+            if Measured.Magnitude > Vel.Magnitude then
+                Vel = Measured
+            end
+        end
+        LastRootPos = Root.Position
+        LastRootTick = Now
         if Vel.Magnitude > 50 then
             local Ping = LocalPlayer:GetNetworkPing() or 0
             local Comp = Ping + 0.03
@@ -105,16 +118,95 @@ function Ragebot:Hit(Character, PenIndex, SharedCFrame)
     local GunName = Gun.Name
     local ProjectileHolder = FindFirstChild(Gun, "Projectile")
     if ProjectileHolder then
+        local ProjectileName = nil
+        if FindFirstChild(ProjectileHolder, "Arrow") then ProjectileName = "Arrow"
+        elseif FindFirstChild(ProjectileHolder, "Rocket") then ProjectileName = "Rocket"
+        elseif FindFirstChild(ProjectileHolder, "Grenade") then ProjectileName = "Grenade"
+        elseif FindFirstChild(ProjectileHolder, "Baseball") then ProjectileName = "Baseball"
+        elseif #ProjectileHolder:GetChildren() > 0 then ProjectileName = ProjectileHolder:GetChildren()[1].Name
+        end
+        if not ProjectileName then return end
+        if FindFirstChild(ProjectileHolder, "Rocket") and LocalPlayer:FindFirstChild("RocketDebounce") then return end
+
+        local GunId = Gun:GetAttribute("Id") or 4
+        local Speed = FindFirstChild(Gun, "Speed") and Gun.Speed.Value * 0.07 or 100
+        if Speed == 0 then Speed = 0.01 end
+
+        local Origin = self:GetOrigin()
+        local Aim = Head.Position
+        local LegitTarget = Origin + Camera.CFrame.LookVector * 1000
+        local Muzzle = (Camera.CFrame * CFrame.new(1.5, -0.65, 0)).Position
+
+        NetClient.lock()
+        NetClient.u16(Events.ReplicateProjectile)
+        NetClient.str(ProjectileName)
+        NetClient.f32(Speed)
+        NetClient.f32(LegitTarget.X) NetClient.f32(LegitTarget.Y) NetClient.f32(LegitTarget.Z)
+        NetClient.f32(Muzzle.X) NetClient.f32(Muzzle.Y) NetClient.f32(Muzzle.Z)
+        NetClient.str(GunName)
+        NetClient.f32(0)
+        NetClient.u8(State.currentSpell or 1)
+        NetClient.u8(bit32.bor(State.jumping and 1 or 0, State.ads and 2 or 0))
+        NetClient.unlock()
+
+        local Travel = (Aim - Origin).Magnitude / Speed
+        local FireOrigin = self:GetOrigin()
+        local FireAds = State.ads
+        local FireJump = State.jumping
+        local FireSpell = State.currentSpell or 1
+        task.delay(Travel, function()
+            if Head.Parent == nil then return end
+            local Spoofed = CFrame.new(FireOrigin, Head.Position)
+            local Cx, Cy, Cz, R00, R01, R02, R10, R11, R12, R20, R21, R22 = Spoofed:GetComponents()
+            local HeadBits = ProjectileName == "Arrow" and 2 or 0
+            local Flags = bit32.replace(bit32.replace(bit32.bor(0, FireAds and 2 or 0, FireJump and 4 or 0), FireSpell, 3, 3), HeadBits, 6, 2)
+            local N = (Head.Position - FireOrigin).Unit
+            NetClient.lock()
+            NetClient.u16(Events.HitPart)
+            NetClient.inst(Head)
+            NetClient.u8(GunId)
+            NetClient.u8(Flags)
+            NetClient.u8(0)
+            NetClient.f32(Cx) NetClient.f32(Cy) NetClient.f32(Cz)
+            NetClient.f32(R00) NetClient.f32(R01) NetClient.f32(R02)
+            NetClient.f32(R10) NetClient.f32(R11) NetClient.f32(R12)
+            NetClient.f32(R20) NetClient.f32(R21) NetClient.f32(R22)
+            NetClient.f32(Head.Position.X) NetClient.f32(Head.Position.Y) NetClient.f32(Head.Position.Z)
+            NetClient.f32(0)
+            NetClient.unlock()
+
+            NetClient.lock()
+            NetClient.u16(Events.ImpactParticleBounce)
+            NetClient.u8(GunId)
+            NetClient.inst(Head)
+            NetClient.f32(Head.Position.X) NetClient.f32(Head.Position.Y) NetClient.f32(Head.Position.Z)
+            NetClient.f32(N.X) NetClient.f32(N.Y) NetClient.f32(N.Z)
+            NetClient.unlock()
+        end)
         return
     end
 
     if FindFirstChild(Gun, "ThrowWeapon") then
+        local TSpeed = FindFirstChild(Gun, "Speed") and Gun.Speed.Value * 0.07 or 100
+        if TSpeed == 0 then TSpeed = 0.01 end
+        local TTarget = Head.Position
+        local TMuzzle = (Camera.CFrame * CFrame.new(1.5, -0.65, 0)).Position
+        NetClient.lock()
+        NetClient.u16(Events.ReplicateProjectile)
+        NetClient.str("Baseball")
+        NetClient.f32(TSpeed)
+        NetClient.f32(TTarget.X) NetClient.f32(TTarget.Y) NetClient.f32(TTarget.Z)
+        NetClient.f32(TMuzzle.X) NetClient.f32(TMuzzle.Y) NetClient.f32(TMuzzle.Z)
+        NetClient.str(GunName)
+        NetClient.f32(0)
+        NetClient.u8(State.currentSpell or 1)
+        NetClient.u8(bit32.bor(State.jumping and 1 or 0, State.ads and 2 or 0))
+        NetClient.unlock()
         return
     end
 
     local GunId = Gun:GetAttribute("Id") or 4
     local Origin = self:GetOrigin()
-
     local Spoofed = SharedCFrame or CFrame.new(Origin, Head.Position)
     local Cx, Cy, Cz, R00, R01, R02, R10, R11, R12, R20, R21, R22 = Spoofed:GetComponents()
     local IsCrit = FindFirstChild(Gun, "Scoped") or FindFirstChild(Gun, "Crit")
