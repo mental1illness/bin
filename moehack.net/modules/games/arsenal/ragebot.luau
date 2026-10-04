@@ -317,9 +317,8 @@ end
 
 function Ragebot:Knifebot()
 
-    if not Toggles["combat/knifebot"].Value then return end
+    if not Toggles["combat/knifebot"].Value then return end 
     if Toggles["combat/ragebot/removeextrachecks"].Value then return end
-
     local Gun = State.gun
     if not Gun then return end
     if FindFirstChild(Gun, "Melee") == nil then return end
@@ -432,10 +431,11 @@ function Ragebot:Scan()
 
                 for Pen, Pierce in Found do
                     if FindFirstChild(Gun, "Melee") ~= nil then 
-                        self:Stab(Target)
+                        self:Stab(Pierce.Character)
                     else
-                        self:Hit(Target)
+                        self:Hit(Pierce.Character, Pen, Shared)
                     end
+
                 end
                 -- self:ReplicateShoot()
                 break
@@ -450,11 +450,13 @@ function Ragebot:Scan()
                         end
                     end
                 end
+
                 if FindFirstChild(Gun, "Melee") ~= nil then 
                     self:Stab(Target)
                 else
                     self:Hit(Target)
                 end
+
                 self:ReplicateShoot()
 
                 if not Toggles["combat/ragebot/multitarget"].Value then
