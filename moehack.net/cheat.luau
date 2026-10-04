@@ -444,7 +444,7 @@ local Library, SaveManager, ThemeManager = moehack.load_module("moehack.net/inte
                 do -- Movement
                     Movement:AddToggle("misc/movement/speed", { Text = "Speed Hack", Default = false })
                     Movement:AddSlider("misc/movement/speed/value", {Text = "Speed Hack Value", Min = 1, Max = 500, Rounding = 0, Default = 30})
-                    Movement:AddDropdown("misc/movement/speed/method", { Text = "Speed Hack Method", Default = 1, Values = {"Directional", "MoveDir"} })
+                    Movement:AddDropdown("misc/movement/speed/method", { Text = "Speed Hack Method", Default = 1, Values = {"Directional", "MoveDir", "CFrame"} })
                     Movement:AddToggle("misc/movement/speed/instantstop", { Text = "Speed Hack Instant Stop", Default = false })
                     Movement:AddToggle("misc/movement/moonwalk", { Text = "Moon Walk", Default = false }):AddKeyPicker("misc/movement/moonwalk/key", { Text = "Moon Walk Key",  SyncToggleState = false, Mode = "Hold", Default = "T" })
 

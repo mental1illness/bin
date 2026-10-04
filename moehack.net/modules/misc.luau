@@ -134,44 +134,56 @@ Misc.Movement = {} do
         if Toggles["misc/movement/speed"].Value then
             local Speed = Options["misc/movement/speed/value"].Value
             local Method = Options["misc/movement/speed/method"].Value
+            local MoveDir = Vector3.zero
 
-            if RootPart then
-                local MoveDir = Vector3.zero
+            if Method == "MoveDir" then
+                MoveDir = Humanoid.MoveDirection
+            elseif Method == "Directional" or Method == "CFrame" then
+                local CameraCFrame = Camera.CFrame
+                local LookVector = CameraCFrame.LookVector
+                local RightVector = CameraCFrame.RightVector
 
-                if Method == "MoveDir" then
-                    MoveDir = Humanoid.MoveDirection
-                elseif Method == "Directional" then
-                    local LookVector = Camera.CFrame.LookVector
-                    local RightVector = Camera.CFrame.RightVector
-
-                    if IsKeyDown(InputService, "W") then
-                        MoveDir += NewVector3(LookVector.X, 0, LookVector.Z)
-                    end
-
-                    if IsKeyDown(InputService, "S") then
-                        MoveDir -= NewVector3(LookVector.X, 0, LookVector.Z)
-                    end
-
-                    if IsKeyDown(InputService, "D") then
-                        MoveDir += NewVector3(RightVector.X, 0, RightVector.Z)
-                    end
-
-                    if IsKeyDown(InputService, "A") then
-                        MoveDir -= NewVector3(RightVector.X, 0, RightVector.Z)
-                    end
+                if Method == "Directional" then
+                    LookVector = NewVector3(LookVector.X, 0, LookVector.Z)
+                    RightVector = NewVector3(RightVector.X, 0, RightVector.Z)
+                else
+                    LookVector = NewVector3(LookVector.X, 0, LookVector.Z)
+                    RightVector = NewVector3(RightVector.X, 0, RightVector.Z)
                 end
 
-                if MoveDir.Magnitude > 0 then
-                    local CurrentY = RootPart.AssemblyLinearVelocity.Y
-                    RootPart.AssemblyLinearVelocity = MoveDir.Unit * Speed + NewVector3(0, CurrentY, 0)
-                else
-                    if Toggles["misc/movement/speed/instantstop"].Value then
-                        local VelocityPaste = RootPart.AssemblyLinearVelocity
-                        RootPart.AssemblyLinearVelocity = NewVector3(VelocityPasteX * 0, VelocityPaste.Y, VelocityPaste.Z * 0)
-                    end
+                if IsKeyDown(InputService, "W") then
+                    MoveDir += LookVector
+                end
+
+                if IsKeyDown(InputService, "S") then
+                    MoveDir -= LookVector
+                end
+
+                if IsKeyDown(InputService, "D") then
+                    MoveDir += RightVector
+                end
+
+                if IsKeyDown(InputService, "A") then
+                    MoveDir -= RightVector
                 end
             end
+
+            if MoveDir.Magnitude > 0 then
+                MoveDir = MoveDir.Unit
+
+                if Method == "CFrame" then
+                    local DeltaTime = RunService.Heartbeat:Wait()
+                    RootPart.CFrame += MoveDir * Speed * DeltaTime
+                else
+                    local CurrentY = RootPart.AssemblyLinearVelocity.Y
+                    RootPart.AssemblyLinearVelocity = MoveDir * Speed + NewVector3(0, CurrentY, 0)
+                end
+            elseif Toggles["misc/movement/speed/instantstop"].Value and Method ~= "CFrame" then
+                local Velocity = RootPart.AssemblyLinearVelocity
+                RootPart.AssemblyLinearVelocity = NewVector3(0, Velocity.Y, 0)
+            end
         end
+
 
         if Toggles["misc/movement/moonwalk"].Value and Options["misc/movement/moonwalk/key"]:GetState() then
             if MoveDir.Magnitude > 0 then
@@ -263,10 +275,9 @@ Misc.Movement = {} do
             local FlySpeed = Options["misc/movement/flyspeed/value"].Value
 
             if MoveDirection.Magnitude > 0 then
-                MoveDirection = MoveDirection.Unit * FlySpeed
+                MoveDirection = MoveDirection.Unit
+                RootPart.CFrame += MoveDirection * FlySpeed * RunService.RenderStepped:Wait()
             end
-
-            RootPart.AssemblyLinearVelocity = MoveDirection
         end
 
     end
