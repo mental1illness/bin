@@ -410,6 +410,16 @@ function ESP.CreateElements(Entity: table)
     ToolStroke.Thickness = 1
     ToolStroke.Color = Color3.new(0, 0, 0)
 
+    Objects.FadeGroups = {
+        Objects.BoundingBox,
+        Objects.CornerBox,
+        Objects.GlowHolder,
+        Objects.HealthBar,
+        Objects.HealthTextHolder,
+        Objects.NameHolder,
+        Objects.Bottom
+    }
+
     return Objects
 end
 
@@ -752,17 +762,12 @@ end
 
 function ESP.FadeOut(Entity: {}, DeltaTime: number)
     local Alpha = 1 - math.exp(-12 * DeltaTime)
-
     if Entity.Objects.Holder then
         Entity.Objects.Holder.Visible = true
     end
-
     --# UI
-
-    for _, Obj in Entity.Objects do
-        if typeof(Obj) ~= "table" and Obj:IsA("CanvasGroup") then
-            Obj.GroupTransparency += (1 - Obj.GroupTransparency) * Alpha
-        end
+    for _, Obj in Entity.Objects.FadeGroups do
+        Obj.GroupTransparency += (1 - Obj.GroupTransparency) * Alpha
     end
 
     --# Chams
@@ -782,15 +787,11 @@ end
 
 function ESP.FadeIn(Entity: {}, DeltaTime: number)
     local Alpha = 1 - math.exp(-12 * DeltaTime)
-
     if Entity.Objects.Holder then
         Entity.Objects.Holder.Visible = true
     end
-
-    for _, Obj in Entity.Objects do
-        if typeof(Obj) ~= "table" and Obj:IsA("CanvasGroup") then
-            Obj.GroupTransparency += (1 - Obj.GroupTransparency) * Alpha
-        end
+    for _, Obj in Entity.Objects.FadeGroups do
+        Obj.GroupTransparency -= Obj.GroupTransparency * Alpha
     end
 
 
