@@ -60,6 +60,8 @@ local LastRootTick = 0
 
 local Offset = NewCFrame(0, 0, -1)
 
+local EmptyVec3 = NewVector3()
+
 --# Main
 local Ragebot = { LastTimeFired = 0 }
 Ragebot.__index = Ragebot
