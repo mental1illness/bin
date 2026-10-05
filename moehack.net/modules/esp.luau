@@ -20,7 +20,10 @@ local ReplicatedStorage = GetService(Game, "ReplicatedStorage")
 local RunService = GetService(Game, "RunService")
 local Lighting = GetService(Game, "Lighting")
 local Players = GetService(Game, "Players")
+local TweenService = GetService(Game, "TweenService")
 local LocalPlayer = Players.LocalPlayer
+
+local FadeInfo = TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
 
 --# Modules
 
@@ -216,20 +219,20 @@ function ESP.CreateElements(Entity: table)
     Objects.GlowHolder.AnchorPoint = Vector2.new(0.5, 0.5)
     Objects.GlowHolder.Position = UDim2New(0.5, -1, 0.5, -1)
 
-	Objects.BoundingBoxGlow = Utility.Create("ImageLabel", {
-		Parent = Objects.GlowHolder,
-		ImageColor3 = Options["esp/box/glowcolor"].Value,
-		ScaleType = Enum.ScaleType.Slice,
-		BorderColor3 = Color3.fromRGB(0, 0, 0),
-		BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-		Image = getcustomasset("glow.png"),
-		BackgroundTransparency = 1,
-		ImageTransparency = Options["esp/box/glowcolor"].Transparency,
-		Size = UDim2New(1, 0, 1, 0),
-		ZIndex = -10,
-		BorderSizePixel = 0,
-		SliceCenter = Rect.new(Vector2.new(21, 21), Vector2.new(79, 79)),
-	})
+    Objects.BoundingBoxGlow = Utility.Create("ImageLabel", {
+        Parent = Objects.GlowHolder,
+        ImageColor3 = Options["esp/box/glowcolor"].Value,
+        ScaleType = Enum.ScaleType.Slice,
+        BorderColor3 = Color3.fromRGB(0, 0, 0),
+        BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+        Image = getcustomasset("glow.png"),
+        BackgroundTransparency = 1,
+        ImageTransparency = Options["esp/box/glowcolor"].Transparency,
+        Size = UDim2New(1, 0, 1, 0),
+        ZIndex = -10,
+        BorderSizePixel = 0,
+        SliceCenter = Rect.new(Vector2.new(21, 21), Vector2.new(79, 79)),
+    })
 
     --# Health Bar
 
@@ -420,6 +423,31 @@ function ESP.CreateElements(Entity: table)
         Objects.Bottom
     }
 
+    --# Fade
+
+    Objects.FadeValue = Create("NumberValue")
+    Objects.FadeValue.Value = 1
+
+    for _, Group in Objects.FadeGroups do
+        Group.GroupTransparency = 1
+    end
+
+    Objects.FadeValue.Changed:Connect(function(Value)
+        Entity.ChamsFade = Value
+
+        for _, Group in Objects.FadeGroups do
+            Group.GroupTransparency = Value
+        end
+
+        local Base = Options["esp/chams/color"].Transparency
+
+        for _, ChamsPart in Entity.ChamsParts do
+            if ChamsPart.Parent then
+                ChamsPart.Transparency = Base + (1 - Base) * Value
+            end
+        end
+    end)
+
     return Objects
 end
 
@@ -556,7 +584,8 @@ function ESP.AddTarget(Target, Settings)
         IsCustom = true,
         LastPosition = nil,
         LastSize = nil,
-        IsFading = true
+        Shown = false,
+        FadeTween = nil
     }
 
     Entity.Objects = ESP.CreateElements(Entity)
@@ -591,6 +620,14 @@ function ESP.RemoveTarget(TargetOrEntity)
     Clear(Entity.ChamsParts)
     Clear(Entity.BodyParts)
 
+    if Entity.FadeTween then
+        Entity.FadeTween:Cancel()
+    end
+
+    if Entity.Objects and Entity.Objects.FadeValue then
+        Entity.Objects.FadeValue:Destroy()
+    end
+
     if Entity.Objects and Entity.Objects.Holder then
         Entity.Objects.Holder:Destroy()
     end
@@ -617,7 +654,8 @@ function ESP.ApplyAllPlayer()
             IsCustom = false,
             LastSize = nil,
             LastPosition = nil,
-            IsFading = false,
+            Shown = false,
+            FadeTween = nil
         }
 
         Entity.Objects = ESP.CreateElements(Entity)
@@ -762,84 +800,52 @@ function ESP.RenderLastPosition(Entity: {})
     return true
 end
 
-local function GetFadeDelta(Entity: {})
-    local Now = os.clock()
-    local DeltaTime = Now - (Entity.LastFadeTick or Now)
-
-    Entity.LastFadeTick = Now
-
-    return Clamp(DeltaTime, 0, 0.1)
-end
-
-local function SetUIFade(Entity: {}, Value: number)
-    Entity.UIFade = Value
-
-    for _, Obj in Entity.Objects.FadeGroups do
-        Obj.GroupTransparency = Value
-    end
-end
-
-function ESP.FadeOut(Entity: {}, DeltaTime: number)
-    local Alpha = 1 - math.exp(-12 * GetFadeDelta(Entity))
-
-    --# UI
-
-    local Fade = Entity.UIFade or Entity.Objects.FadeGroups[1].GroupTransparency
-    Fade += (1 - Fade) * Alpha
-
-    if Fade > 0.99 then
-        Fade = 1
+local function TweenFade(Entity: {}, Target: number)
+    if Entity.FadeTween then
+        Entity.FadeTween:Cancel()
     end
 
-    SetUIFade(Entity, Fade)
+    local Tween = TweenService:Create(Entity.Objects.FadeValue, FadeInfo, {Value = Target})
+    Entity.FadeTween = Tween
 
-    if Fade >= 1 then
-        Entity.Objects.Holder.Visible = false
-    else
-        if ESP.RenderLastPosition(Entity) then
-            Entity.Objects.Holder.Visible = true
+    Tween.Completed:Connect(function(State)
+        if State == Enum.PlaybackState.Completed and not Entity.Shown then
+            local Holder = Entity.Objects.Holder
+
+            if Holder and Holder.Parent then
+                Holder.Visible = false
+            end
         end
-    end
+    end)
 
-    --# Chams
-
-    Entity.ChamsFade = (Entity.ChamsFade or 0) + (1 - (Entity.ChamsFade or 0)) * Alpha
-
-    local ChamsTransparency = Options["esp/chams/color"].Transparency
-
-    for _, ChamsPart in Entity.ChamsParts do
-        if ChamsPart.Parent then
-            ChamsPart.Transparency =
-                ChamsTransparency
-                + (1 - ChamsTransparency) * Entity.ChamsFade
-        end
-    end
+    Tween:Play()
 end
 
 function ESP.FadeIn(Entity: {}, DeltaTime: number)
-    local Alpha = 1 - math.exp(-12 * GetFadeDelta(Entity))
-
-    local Fade = Entity.UIFade or Entity.Objects.FadeGroups[1].GroupTransparency
-    Fade -= Fade * Alpha
-
-    if Fade < 0.01 then
-        Fade = 0
-    end
-
-    SetUIFade(Entity, Fade)
     Entity.Objects.Holder.Visible = true
 
-    Entity.ChamsFade = (Entity.ChamsFade or 1) * (1 - Alpha)
-
-    local ChamsTransparency = Options["esp/chams/color"].Transparency
-
-    for _, ChamsPart in Entity.ChamsParts do
-        if ChamsPart.Parent then
-            ChamsPart.Transparency = ChamsTransparency + (1 - ChamsTransparency) * Entity.ChamsFade
-        end
+    if Entity.Shown then
+        return
     end
+
+    Entity.Shown = true
+    TweenFade(Entity, 0)
 end
 
+function ESP.FadeOut(Entity: {}, DeltaTime: number)
+    if Entity.Shown then
+        Entity.Shown = false
+        TweenFade(Entity, 1)
+    end
+
+    if Entity.Objects.FadeValue.Value < 1 then
+        if ESP.RenderLastPosition(Entity) then
+            Entity.Objects.Holder.Visible = true
+        end
+    else
+        Entity.Objects.Holder.Visible = false
+    end
+end
 
 --# Chams
 
@@ -983,7 +989,6 @@ function ESP.Render(Entity: {}, DeltaTime: number)
     end
 
     if not RealCharacter then
-        ESP.RenderLastPosition(Entity)
         ESP.FadeOut(Entity, DeltaTime)
         return
     end
@@ -1290,6 +1295,13 @@ function ESP.Update(DeltaTime)
 
         if ScreenGui.Enabled then
             for _, Entity in ESP.Entities do
+                if Entity.FadeTween then
+                    Entity.FadeTween:Cancel()
+                end
+
+                Entity.Shown = false
+                Entity.Objects.FadeValue.Value = 1
+
                 ESP.ChamsRemove(Entity)
                 Entity.Objects.Holder.Visible = false
             end
