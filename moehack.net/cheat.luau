@@ -793,7 +793,7 @@ end
 --# Connections
 
 Library:GiveSignal(
-	RunService.PreRender:Connect(function(Delta)
+	RunService.RenderStepped:Connect(function(Delta)
 		FrameRate = Floor(1000 / RenderAverage:GetValue())
 		Ping = Floor(DataPing:GetValue())
 

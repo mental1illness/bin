@@ -829,6 +829,12 @@ Visuals.Players = {} do
 
 end
 
+Library:GiveSignal(Lighting.ChildAdded:Connect(function(Object)
+    if Visuals.World.Sky then
+        Visuals.World.Sky:Remove()
+    end
+end))
+
 function Visuals.Tick()
     Visuals.Players.Tick()
     Visuals.World.Tick()
