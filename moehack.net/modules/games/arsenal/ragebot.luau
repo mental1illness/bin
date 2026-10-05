@@ -221,12 +221,12 @@ function Ragebot:Hit(Character, PenIndex, SharedCFrame)
     if Pen < 1 then Pen = 1 end
     if Pen > 3 then Pen = 3 end
 
-    if LocalPlayer.Character then
-        local RootPart = LocalPlayer.Character.PrimaryPart
-        if RootPart then
-            RootPart.AssemblyLinearVelocity = EmptyVec3
-        end
-    end
+    -- if LocalPlayer.Character then
+    --     local RootPart = LocalPlayer.Character.PrimaryPart
+    --     if RootPart then
+    --         RootPart.AssemblyLinearVelocity = EmptyVec3
+    --     end
+    -- end
 
     for _ = 1, Bullets do
         NetClient.lock()
