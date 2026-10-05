@@ -218,7 +218,7 @@ function ESP.CreateElements(Entity: table)
 		ImageTransparency = Options["esp/box/glowcolor"].Transparency,
         AnchorPoint = Vector2.new(0.5, 0.5),
 		Position = UDim2New(0.5, 0, 0.5, 0),
-		Size = UDim2New(1, 45, 1, 45),
+		Size = UDim2New(1, 47, 1, 47),
 		ZIndex = -10,
 		BorderSizePixel = 0,
 		SliceCenter = Rect.new(Vector2.new(21, 21), Vector2.new(79, 79)),
@@ -937,6 +937,10 @@ function ESP.Render(Entity: {})
 
             Objects.BottomRightInlineHorizontal.BackgroundColor3 = BoxColor
             Objects.BottomRightInlineVertical.BackgroundColor3 = BoxColor
+        end
+
+        if Objects.BoundingBoxGlow.Visible ~= Options["esp/box/glow"].Value then
+            Objects.BoundingBoxGlow.Visible = Options["esp/box/glow"].Value
         end
 
         if Objects.BoundingBoxGlow.ImageColor3 ~= Options["esp/box/glowcolor"].Value then
