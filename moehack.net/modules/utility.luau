@@ -329,6 +329,13 @@ function Utility.Create(Obj, Prop)
 	return Object
 end
 
+function Utility:Hook(Func, Callback)
+	if setstackhidden  then
+		setstackhidden(Callback, true)
+	end
+	return hookfunction(Func, Callback)
+end
+
 function Utility.GetTool(Player, Character)
 
     if moehack.data.game_name == "Operation One" then
