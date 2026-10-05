@@ -760,7 +760,7 @@ function ESP.FadeOut(Entity: {}, DeltaTime: number)
     --# UI
 
     for _, Obj in Entity.Objects do
-        if Obj:IsA("CanvasGroup") then
+        if typeof(Obj) ~= "table" and Obj:IsA("CanvasGroup") then
             Obj.GroupTransparency += (1 - Obj.GroupTransparency) * Alpha
         end
     end
@@ -788,8 +788,8 @@ function ESP.FadeIn(Entity: {}, DeltaTime: number)
     end
 
     for _, Obj in Entity.Objects do
-        if Obj:IsA("CanvasGroup") then
-            Obj.GroupTransparency -= Obj.GroupTransparency * Alpha
+        if typeof(Obj) ~= "table" and Obj:IsA("CanvasGroup") then
+            Obj.GroupTransparency += (1 - Obj.GroupTransparency) * Alpha
         end
     end
 
