@@ -213,8 +213,8 @@ function ESP.CreateElements(Entity: table)
     Objects.GlowHolder.Parent = Objects.Holder
     Objects.GlowHolder.Size = UDim2New(1, 47, 1, 47)
     Objects.GlowHolder.BackgroundTransparency = 1
-    Objects.GlowHolder.AnchorPoint = Vector2.new(0.5, 0.5),
-    Objects.GlowHolder.Position = UDim2New(0.5, -1, 0.5, -1),
+    Objects.GlowHolder.AnchorPoint = Vector2.new(0.5, 0.5)
+    Objects.GlowHolder.Position = UDim2New(0.5, -1, 0.5, -1)
 
 	Objects.BoundingBoxGlow = Utility.Create("ImageLabel", {
 		Parent = Objects.GlowHolder,
