@@ -173,8 +173,9 @@ Misc.Movement = {} do
 
                 if Method == "CFrame" then
                     local DeltaTime = RunService.Heartbeat:Wait()
+                    local CurrentY = RootPart.AssemblyLinearVelocity.Y
                     RootPart.CFrame += MoveDir * Speed * DeltaTime
-                    RootPart.AssemblyLinearVelocity = NewVector3(0, Velocity.Y, 0)
+                    RootPart.AssemblyLinearVelocity = NewVector3(0, CurrentY, 0)
                 else
                     local CurrentY = RootPart.AssemblyLinearVelocity.Y
                     RootPart.AssemblyLinearVelocity = MoveDir * Speed + NewVector3(0, CurrentY, 0)
