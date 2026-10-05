@@ -753,10 +753,14 @@ end
 function ESP.FadeOut(Entity: {}, DeltaTime: number)
     local Alpha = 1 - math.exp(-12 * DeltaTime)
 
+    if Entity.Objects.Holder then
+        Entity.Objects.Holder.Visible = true
+    end
+
     --# UI
 
     for _, Obj in Entity.Objects do
-        if typeof(Obj) == "Instance" and Obj:IsA("CanvasGroup") then
+        if Obj:IsA("CanvasGroup") then
             Obj.GroupTransparency += (1 - Obj.GroupTransparency) * Alpha
         end
     end
@@ -779,8 +783,12 @@ end
 function ESP.FadeIn(Entity: {}, DeltaTime: number)
     local Alpha = 1 - math.exp(-12 * DeltaTime)
 
+    if Entity.Objects.Holder then
+        Entity.Objects.Holder.Visible = true
+    end
+
     for _, Obj in Entity.Objects do
-        if typeof(Obj) == "Instance" and Obj:IsA("CanvasGroup") then
+        if Obj:IsA("CanvasGroup") then
             Obj.GroupTransparency -= Obj.GroupTransparency * Alpha
         end
     end
@@ -983,6 +991,7 @@ function ESP.Render(Entity: {}, DeltaTime: number)
     local LowX, HighX, LowY, HighY, OnScreen = ESP.GetBoundingBox(Entity.BodyParts, Character)
 
     if not OnScreen or LowX == 1e6 or HighX == -1e6 then
+        Objects.Holder.Visible = false
         return
     end
 
