@@ -216,7 +216,7 @@ function ESP.CreateElements(Entity: table)
 		Image = getcustomasset("glow.png"),
 		BackgroundTransparency = 1,
 		ImageTransparency = Options["esp/box/glowcolor"].Transparency,
-		Position = UDim2New(0, -20, 0, -20),
+		Position = UDim2New(0, 0, 0, 0),
 		Size = UDim2New(1, 45, 1, 45),
 		ZIndex = -10,
 		BorderSizePixel = 0,
