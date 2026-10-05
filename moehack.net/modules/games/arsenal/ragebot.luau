@@ -28,6 +28,7 @@ local Camera = workspace.CurrentCamera
 local NetClient = require(ReplicatedFirst.Client.Utility.NetClient)
 local Events = require(ReplicatedStorage.Modules.Events)
 local State = require(ReplicatedFirst.Client.Utility.State)
+local Bridge = require(ReplicatedFirst.Client.Utility.Bridge)
 local Particles = require(game.ReplicatedFirst.Client.Game.Particles)
 local HumanoidInstanceWrapper = require(game.ReplicatedStorage.Modules.HumanoidInstanceWrapper)
 local General = require(game:GetService("ReplicatedFirst").Client.Utility.General)
@@ -103,8 +104,19 @@ function Ragebot:IsVisible(Target: BasePart, Origin: Vector3?): boolean
   return Result.Instance == Target
 end
 
+function Ragebot:HitFX(Head: BasePart, Origin: Vector3, HeadBits: number)
+    if not Head or not Origin then return end
+    local Gun = State.gun
+    if not Gun then return end
+    local Normal = (Head.Position - Origin).Unit
+    Bridge.HitObject:Fire(Head, Head.Position, Normal, Gun, HeadBits or 1, false, false, false)
+    local Override = GeneralFunctions.getTrailColorOverride(LocalPlayer, Gun)
+    Particles.CreateTrail(Origin, Head.Position, Override)
+end
+
 function Ragebot:Hit(Character, PenIndex, SharedCFrame)
     if not Character then return end
+    local Self = self
     local Head = FindFirstChild(Character, "HeadHB") or FindFirstChild(Character, "Head")
     if not Head then return end
 
@@ -186,26 +198,9 @@ function Ragebot:Hit(Character, PenIndex, SharedCFrame)
             NetClient.f32(Head.Position.X) NetClient.f32(Head.Position.Y) NetClient.f32(Head.Position.Z)
             NetClient.f32(N.X) NetClient.f32(N.Y) NetClient.f32(N.Z)
             NetClient.unlock()
-        end)
-        return
-    end
 
-    if FindFirstChild(Gun, "ThrowWeapon") then
-        local TSpeed = FindFirstChild(Gun, "Speed") and Gun.Speed.Value * 0.07 or 100
-        if TSpeed == 0 then TSpeed = 0.01 end
-        local TTarget = Head.Position
-        local TMuzzle = (Camera.CFrame * CFrame.new(1.5, -0.65, 0)).Position
-        NetClient.lock()
-        NetClient.u16(Events.ReplicateProjectile)
-        NetClient.str("Baseball")
-        NetClient.f32(TSpeed)
-        NetClient.f32(TTarget.X) NetClient.f32(TTarget.Y) NetClient.f32(TTarget.Z)
-        NetClient.f32(TMuzzle.X) NetClient.f32(TMuzzle.Y) NetClient.f32(TMuzzle.Z)
-        NetClient.str(GunName)
-        NetClient.f32(0)
-        NetClient.u8(State.currentSpell or 1)
-        NetClient.u8(bit32.bor(State.jumping and 1 or 0, State.ads and 2 or 0))
-        NetClient.unlock()
+            Self:HitFX(Head, FireOrigin, HeadBits)
+        end)
         return
     end
 
@@ -237,6 +232,26 @@ function Ragebot:Hit(Character, PenIndex, SharedCFrame)
         NetClient.f32(R20) NetClient.f32(R21) NetClient.f32(R22)
         NetClient.f32(Head.Position.X) NetClient.f32(Head.Position.Y) NetClient.f32(Head.Position.Z)
         NetClient.f32(DeltaTime)
+        NetClient.unlock()
+
+        self:HitFX(Head, Origin, HeadBits)
+    end
+
+    if FindFirstChild(Gun, "ThrowWeapon") then
+        local TSpeed = FindFirstChild(Gun, "Speed") and Gun.Speed.Value * 0.07 or 100
+        if TSpeed == 0 then TSpeed = 0.01 end
+        local LegitTarget = Origin + Camera.CFrame.LookVector * 1000
+        local Muzzle = (Camera.CFrame * CFrame.new(1.5, -0.65, 0)).Position
+        NetClient.lock()
+        NetClient.u16(Events.ReplicateProjectile)
+        NetClient.str("Baseball")
+        NetClient.f32(TSpeed)
+        NetClient.f32(LegitTarget.X) NetClient.f32(LegitTarget.Y) NetClient.f32(LegitTarget.Z)
+        NetClient.f32(Muzzle.X) NetClient.f32(Muzzle.Y) NetClient.f32(Muzzle.Z)
+        NetClient.str(GunName)
+        NetClient.f32(0)
+        NetClient.u8(State.currentSpell or 1)
+        NetClient.u8(bit32.bor(State.jumping and 1 or 0, State.ads and 2 or 0))
         NetClient.unlock()
     end
 end
@@ -315,11 +330,13 @@ function Ragebot:Stab(Character)
     NetClient.f32(Head.Position.X) NetClient.f32(Head.Position.Y) NetClient.f32(Head.Position.Z)
     NetClient.f32(DeltaTime)
     NetClient.unlock()
+
+    self:HitFX(Head, Origin, 0)
 end
 
 function Ragebot:Knifebot()
 
-    if not Toggles["combat/knifebot"].Value then return end 
+    if not Toggles["combat/knifebot"].Value then return end
     if Toggles["combat/ragebot/removeextrachecks"].Value then return end
     local Gun = State.gun
     if not Gun then return end
@@ -432,14 +449,14 @@ function Ragebot:Scan()
                 end
 
                 for Pen, Pierce in Found do
-                    if FindFirstChild(Gun, "Melee") ~= nil then 
+                    if FindFirstChild(Gun, "Melee") ~= nil then
                         self:Stab(Pierce.Character)
                     else
                         self:Hit(Pierce.Character, Pen, Shared)
                     end
 
                 end
-                -- self:ReplicateShoot()
+                self:ReplicateShoot()
                 break
             else
 
@@ -453,7 +470,7 @@ function Ragebot:Scan()
                     end
                 end
 
-                if FindFirstChild(Gun, "Melee") ~= nil then 
+                if FindFirstChild(Gun, "Melee") ~= nil then
                     self:Stab(Target)
                 else
                     self:Hit(Target)
@@ -471,7 +488,7 @@ function Ragebot:Scan()
     end
 end
 
-Library:GiveSignal(RunService.Stepped:Connect(function()
+Library:GiveSignal(RunService.PreRender:Connect(function()
     Ragebot:Scan()
     Ragebot:Knifebot()
 end))
