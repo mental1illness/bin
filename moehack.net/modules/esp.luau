@@ -755,17 +755,15 @@ function ESP.FadeOut(Entity: {}, DeltaTime: number)
 
     --# UI
 
-    for _, Object in Entity.Objects do
-        if Object:IsA("CanvasGroup") then
-            Object.GroupTransparency +=
-                (1 - Object.GroupTransparency) * Alpha
+    for _, Obj in Entity.Objects do
+        if typeof(Obj) == "Instance" and Obj:IsA("CanvasGroup") then
+            Obj.GroupTransparency += (1 - Obj.GroupTransparency) * Alpha
         end
     end
 
     --# Chams
 
-    Entity.ChamsFade = (Entity.ChamsFade or 0)
-        + (1 - (Entity.ChamsFade or 0)) * Alpha
+    Entity.ChamsFade = (Entity.ChamsFade or 0) + (1 - (Entity.ChamsFade or 0)) * Alpha
 
     local ChamsTransparency = Options["esp/chams/color"].Transparency
 
@@ -781,12 +779,12 @@ end
 function ESP.FadeIn(Entity: {}, DeltaTime: number)
     local Alpha = 1 - math.exp(-12 * DeltaTime)
 
-
-    for _, Object in Entity.Objects do
-        if Object:IsA("CanvasGroup") then
-            Object.GroupTransparency -= Object.GroupTransparency * Alpha
+    for _, Obj in Entity.Objects do
+        if typeof(Obj) == "Instance" and Obj:IsA("CanvasGroup") then
+            OObject.GroupTransparency -= Object.GroupTransparency * Alpha
         end
     end
+
 
     Entity.ChamsFade = (Entity.ChamsFade or 1) * (1 - Alpha)
 
