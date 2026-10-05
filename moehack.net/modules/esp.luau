@@ -205,6 +205,24 @@ function ESP.CreateElements(Entity: table)
         Objects[Name .. "OutlineVertical"] = OutlineVertical
     end
 
+    --# Glow
+
+	Objects.BoundingBoxGlow = Utility.Create("ImageLabel", {
+		Parent = Objects.BoundingBox,
+		ImageColor3 = Options["esp/box/glowcolor"].Value,
+		ScaleType = Enum.ScaleType.Slice,
+		BorderColor3 = Color3.fromRGB(0, 0, 0),
+		BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+		Image = getcustomasset("glow.png"),
+		BackgroundTransparency = 1,
+		ImageTransparency = Options["esp/box/glowcolor"].Transparency,
+		Position = UDim2New(0, -20, 0, -20),
+		Size = UDim2New(1, 40, 1, 40),
+		ZIndex = -10,
+		BorderSizePixel = 0,
+		SliceCenter = Rect.new(Vector2.new(21, 21), Vector2.new(79, 79)),
+	})
+
     --# Health Bar
 
     Objects.HealthBar = Create("CanvasGroup")
@@ -918,6 +936,14 @@ function ESP.Render(Entity: {})
 
             Objects.BottomRightInlineHorizontal.BackgroundColor3 = BoxColor
             Objects.BottomRightInlineVertical.BackgroundColor3 = BoxColor
+        end
+
+        if Objects.BoundingBoxGlow.ImageColor3 ~= Options["esp/box/glowcolor"].Value then
+            Objects.BoundingBoxGlow.ImageColor3 = Options["esp/box/glowcolor"].Value
+        end
+
+        if Objects.BoundingBoxGlow.ImageTransparency ~= Options["esp/box/glowcolor"].Transparency then
+            Objects.BoundingBoxGlow.ImageTransparency = Options["esp/box/glowcolor"].Transparency
         end
 
         if Toggles["esp/box/fill"].Value then

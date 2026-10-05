@@ -164,6 +164,9 @@ local Library, SaveManager, ThemeManager = moehack.load_module("moehack.net/inte
                         DepBox:SetupDependencies({
                             { Toggles["esp/box"], true } 
                         });
+
+                        DepBox:AddToggle("esp/box/glow", { Text = "Glow Box", Default = false })
+                            :AddColorPicker('esp/box/glowcolor', { Default = Color3.fromRGB(255, 255, 255), Title = 'Glow Color', Transparency = 0.5 })
                     end
                     local HealthBar = Main:AddToggle("esp/healthbar", { Text = "Health Bar", Default = false }) do
 
