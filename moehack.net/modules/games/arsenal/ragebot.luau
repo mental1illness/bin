@@ -94,16 +94,24 @@ function Ragebot:GetOrigin()
 end
 
 function Ragebot:IsVisible(Target: BasePart, Origin: Vector3?): boolean
-  if not Target or not Target.Parent then return false end
-  Origin = Origin or Camera.CFrame.Position
+    if not Target or not Target.Parent then return false end
+    Origin = Origin or Camera.CFrame.Position
 
-  VisibilityParams.FilterType = Enum.RaycastFilterType.Exclude
-  VisibilityParams.FilterDescendantsInstances = GeneralFunctions.gethitlist()
-  VisibilityParams.IgnoreWater = true
+    local Character = Target:FindFirstAncestorOfClass("Model")
+    if not Character then return false end
 
-  local Result = Raycast(workspace, Origin, Target.Position - Origin, VisibilityParams)
-  if not Result then return false end
-  return Result.Instance == Target
+    VisibilityParams.FilterType = Enum.RaycastFilterType.Exclude
+    VisibilityParams.FilterDescendantsInstances = GeneralFunctions.gethitlist()
+    VisibilityParams.IgnoreWater = true
+
+    local Direction = Target.Position - Origin
+    local Result = Raycast(workspace, Origin, Direction, VisibilityParams)
+
+    if not Result then
+        return true
+    end
+
+    return Result.Instance:IsDescendantOf(Character)
 end
 
 function Ragebot:HitFX(Head: BasePart, Origin: Vector3, HeadBits: number)
