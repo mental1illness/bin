@@ -109,7 +109,7 @@ function ESP.CreateElements(Entity: table)
     Objects.BoundingBox.Parent = Objects.Holder
     Objects.BoundingBox.Size = FromScale(1, 1)
     Objects.BoundingBox.BackgroundTransparency = 1
-    Objects.BoundingBox.GroupTransparency = 0
+    -- Objects.BoundingBox.GroupTransparency = 0
 
     local BoundingBoxStroke = Create("UIStroke")
     BoundingBoxStroke.LineJoinMode = Enum.LineJoinMode.Miter
