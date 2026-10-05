@@ -797,8 +797,8 @@ end
 
 Library:GiveSignal(
 	RunService.RenderStepped:Connect(function(Delta)
-		FrameRate = Floor(1000 / RenderAverage:GetValue())
-		Ping = Floor(DataPing:GetValue())
+		FrameRate = Floor(1000 / RenderAverage.GetValue(RenderAverage))
+		Ping = Floor(DataPing.GetValue(DataPing))
 
         Visuals.Tick(Delta)
         Combat.Tick(Delta)
