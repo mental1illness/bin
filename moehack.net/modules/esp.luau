@@ -781,7 +781,7 @@ function ESP.FadeIn(Entity: {}, DeltaTime: number)
 
     for _, Obj in Entity.Objects do
         if typeof(Obj) == "Instance" and Obj:IsA("CanvasGroup") then
-            OObject.GroupTransparency -= Object.GroupTransparency * Alpha
+            Obj.GroupTransparency -= Obj.GroupTransparency * Alpha
         end
     end
 
