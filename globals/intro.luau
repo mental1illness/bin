@@ -36,7 +36,7 @@ function Intro.GetRandomMessages()
     for _, Message in Intro.Messages do
         TotalWeight += Message.Weight
     end
-
+    
     local Roll = math.random() * TotalWeight
 
     for _, Message in Intro.Messages do
