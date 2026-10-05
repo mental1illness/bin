@@ -4,10 +4,12 @@
 --# Aliases
 
 local FromOffset, FromScale, UDim2New = UDim2.fromOffset, UDim2.fromScale, UDim2.new
-local NewVector3 = Vector3.new
-local Create = Instance.new
-local Minimum, Maximum, Floor, Clamp = math.min, math.max, math.floor, math.clamp
-local Insert, RemoveTable, Clear = table.insert, table.remove, table.clear
+local Atan2, Rad, Pi, Abs, Minimum, Maximum, Floor, Clamp = math.atan2, math.rad, math.pi, math.abs, math.min, math.max, math.floor, math.clamp
+local NewVector, NewVector3, NewCFrame = vector.create, Vector3.new, CFrame.new
+local Create, IsA = Instance.new, workspace.IsA
+local Spawn, Wait = task.spawn, task.wait
+local ForEach, Insert, RemoveTable = table.foreach, table.insert, table.remove
+local FindFirstChild, WaitForChild = workspace.FindFirstChild, workspace.WaitForChild
 local WorldToViewportPoint = workspace.CurrentCamera.WorldToViewportPoint
 local GetService = Game.GetService
 
@@ -99,13 +101,14 @@ function ESP.CreateElements(Entity: table)
 
     --# Holder
 
-    Objects.Holder = Create("Frame")
+    Objects.Holder = Create("CanvasGroup")
     Objects.Holder.Parent = ScreenGui
     Objects.Holder.BackgroundTransparency = 1
+    Objects.Holder.GroupTransparency = 1
 
     --# Bounding Box
 
-    Objects.BoundingBox = Create("Frame")
+    Objects.BoundingBox = Create("CanvasGroup")
     Objects.BoundingBox.Parent = Objects.Holder
     Objects.BoundingBox.Size = FromScale(1, 1)
     Objects.BoundingBox.BackgroundTransparency = 1
@@ -207,8 +210,15 @@ function ESP.CreateElements(Entity: table)
 
     --# Glow
 
+    Objects.GlowHolder = Create("CanvasGroup")
+    Objects.GlowHolder.Parent = Objects.Holder
+    Objects.GlowHolder.Size = UDim2New(1, 47, 1, 47)
+    Objects.GlowHolder.BackgroundTransparency = 1
+    Objects.GlowHolder.AnchorPoint = Vector2.new(0.5, 0.5),
+    Objects.GlowHolder.Position = UDim2New(0.5, -1, 0.5, -1),
+
 	Objects.BoundingBoxGlow = Utility.Create("ImageLabel", {
-		Parent = Objects.BoundingBox,
+		Parent = Objects.GlowHolder,
 		ImageColor3 = Options["esp/box/glowcolor"].Value,
 		ScaleType = Enum.ScaleType.Slice,
 		BorderColor3 = Color3.fromRGB(0, 0, 0),
@@ -216,9 +226,7 @@ function ESP.CreateElements(Entity: table)
 		Image = getcustomasset("glow.png"),
 		BackgroundTransparency = 1,
 		ImageTransparency = Options["esp/box/glowcolor"].Transparency,
-        AnchorPoint = Vector2.new(0.5, 0.5),
-		Position = UDim2New(0.5, -1, 0.5, -1),
-		Size = UDim2New(1, 47, 1, 47),
+		Size = UDim2New(1, 0, 1, 0),
 		ZIndex = -10,
 		BorderSizePixel = 0,
 		SliceCenter = Rect.new(Vector2.new(21, 21), Vector2.new(79, 79)),
@@ -535,7 +543,11 @@ function ESP.AddTarget(Target, Settings)
         TargetConnections = {},
         ChamsModel = nil,
         ChamsParts = {},
-        IsCustom = true
+        ChamsFade = 1,
+        IsCustom = true,
+        LastPosition = nil,
+        LastSize = nil,
+        IsFading = true
     }
 
     Entity.Objects = ESP.CreateElements(Entity)
@@ -592,7 +604,11 @@ function ESP.ApplyAllPlayer()
             ChamsParts = {},
             BodyParts = {},
             TargetConnections = {},
-            IsCustom = false
+            ChamsFade = 1,
+            IsCustom = false,
+            LastSize = nil,
+            LastPosition = nil,
+            IsFading = false,
         }
 
         Entity.Objects = ESP.CreateElements(Entity)
@@ -689,6 +705,101 @@ function ESP.GetBoundingBox(Model: {}, Character)
 
     return LowestX, HighestX, LowestY, HighestY, OnScreen
 end
+
+--# Animations
+
+function ESP.RenderLastPosition(Entity: {})
+    local Position = Entity.LastPosition
+    local Size = Entity.LastSize
+
+    if not Position or not Size then
+        return false
+    end
+
+    local HalfSize = Size * 0.5
+    local LowestX, HighestX = 1e6, -1e6
+    local LowestY, HighestY = 1e6, -1e6
+    local OnScreen = false
+
+    for _, Signs in Corners do
+        local ScreenPoint, Visible = WorldToViewportPoint(
+            CurrentCamera,
+            NewCFrame(Position) * NewVector3(
+                HalfSize.X * Signs[1],
+                HalfSize.Y * Signs[2],
+                HalfSize.Z * Signs[3]
+            )
+        )
+
+        OnScreen = OnScreen or Visible
+        LowestX = Minimum(LowestX, ScreenPoint.X)
+        HighestX = Maximum(HighestX, ScreenPoint.X)
+        LowestY = Minimum(LowestY, ScreenPoint.Y)
+        HighestY = Maximum(HighestY, ScreenPoint.Y)
+    end
+
+    if not OnScreen or LowestX == 1e6 or HighestX == -1e6 then
+        return false
+    end
+
+    Entity.Objects.Holder.Position = FromOffset(LowestX, LowestY)
+    Entity.Objects.Holder.Size = FromOffset(
+        HighestX - LowestX,
+        HighestY - LowestY
+    )
+
+    return true
+end
+
+function ESP.FadeOut(Entity: {}, DeltaTime: number)
+    local Alpha = 1 - math.exp(-12 * DeltaTime)
+
+    --# UI
+
+    for _, Object in Entity.Objects do
+        if Object:IsA("CanvasGroup") then
+            Object.GroupTransparency +=
+                (1 - Object.GroupTransparency) * Alpha
+        end
+    end
+
+    --# Chams
+
+    Entity.ChamsFade = (Entity.ChamsFade or 0)
+        + (1 - (Entity.ChamsFade or 0)) * Alpha
+
+    local ChamsTransparency = Options["esp/chams/color"].Transparency
+
+    for _, ChamsPart in Entity.ChamsParts do
+        if ChamsPart.Parent then
+            ChamsPart.Transparency =
+                ChamsTransparency
+                + (1 - ChamsTransparency) * Entity.ChamsFade
+        end
+    end
+end
+
+function ESP.FadeIn(Entity: {}, DeltaTime: number)
+    local Alpha = 1 - math.exp(-12 * DeltaTime)
+
+
+    for _, Object in Entity.Objects do
+        if Object:IsA("CanvasGroup") then
+            Object.GroupTransparency -= Object.GroupTransparency * Alpha
+        end
+    end
+
+    Entity.ChamsFade = (Entity.ChamsFade or 1) * (1 - Alpha)
+
+    local ChamsTransparency = Options["esp/chams/color"].Transparency
+
+    for _, ChamsPart in Entity.ChamsParts do
+        if ChamsPart.Parent then
+            ChamsPart.Transparency = ChamsTransparency + (1 - ChamsTransparency) * Entity.ChamsFade
+        end
+    end
+end
+
 
 --# Chams
 
@@ -797,8 +908,10 @@ function ESP.ChamsRender(Entity: {})
             ChamsPart.Material = Material
         end
 
-        if ChamsPart.Transparency ~= Picker.Transparency and RealPart.Transparency < 1 then
-            ChamsPart.Transparency = Picker.Transparency
+        local Transparency = Picker.Transparency + (1 - Picker.Transparency) * (Entity.ChamsFade or 0)
+
+        if ChamsPart.Transparency ~= Transparency and RealPart.Transparency < 1 then
+            ChamsPart.Transparency = Transparency
         end
     end
 
@@ -809,7 +922,7 @@ end
 
 --# Render
 
-function ESP.Render(Entity: {})
+function ESP.Render(Entity: {}, DeltaTime: number)
     local Player = Entity.Player
     local Objects = Entity.Objects
 
@@ -830,8 +943,8 @@ function ESP.Render(Entity: {})
     end
 
     if not RealCharacter then
-        Objects.Holder.Visible = false
-        ESP.ChamsRemove(Entity)
+        ESP.RenderLastPosition(Entity)
+        ESP.FadeOut(Entity, DeltaTime)
         return
     end
 
@@ -855,27 +968,24 @@ function ESP.Render(Entity: {})
     local IsTeammate = Player and Utility.IsTeammate(Player, LocalPlayer) or false
 
     if Humanoid and moehack.data.game_name == "Blox Strike" then
-        Objects.Holder.Visible = false
         ESP.ChamsRemove(Entity)
+        ESP.FadeOut(Entity, DeltaTime)
         return
     end
 
     if IsTeammate and not Toggles["esp/settings/renderteam"].Value then
-        Objects.Holder.Visible = false
-        ESP.ChamsRemove(Entity)
+        ESP.FadeOut(Entity, DeltaTime)
         return
     end
 
     if Health <= 0 then
-        Objects.Holder.Visible = false
-        ESP.ChamsRemove(Entity)
+        ESP.FadeOut(Entity, DeltaTime)
         return
     end
 
     local LowX, HighX, LowY, HighY, OnScreen = ESP.GetBoundingBox(Entity.BodyParts, Character)
 
     if not OnScreen or LowX == 1e6 or HighX == -1e6 then
-        Objects.Holder.Visible = false
         return
     end
 
@@ -895,9 +1005,21 @@ function ESP.Render(Entity: {})
         and (CurrentCamera.CFrame.Position - TargetRoot.Position).Magnitude
         or 0
 
+    if TargetRoot then
+        Entity.LastPosition = TargetRoot.Position
+
+        if RealCharacter:IsA("BasePart") then
+            Entity.LastSize = RealCharacter.Size
+        elseif Character and Character:IsA("Model") then
+            Entity.LastSize = Character:GetExtentsSize()
+        elseif RealCharacter:IsA("Model") then
+            Entity.LastSize = RealCharacter:GetExtentsSize()
+        end
+    end
+
     if Distance > Options["esp/settings/renderdist"].Value then
-        Objects.Holder.Visible = false
         ESP.ChamsRemove(Entity)
+        ESP.FadeOut(Entity, DeltaTime)
         return
     end
 
@@ -939,8 +1061,8 @@ function ESP.Render(Entity: {})
             Objects.BottomRightInlineVertical.BackgroundColor3 = BoxColor
         end
 
-        if Objects.BoundingBoxGlow.Visible ~= Toggles["esp/box/glow"].Value then
-            Objects.BoundingBoxGlow.Visible = Toggles["esp/box/glow"].Value
+        if Objects.GlowHolder.Visible ~= Toggles["esp/box/glow"].Value then
+            Objects.GlowHolder.Visible = Toggles["esp/box/glow"].Value
         end
 
         if Objects.BoundingBoxGlow.ImageColor3 ~= Options["esp/box/glowcolor"].Value then
@@ -970,6 +1092,7 @@ function ESP.Render(Entity: {})
     else
         Objects.BoundingBox.Visible = false
         Objects.CornerBox.Visible = false
+        Objects.GlowHolder.Visible = false
     end
 
     --# Name
@@ -1116,7 +1239,8 @@ function ESP.Render(Entity: {})
         HighX - LowX,
         HighY - LowY
     )
-    Objects.Holder.Visible = true
+
+    ESP.FadeIn(Entity, DeltaTime)
 end
 
 function ESP.Update(DeltaTime)
@@ -1156,7 +1280,7 @@ function ESP.Update(DeltaTime)
     LastHz -= Interval
 
     for _, Entity in ESP.Entities do
-        ESP.Render(Entity)
+        ESP.Render(Entity, DeltaTime)
     end
 end
 
