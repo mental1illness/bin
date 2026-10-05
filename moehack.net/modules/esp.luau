@@ -66,6 +66,16 @@ local CornerBoxes = {
     {"BottomRight", 180}
 }
 
+local StrokeNames = {
+    "BoundingBoxStroke",
+    "BoundingBoxInline",
+    "HealthBarOutline",
+    "HealthTextStroke",
+    "NameStroke",
+    "DistStroke",
+    "ToolStroke"
+}
+
 local LastHz = 0
 local PlayersCache = {}
 
@@ -116,10 +126,10 @@ function ESP.CreateElements(Entity: table)
     Objects.BoundingBox.BackgroundTransparency = 1
     Objects.BoundingBox.GroupTransparency = 0
 
-    local BoundingBoxStroke = Create("UIStroke")
-    BoundingBoxStroke.LineJoinMode = Enum.LineJoinMode.Miter
-    BoundingBoxStroke.Thickness = 3
-    BoundingBoxStroke.Parent = Objects.BoundingBox
+    Objects.BoundingBoxStroke = Create("UIStroke")
+    Objects.BoundingBoxStroke.LineJoinMode = Enum.LineJoinMode.Miter
+    Objects.BoundingBoxStroke.Thickness = 3
+    Objects.BoundingBoxStroke.Parent = Objects.BoundingBox
 
     Objects.BoundingBoxInline = Create("UIStroke")
     Objects.BoundingBoxInline.LineJoinMode = Enum.LineJoinMode.Miter
@@ -243,12 +253,12 @@ function ESP.CreateElements(Entity: table)
     Objects.HealthBar.BackgroundTransparency = 1
     Objects.HealthBar.BorderSizePixel = 0
 
-    local HealthBarOutline = Create("UIStroke")
-    HealthBarOutline.LineJoinMode = Enum.LineJoinMode.Miter
-    HealthBarOutline.Thickness = 1
-    HealthBarOutline.ZIndex = 4
-    HealthBarOutline.Color = Color3.fromRGB(0, 0, 0)
-    HealthBarOutline.Parent = Objects.HealthBar
+    Objects.HealthBarOutline = Create("UIStroke")
+    Objects.HealthBarOutline.LineJoinMode = Enum.LineJoinMode.Miter
+    Objects.HealthBarOutline.Thickness = 1
+    Objects.HealthBarOutline.ZIndex = 4
+    Objects.HealthBarOutline.Color = Color3.fromRGB(0, 0, 0)
+    Objects.HealthBarOutline.Parent = Objects.HealthBar
 
     Objects.HealthBarBackground = Create("Frame")
     Objects.HealthBarBackground.Parent = Objects.HealthBar
@@ -299,11 +309,11 @@ function ESP.CreateElements(Entity: table)
     Objects.HealthText.TextSize = 9
     Objects.HealthText.ZIndex = 5
 
-    local HealthTextStroke = Create("UIStroke")
-    HealthTextStroke.Parent = Objects.HealthText
-    HealthTextStroke.LineJoinMode = Enum.LineJoinMode.Miter
-    HealthTextStroke.Thickness = 1
-    HealthTextStroke.Color = Color3.new(0, 0, 0)
+    Objects.HealthTextStroke = Create("UIStroke")
+    Objects.HealthTextStroke.Parent = Objects.HealthText
+    Objects.HealthTextStroke.LineJoinMode = Enum.LineJoinMode.Miter
+    Objects.HealthTextStroke.Thickness = 1
+    Objects.HealthTextStroke.Color = Color3.new(0, 0, 0)
 
     --# Name
 
@@ -348,11 +358,11 @@ function ESP.CreateElements(Entity: table)
         }
     )
 
-    local NameStroke = Create("UIStroke")
-    NameStroke.Parent = Objects.Name
-    NameStroke.LineJoinMode = Enum.LineJoinMode.Miter
-    NameStroke.Thickness = 1
-    NameStroke.Color = Color3.new(0, 0, 0)
+    Objects.NameStroke = Create("UIStroke")
+    Objects.NameStroke.Parent = Objects.Name
+    Objects.NameStroke.LineJoinMode = Enum.LineJoinMode.Miter
+    Objects.NameStroke.Thickness = 1
+    Objects.NameStroke.Color = Color3.new(0, 0, 0)
 
     --# Sides Elements
 
@@ -387,11 +397,11 @@ function ESP.CreateElements(Entity: table)
     Objects.Distance.TextSize = 9
     Objects.Distance.ZIndex = 5
 
-    local DistStroke = Create("UIStroke")
-    DistStroke.Parent = Objects.Distance
-    DistStroke.LineJoinMode = Enum.LineJoinMode.Miter
-    DistStroke.Thickness = 1
-    DistStroke.Color = Color3.new(0, 0, 0)
+    Objects.DistStroke = Create("UIStroke")
+    Objects.DistStroke.Parent = Objects.Distance
+    Objects.DistStroke.LineJoinMode = Enum.LineJoinMode.Miter
+    Objects.DistStroke.Thickness = 1
+    Objects.DistStroke.Color = Color3.new(0, 0, 0)
 
     --# Tool
 
@@ -407,11 +417,11 @@ function ESP.CreateElements(Entity: table)
     Objects.Tool.TextSize = 9
     Objects.Tool.ZIndex = 5
 
-    local ToolStroke = Create("UIStroke")
-    ToolStroke.Parent = Objects.Tool
-    ToolStroke.LineJoinMode = Enum.LineJoinMode.Miter
-    ToolStroke.Thickness = 1
-    ToolStroke.Color = Color3.new(0, 0, 0)
+    Objects.ToolStroke = Create("UIStroke")
+    Objects.ToolStroke.Parent = Objects.Tool
+    Objects.ToolStroke.LineJoinMode = Enum.LineJoinMode.Miter
+    Objects.ToolStroke.Thickness = 1
+    Objects.ToolStroke.Color = Color3.new(0, 0, 0)
 
     Objects.FadeGroups = {
         Objects.BoundingBox,
@@ -432,11 +442,25 @@ function ESP.CreateElements(Entity: table)
         Group.GroupTransparency = 1
     end
 
+    for _, Name in StrokeNames do
+        Objects[Name].Transparency = 1
+    end
+
     Objects.FadeValue.Changed:Connect(function(Value)
         Entity.ChamsFade = Value
 
         for _, Group in Objects.FadeGroups do
-            Group.GroupTransparency = Value
+            if Group.Parent then
+                Group.GroupTransparency = Value
+            end
+        end
+
+        for _, Name in StrokeNames do
+            local Stroke = Objects[Name]
+
+            if Stroke and Stroke.Parent then
+                Stroke.Transparency = Value
+            end
         end
 
         local Base = Options["esp/chams/color"].Transparency
@@ -583,7 +607,7 @@ function ESP.AddTarget(Target, Settings)
         ChamsFade = 1,
         IsCustom = true,
         LastPosition = nil,
-        LastSize = nil,
+        LastRect = nil,
         Shown = false,
         FadeTween = nil
     }
@@ -652,7 +676,7 @@ function ESP.ApplyAllPlayer()
             TargetConnections = {},
             ChamsFade = 1,
             IsCustom = false,
-            LastSize = nil,
+            LastRect = nil,
             LastPosition = nil,
             Shown = false,
             FadeTween = nil
@@ -757,45 +781,27 @@ end
 
 function ESP.RenderLastPosition(Entity: {})
     local Position = Entity.LastPosition
-    local Size = Entity.LastSize
+    local Rect = Entity.LastRect
 
-    if not Position or not Size then
+    if not Position or not Rect then
         Entity.Objects.Holder.Visible = false
         return false
     end
 
-    local HalfSize = Size * 0.5
-    local LowestX, HighestX = 1e6, -1e6
-    local LowestY, HighestY = 1e6, -1e6
-    local OnScreen = false
+    local ScreenPoint, Visible = WorldToViewportPoint(CurrentCamera, Position)
 
-    for _, Signs in Corners do
-        local ScreenPoint, Visible = WorldToViewportPoint(
-            CurrentCamera,
-            NewCFrame(Position) * NewVector3(
-                HalfSize.X * Signs[1],
-                HalfSize.Y * Signs[2],
-                HalfSize.Z * Signs[3]
-            )
-        )
-
-        OnScreen = OnScreen or Visible
-        LowestX = Minimum(LowestX, ScreenPoint.X)
-        HighestX = Maximum(HighestX, ScreenPoint.X)
-        LowestY = Minimum(LowestY, ScreenPoint.Y)
-        HighestY = Maximum(HighestY, ScreenPoint.Y)
-    end
-
-    if not OnScreen or LowestX == 1e6 or HighestX == -1e6 then
+    if not Visible or ScreenPoint.Z <= 0 then
         Entity.Objects.Holder.Visible = false
         return false
     end
 
-    Entity.Objects.Holder.Position = FromOffset(LowestX, LowestY)
-    Entity.Objects.Holder.Size = FromOffset(
-        HighestX - LowestX,
-        HighestY - LowestY
+    local Scale = Rect.Depth / ScreenPoint.Z
+
+    Entity.Objects.Holder.Position = FromOffset(
+        ScreenPoint.X + Rect.OffsetX * Scale,
+        ScreenPoint.Y + Rect.OffsetY * Scale
     )
+    Entity.Objects.Holder.Size = FromOffset(Rect.Width * Scale, Rect.Height * Scale)
 
     return true
 end
@@ -1052,15 +1058,17 @@ function ESP.Render(Entity: {}, DeltaTime: number)
         or 0
 
     if TargetRoot then
-        Entity.LastPosition = TargetRoot.Position
+        local RootPosition = TargetRoot.Position
+        local RootPoint = WorldToViewportPoint(CurrentCamera, RootPosition)
 
-        if RealCharacter:IsA("BasePart") then
-            Entity.LastSize = RealCharacter.Size
-        elseif Character and Character:IsA("Model") then
-            Entity.LastSize = Character:GetExtentsSize()
-        elseif RealCharacter:IsA("Model") then
-            Entity.LastSize = RealCharacter:GetExtentsSize()
-        end
+        Entity.LastPosition = RootPosition
+        Entity.LastRect = {
+            OffsetX = LowX - RootPoint.X,
+            OffsetY = LowY - RootPoint.Y,
+            Width = HighX - LowX,
+            Height = HighY - LowY,
+            Depth = Maximum(RootPoint.Z, 0.001)
+        }
     end
 
     if Distance > Options["esp/settings/renderdist"].Value then
