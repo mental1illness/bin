@@ -722,6 +722,7 @@ function ESP.RenderLastPosition(Entity: {})
     local Size = Entity.LastSize
 
     if not Position or not Size then
+        Entity.Objects.Holder.Visible = false
         return false
     end
 
@@ -748,6 +749,7 @@ function ESP.RenderLastPosition(Entity: {})
     end
 
     if not OnScreen or LowestX == 1e6 or HighestX == -1e6 then
+        Entity.Objects.Holder.Visible = false
         return false
     end
 
@@ -760,14 +762,43 @@ function ESP.RenderLastPosition(Entity: {})
     return true
 end
 
-function ESP.FadeOut(Entity: {}, DeltaTime: number)
-    local Alpha = 1 - math.exp(-12 * DeltaTime)
-    if Entity.Objects.Holder then
-        Entity.Objects.Holder.Visible = true
-    end
-    --# UI
+local function GetFadeDelta(Entity: {})
+    local Now = os.clock()
+    local DeltaTime = Now - (Entity.LastFadeTick or Now)
+
+    Entity.LastFadeTick = Now
+
+    return Clamp(DeltaTime, 0, 0.1)
+end
+
+local function SetUIFade(Entity: {}, Value: number)
+    Entity.UIFade = Value
+
     for _, Obj in Entity.Objects.FadeGroups do
-        Obj.GroupTransparency += (1 - Obj.GroupTransparency) * Alpha
+        Obj.GroupTransparency = Value
+    end
+end
+
+function ESP.FadeOut(Entity: {}, DeltaTime: number)
+    local Alpha = 1 - math.exp(-12 * GetFadeDelta(Entity))
+
+    --# UI
+
+    local Fade = Entity.UIFade or Entity.Objects.FadeGroups[1].GroupTransparency
+    Fade += (1 - Fade) * Alpha
+
+    if Fade > 0.99 then
+        Fade = 1
+    end
+
+    SetUIFade(Entity, Fade)
+
+    if Fade >= 1 then
+        Entity.Objects.Holder.Visible = false
+    else
+        if ESP.RenderLastPosition(Entity) then
+            Entity.Objects.Holder.Visible = true
+        end
     end
 
     --# Chams
@@ -786,14 +817,17 @@ function ESP.FadeOut(Entity: {}, DeltaTime: number)
 end
 
 function ESP.FadeIn(Entity: {}, DeltaTime: number)
-    local Alpha = 1 - math.exp(-12 * DeltaTime)
-    if Entity.Objects.Holder then
-        Entity.Objects.Holder.Visible = true
-    end
-    for _, Obj in Entity.Objects.FadeGroups do
-        Obj.GroupTransparency -= Obj.GroupTransparency * Alpha
+    local Alpha = 1 - math.exp(-12 * GetFadeDelta(Entity))
+
+    local Fade = Entity.UIFade or Entity.Objects.FadeGroups[1].GroupTransparency
+    Fade -= Fade * Alpha
+
+    if Fade < 0.01 then
+        Fade = 0
     end
 
+    SetUIFade(Entity, Fade)
+    Entity.Objects.Holder.Visible = true
 
     Entity.ChamsFade = (Entity.ChamsFade or 1) * (1 - Alpha)
 
