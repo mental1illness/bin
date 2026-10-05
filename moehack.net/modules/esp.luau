@@ -105,7 +105,7 @@ function ESP.CreateElements(Entity: table)
 
     --# Bounding Box
 
-    Objects.BoundingBox = Create("CanvasGroup")
+    Objects.BoundingBox = Create("Frame")
     Objects.BoundingBox.Parent = Objects.Holder
     Objects.BoundingBox.Size = FromScale(1, 1)
     Objects.BoundingBox.BackgroundTransparency = 1
@@ -217,7 +217,7 @@ function ESP.CreateElements(Entity: table)
 		BackgroundTransparency = 1,
 		ImageTransparency = Options["esp/box/glowcolor"].Transparency,
 		Position = UDim2New(0, -20, 0, -20),
-		Size = UDim2New(1, 40, 1, 40),
+		Size = UDim2New(1, 43, 1, 43),
 		ZIndex = -10,
 		BorderSizePixel = 0,
 		SliceCenter = Rect.new(Vector2.new(21, 21), Vector2.new(79, 79)),
