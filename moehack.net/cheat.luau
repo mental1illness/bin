@@ -542,7 +542,7 @@ local Library, SaveManager, ThemeManager = moehack.load_module("moehack.net/inte
                         end
                         
                         Spawn(function()
-                            while Wait(3) do
+                            local DoDis = function()
                                 if isfolder("moehack/sounds") then
                                     local Files = listfiles("moehack/sounds")
                                     local SoundTypes = {}
@@ -563,6 +563,11 @@ local Library, SaveManager, ThemeManager = moehack.load_module("moehack.net/inte
                                     end
                                 end
                             end
+                            DoDis()
+                            while Wait(3) do
+                                DoDis()
+                            end
+                            
                         end)
 
                         local SoundCache = {}
