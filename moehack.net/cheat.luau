@@ -409,7 +409,6 @@ local Library, SaveManager, ThemeManager = moehack.load_module("moehack.net/inte
                         World:AddToggle("visuals/world/bullettracers", { Text = "Bullet Tracers", Default = false }):AddColorPicker("visuals/world/bullettracers/color", { Default = Color3.fromRGB(255, 255, 255), Title = "Tracers Color" })
                         World:AddDropdown("visuals/world/bullettracers/mode", { Text = "Tracer Mode", Values = { "Default", "Spiral", "Wave", "ZigZag", "Double", "Cross", "Dash", "Pulse", "Taper", "Helix", "Lightning", "Scatter" }, Default = "Default" })
                         World:AddSlider("visuals/world/bullettracers/thickness", { Text = "Thickness", Min = 1, Max = 10, Rounding = 1, Default = 2 })
-                        World:AddSlider("visuals/world/bullettracers/quality", { Text = "Curve Quality", Min = 16, Max = 256, Rounding = 0, Default = 120 })
                         World:AddSlider("visuals/world/bullettracers/radius", { Text = "Curve Radius", Min = 1, Max = 100, Rounding = 1, Default = 25 })
                         World:AddSlider("visuals/world/bullettracers/turns", { Text = "Spiral Turns", Min = 1, Max = 20, Rounding = 1, Default = 5 })
                         World:AddSlider("visuals/world/bullettracers/waves", { Text = "Wave Frequency", Min = 1, Max = 20, Rounding = 1, Default = 5 })
@@ -419,7 +418,6 @@ local Library, SaveManager, ThemeManager = moehack.load_module("moehack.net/inte
                         World:AddSlider("visuals/world/bullettracers/traveltime", { Text = "Travel Time", Min = 1, Max = 10, Rounding = 0, Default = 3 })
                         World:AddToggle("visuals/world/bullettracers/alwaysontop", { Text = "Always On Top", Default = true })
                         World:AddToggle("visuals/world/bullettracers/dynamicthickness", { Text = "Dynamic Thickness", Default = false })
-                        World:AddToggle("visuals/world/bullettracers/animated", { Text = "Animate Effect", Default = true })
                     
                     end
                 end
