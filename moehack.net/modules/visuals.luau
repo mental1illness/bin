@@ -872,29 +872,55 @@ do -- Other funcs
         end
     
         local Tracer = Utility.Create("Part", {
+            Name = "BulletTracer",
             Anchored = true,
             CanCollide = false,
             CanQuery = false,
             CanTouch = false,
-            Material = Enum.Material.Neon,
-            Size = Vector3.new(0.05, 0.05, Distance),
-            CFrame = CFrame.lookAt(Origin, HitPos) * CFrame.new(0, 0, -Distance / 2),
-            Parent = Camera
+            Transparency = 1,
+            Size = Vector3.one,
+            CFrame = CFrame.new(Origin),
+            Parent = workspace
+        })
+    
+        local Line = Utility.Create("LineHandleAdornment", {
+            Name = "Tracer",
+            Adornee = Tracer,
+            AlwaysOnTop = true,
+            ZIndex = 10,
+            Thickness = 2,
+            Length = Distance,
+            CFrame = CFrame.lookAt(Vector3.zero, Direction),
+            Parent = Tracer
         })
     
         task.delay(LifeTime or 0, function()
-            if not Tracer.Parent then
+            if not Line.Parent then
                 return
             end
     
-            local Tween = TweenService:Create(Tracer, TweenInfo.new(FadeTime or 0), {
-                Transparency = 1
-            })
+            local StartThickness = Line.Thickness
+            local StartTime = os.clock()
+            local Duration = FadeTime or 0
     
-            Tween:Play()
-            Tween.Completed:Once(function()
+            if Duration <= 0 then
+                Line:Destroy()
                 Tracer:Destroy()
-            end)
+                return
+            end
+    
+            while Line.Parent do
+                local Alpha = math.clamp((os.clock() - StartTime) / Duration, 0, 1)
+                Line.Thickness = StartThickness * (1 - Alpha)
+    
+                if Alpha >= 1 then
+                    break
+                end
+    
+                RunService.PreRender:Wait()
+            end
+    
+            Tracer:Destroy()
         end)
     
         return Tracer
