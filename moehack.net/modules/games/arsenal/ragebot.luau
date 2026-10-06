@@ -63,7 +63,7 @@ local NAN = 0/0
 local LastRootPos = nil
 local LastRootTick = 0
 
-local OldDamage = 0
+local CanHitFXPls = false
 
 -- local Offset = NewCFrame(0, 0, -1)
 
@@ -120,26 +120,18 @@ function Ragebot:IsVisible(Target: BasePart, Origin: Vector3?): boolean
     return Result.Instance:IsDescendantOf(Character)
 end
 
-function Ragebot:DamageDealt()
-    local NewDamage = LocalPlayer.Damage.Value
-    if OldDamage ~= NewDamage then
-        OldDamage = NewDamage
-        return true
-    end
-    return false
-end
-
 function Ragebot:HitFX(Head: BasePart, Origin: Vector3, HeadBits: number)
-    
-    if not self:DamageDealt() then return end
+    if not CanHitFXPls then return end
 
     if not Head or not Origin then return end
     local Gun = State.gun
     if not Gun then return end
     local Normal = (Head.Position - Origin).Unit
-    -- Bridge.HitObject:Fire(Head, Head.Position, Normal, Gun, HeadBits or 1, false, false, false)
+    Bridge.HitObject:Fire(Head, Head.Position, Normal, Gun, HeadBits or 1, false, false, false)
     local Override = GeneralFunctions.getTrailColorOverride(LocalPlayer, Gun)
     Particles.CreateTrail(Origin, Head.Position, Override)
+
+    CanHitFXPls = false
 end
 
 function Ragebot:OriginScan(TargetCharacter)
@@ -324,9 +316,6 @@ function Ragebot:Hit(Character, PenIndex, SharedCFrame, ForcedOrigin)
 end
 
 function Ragebot:ReplicateShoot()
-
-    if not self:DamageDealt() then return end
-
     local Character = LocalPlayer.Character
     if Character == nil then return end
 
@@ -440,7 +429,6 @@ function Ragebot:Knifebot()
 
         if TargetCharacter then
             self:Stab(TargetCharacter)
-            self:ReplicateShoot()
             if not Toggles["combat/ragebot/multitarget"].Value then
                 break
             end
@@ -513,7 +501,6 @@ function Ragebot:Scan()
                         self:Hit(Pierce.Character, Pen, NewCFrame(Pierce.Origin, Pierce.Head.Position), Pierce.Origin)
                     end
                 end
-                self:ReplicateShoot()
                 break
             else
                 if FindFirstChild(Gun, "Melee") ~= nil then
@@ -521,12 +508,17 @@ function Ragebot:Scan()
                 else
                     self:Hit(Target, nil, nil, Entry.Origin)
                 end
-                self:ReplicateShoot()
                 if not Toggles["combat/ragebot/multitarget"].Value then break end
             end
         end
     end
 end
+
+Library:GiveSignal( LocalPlayer.Damage.Changed:Connect(function()
+    Ragebot:ReplicateShoot()
+    CanHitFXPls = true
+end) )
+
 
 Library:GiveSignal(RunService.Stepped:Connect(function()
     Ragebot:Scan()
