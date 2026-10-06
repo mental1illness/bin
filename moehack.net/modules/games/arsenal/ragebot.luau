@@ -438,9 +438,7 @@ function Ragebot:Scan()
     local Gun = State.gun
     if not Gun then return end
     local FireRate = Gun and FindFirstChild(Gun, "FireRate") and Gun.FireRate.Value or 0
-    if Toggles["combat/ragebot/rapidfire"].Value then
-        FireRate = Options["combat/ragebot/rapidfire/tick"].Value
-    end
+
     if not FireRate then return end
     if not Toggles["combat/ragebot/removeextrachecks"].Value then
         if FindFirstChild(Gun, "Melee") ~= nil then return end
@@ -471,7 +469,10 @@ function Ragebot:Scan()
     for _, Entry in Sorted do
         local Target = Entry.Character
         local Now = tick()
-        if Target and Now - (self.LastTimeFired or 0) >= FireRate then
+        if Target then
+            if not Toggles["combat/ragebot/rapidfire"].Value and not Now - (self.LastTimeFired or 0) >= FireRate then
+                continue
+            end
             self.LastTimeFired = Now
             if HasPen then
                 local HitList = GeneralFunctions.gethitlist()

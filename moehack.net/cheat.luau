@@ -146,7 +146,7 @@ local Library, SaveManager, ThemeManager = moehack.load_module("moehack.net/inte
                         moehack.load_module("moehack.net/modules/games/arsenal/ragebot.luau")
                         Ragebot:AddToggle("combat/ragebot", { Text = "Enabled", Default = false })
                         Ragebot:AddToggle("combat/ragebot/rapidfire", { Text = "Rapid Fire", Default = false })
-                        Ragebot:AddSlider("combat/ragebot/rapidfire/tick", { Text = "Rapid Fire Tick", Min = 0.05, Max = 0.1, Rounding = 2, Default = 0.1/2 })
+                        -- Ragebot:AddSlider("combat/ragebot/rapidfire/tick", { Text = "Rapid Fire Tick", Min = 0.05, Max = 0.1, Rounding = 2, Default = 0.1/2 })
                         Ragebot:AddSlider("combat/ragebot/projectilespeedmult", { Text = "Projectiles Speed Multipier", Min = 1, Max = 100, Rounding = 0, Default = 1 })
                         Ragebot:AddToggle("combat/ragebot/multitarget", { Text = "Multi Target", Default = false })
                         -- Ragebot:AddToggle("combat/ragebot/tptoenemy", { Text = "Teleport To Enemy", Default = false })
