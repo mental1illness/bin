@@ -863,7 +863,7 @@ Visuals.Players = {} do
 end
 
 do -- Other funcs
-    function Visuals:BulletTracers(Origin, HitPos, LifeTime, FadeTime, TravelTime, Mode, Color)
+    function Visuals:BulletTracers(Origin, HitPos)
         local Direction = HitPos - Origin
         local Distance = Direction.Magnitude
     
@@ -872,8 +872,21 @@ do -- Other funcs
         end
     
         Direction = Direction.Unit
-        Mode = Mode or "Default"
-        Color = Color or Color3.fromRGB(255, 255, 255)
+    
+        local Mode = Options["visuals/world/bullettracers/mode"].Value
+        local Color = Flags["visuals/world/bullettracers/color"]
+        local Thickness = Options["visuals/world/bullettracers/thickness"].Value
+        local Segments = Options["visuals/world/bullettracers/quality"].Value
+        local Radius = Distance * (Options["visuals/world/bullettracers/radius"].Value / 1000)
+        local Turns = Options["visuals/world/bullettracers/turns"].Value
+        local Waves = Options["visuals/world/bullettracers/waves"].Value
+        local LightningJitter = Distance * (Options["visuals/world/bullettracers/lightning"].Value / 100)
+        local AlwaysOnTop = Options["visuals/world/bullettracers/alwaysontop"].Value
+        local DynamicThickness = Options["visuals/world/bullettracers/dynamicthickness"].Value
+        local Animated = Options["visuals/world/bullettracers/animated"].Value
+        local LifeTime = Options["visuals/world/bullettracers/lifetime"].Value
+        local FadeTime = Options["visuals/world/bullettracers/fadetime"].Value
+        local TravelTime = Options["visuals/world/bullettracers/traveltime"].Value
     
         local Tracer = Utility.Create("Part", {
             Anchored = true,
@@ -891,33 +904,26 @@ do -- Other funcs
         local Right = Direction:Cross(Up).Unit
         Up = Right:Cross(Direction).Unit
     
-        local Segments = Clamp(Floor(Distance / 2), 8, 32)
-        local Radius = Clamp(Distance * 0.025, 0.05, 0.5)
+        Segments = Clamp(Segments, 16, 256)
     
         if Mode == "Default" then
             local Line = Utility.Create("LineHandleAdornment", {
                 Adornee = Tracer,
-                AlwaysOnTop = true,
+                AlwaysOnTop = AlwaysOnTop,
                 ZIndex = 10,
-                Thickness = 2,
+                Thickness = Thickness,
                 Color3 = Color,
                 Length = Distance,
                 CFrame = NewCFrame(Vector3.zero, Direction),
                 Parent = Tracer
             })
     
-            Lines[1] = {
-                Object = Line,
-                Length = Distance
-            }
+            Lines[#Lines + 1] = { Object = Line, Length = Distance }
     
         elseif Mode == "Spiral" then
-            local Turns = Maximum(Distance / 4, 2)
-    
             for Index = 1, Segments do
                 local Alpha1 = (Index - 1) / Segments
                 local Alpha2 = Index / Segments
-    
                 local Angle1 = Alpha1 * Turns * Pi * 2
                 local Angle2 = Alpha2 * Turns * Pi * 2
     
@@ -930,25 +936,20 @@ do -- Other funcs
                 if Length > 0 then
                     local Line = Utility.Create("LineHandleAdornment", {
                         Adornee = Tracer,
-                        AlwaysOnTop = true,
+                        AlwaysOnTop = AlwaysOnTop,
                         ZIndex = 10,
-                        Thickness = 2,
+                        Thickness = DynamicThickness and Maximum(0.5, Thickness * (1 - Alpha1)) or Thickness,
                         Color3 = Color,
                         Length = Length,
                         CFrame = NewCFrame(Position1, Position2),
                         Parent = Tracer
                     })
     
-                    Lines[#Lines + 1] = {
-                        Object = Line,
-                        Length = Length
-                    }
+                    Lines[#Lines + 1] = { Object = Line, Length = Length }
                 end
             end
     
-        elseif Mode == "Wave" then
-            local Waves = Maximum(Distance / 5, 2)
-    
+        elseif Mode == "Wave" or Mode == "ZigZag" then
             for Index = 1, Segments do
                 local Alpha1 = (Index - 1) / Segments
                 local Alpha2 = Index / Segments
@@ -965,52 +966,16 @@ do -- Other funcs
                 if Length > 0 then
                     local Line = Utility.Create("LineHandleAdornment", {
                         Adornee = Tracer,
-                        AlwaysOnTop = true,
+                        AlwaysOnTop = AlwaysOnTop,
                         ZIndex = 10,
-                        Thickness = 2,
+                        Thickness = DynamicThickness and Maximum(0.5, Thickness * (1 - Alpha1)) or Thickness,
                         Color3 = Color,
                         Length = Length,
                         CFrame = NewCFrame(Position1, Position2),
                         Parent = Tracer
                     })
     
-                    Lines[#Lines + 1] = {
-                        Object = Line,
-                        Length = Length
-                    }
-                end
-            end
-    
-        elseif Mode == "ZigZag" then
-            for Index = 1, Segments do
-                local Alpha1 = (Index - 1) / Segments
-                local Alpha2 = Index / Segments
-    
-                local Offset1 = (Index % 2 == 0 and Radius or -Radius)
-                local Offset2 = (Index % 2 == 0 and -Radius or Radius)
-    
-                local Position1 = Direction * (Distance * Alpha1) + Right * Offset1
-                local Position2 = Direction * (Distance * Alpha2) + Right * Offset2
-    
-                local SegmentDirection = Position2 - Position1
-                local Length = SegmentDirection.Magnitude
-    
-                if Length > 0 then
-                    local Line = Utility.Create("LineHandleAdornment", {
-                        Adornee = Tracer,
-                        AlwaysOnTop = true,
-                        ZIndex = 10,
-                        Thickness = 2,
-                        Color3 = Color,
-                        Length = Length,
-                        CFrame = NewCFrame(Position1, Position2),
-                        Parent = Tracer
-                    })
-    
-                    Lines[#Lines + 1] = {
-                        Object = Line,
-                        Length = Length
-                    }
+                    Lines[#Lines + 1] = { Object = Line, Length = Length }
                 end
             end
     
@@ -1020,19 +985,16 @@ do -- Other funcs
     
                 local Line = Utility.Create("LineHandleAdornment", {
                     Adornee = Tracer,
-                    AlwaysOnTop = true,
+                    AlwaysOnTop = AlwaysOnTop,
                     ZIndex = 10,
-                    Thickness = 2,
+                    Thickness = Thickness,
                     Color3 = Color,
                     Length = Distance,
                     CFrame = NewCFrame(Offset, Offset + Direction),
                     Parent = Tracer
                 })
     
-                Lines[#Lines + 1] = {
-                    Object = Line,
-                    Length = Distance
-                }
+                Lines[#Lines + 1] = { Object = Line, Length = Distance }
             end
     
         elseif Mode == "Cross" then
@@ -1041,66 +1003,58 @@ do -- Other funcs
     
                 local Line = Utility.Create("LineHandleAdornment", {
                     Adornee = Tracer,
-                    AlwaysOnTop = true,
+                    AlwaysOnTop = AlwaysOnTop,
                     ZIndex = 10,
-                    Thickness = 2,
+                    Thickness = Thickness,
                     Color3 = Color,
                     Length = Distance,
                     CFrame = NewCFrame(Offset, Offset + Direction),
                     Parent = Tracer
                 })
     
-                Lines[#Lines + 1] = {
-                    Object = Line,
-                    Length = Distance
-                }
+                Lines[#Lines + 1] = { Object = Line, Length = Distance }
             end
     
         elseif Mode == "Dash" then
-            local DashLength = 2
-            local GapLength = 1
+            local DashLength = Radius
+            local GapLength = Radius
             local Step = DashLength + GapLength
     
             for Position = 0, Distance, Step do
                 local Length = Minimum(DashLength, Distance - Position)
     
                 if Length > 0 then
-                    local Offset = Direction * (Position + Length * 0.5)
+                    local Start = Direction * Position
+                    local Finish = Start + Direction * Length
     
                     local Line = Utility.Create("LineHandleAdornment", {
                         Adornee = Tracer,
-                        AlwaysOnTop = true,
+                        AlwaysOnTop = AlwaysOnTop,
                         ZIndex = 10,
-                        Thickness = 2,
+                        Thickness = Thickness,
                         Color3 = Color,
                         Length = Length,
-                        CFrame = NewCFrame(Offset, Offset + Direction),
+                        CFrame = NewCFrame(Start, Finish),
                         Parent = Tracer
                     })
     
-                    Lines[#Lines + 1] = {
-                        Object = Line,
-                        Length = Length
-                    }
+                    Lines[#Lines + 1] = { Object = Line, Length = Length }
                 end
             end
     
         elseif Mode == "Pulse" then
             local Line = Utility.Create("LineHandleAdornment", {
                 Adornee = Tracer,
-                AlwaysOnTop = true,
+                AlwaysOnTop = AlwaysOnTop,
                 ZIndex = 10,
-                Thickness = 2,
+                Thickness = Thickness,
                 Color3 = Color,
                 Length = Distance,
                 CFrame = NewCFrame(Vector3.zero, Direction),
                 Parent = Tracer
             })
     
-            Lines[1] = {
-                Object = Line,
-                Length = Distance
-            }
+            Lines[#Lines + 1] = { Object = Line, Length = Distance }
     
         elseif Mode == "Taper" then
             for Index = 1, Segments do
@@ -1116,25 +1070,20 @@ do -- Other funcs
                 if Length > 0 then
                     local Line = Utility.Create("LineHandleAdornment", {
                         Adornee = Tracer,
-                        AlwaysOnTop = true,
+                        AlwaysOnTop = AlwaysOnTop,
                         ZIndex = 10,
-                        Thickness = Maximum(0.5, 3 * (1 - Alpha1)),
+                        Thickness = Maximum(0.5, Thickness * (1 - Alpha1)),
                         Color3 = Color,
                         Length = Length,
                         CFrame = NewCFrame(Position1, Position2),
                         Parent = Tracer
                     })
     
-                    Lines[#Lines + 1] = {
-                        Object = Line,
-                        Length = Length
-                    }
+                    Lines[#Lines + 1] = { Object = Line, Length = Length }
                 end
             end
     
         elseif Mode == "Helix" then
-            local Turns = Maximum(Distance / 5, 2)
-    
             for Index = 1, Segments do
                 local Alpha1 = (Index - 1) / Segments
                 local Alpha2 = Index / Segments
@@ -1151,181 +1100,142 @@ do -- Other funcs
                 if Length > 0 then
                     local Line = Utility.Create("LineHandleAdornment", {
                         Adornee = Tracer,
-                        AlwaysOnTop = true,
+                        AlwaysOnTop = AlwaysOnTop,
                         ZIndex = 10,
-                        Thickness = 2,
+                        Thickness = DynamicThickness and Maximum(0.5, Thickness * (1 - Alpha1)) or Thickness,
                         Color3 = Color,
                         Length = Length,
                         CFrame = NewCFrame(Position1, Position2),
                         Parent = Tracer
                     })
     
-                    Lines[#Lines + 1] = {
-                        Object = Line,
-                        Length = Length
-                    }
-                end
-            end
-    
-            for Index = 1, Segments do
-                local Alpha1 = (Index - 1) / Segments
-                local Alpha2 = Index / Segments
-    
-                local Angle1 = Alpha1 * Turns * Pi * 2 + Pi
-                local Angle2 = Alpha2 * Turns * Pi * 2 + Pi
-    
-                local Position1 = Direction * (Distance * Alpha1) + (Right * math.cos(Angle1) + Up * math.sin(Angle1)) * Radius
-                local Position2 = Direction * (Distance * Alpha2) + (Right * math.cos(Angle2) + Up * math.sin(Angle2)) * Radius
-    
-                local SegmentDirection = Position2 - Position1
-                local Length = SegmentDirection.Magnitude
-    
-                if Length > 0 then
-                    local Line = Utility.Create("LineHandleAdornment", {
-                        Adornee = Tracer,
-                        AlwaysOnTop = true,
-                        ZIndex = 10,
-                        Thickness = 2,
-                        Color3 = Color,
-                        Length = Length,
-                        CFrame = NewCFrame(Position1, Position2),
-                        Parent = Tracer
-                    })
-    
-                    Lines[#Lines + 1] = {
-                        Object = Line,
-                        Length = Length
-                    }
+                    Lines[#Lines + 1] = { Object = Line, Length = Length }
                 end
             end
     
         elseif Mode == "Lightning" then
-            local Jitter = Radius * 3
             local PreviousPosition = Vector3.zero
     
             for Index = 1, Segments do
-                local Alpha2 = Index / Segments
-                local Position1 = Index == 1 and Vector3.zero or PreviousPosition
-                local Position2 = Direction * (Distance * Alpha2)
+                local Alpha = Index / Segments
+                local Position = Direction * (Distance * Alpha)
     
                 if Index < Segments then
-                    Position2 += (Right * (math.random() - 0.5) + Up * (math.random() - 0.5)) * Jitter
+                    local Falloff = math.sin(Alpha * Pi)
+    
+                    Position += (
+                        Right * math.sin(Alpha * Waves * Pi * 2) +
+                        Up * math.cos(Alpha * Waves * Pi * 2)
+                    ) * LightningJitter * Falloff
                 end
     
-                PreviousPosition = Position2
-    
-                local SegmentDirection = Position2 - Position1
+                local SegmentDirection = Position - PreviousPosition
                 local Length = SegmentDirection.Magnitude
     
                 if Length > 0 then
                     local Line = Utility.Create("LineHandleAdornment", {
                         Adornee = Tracer,
-                        AlwaysOnTop = true,
+                        AlwaysOnTop = AlwaysOnTop,
                         ZIndex = 10,
-                        Thickness = 2,
+                        Thickness = Thickness,
                         Color3 = Color,
                         Length = Length,
-                        CFrame = NewCFrame(Position1, Position2),
+                        CFrame = NewCFrame(PreviousPosition, Position),
                         Parent = Tracer
                     })
     
-                    Lines[#Lines + 1] = {
-                        Object = Line,
-                        Length = Length
-                    }
+                    Lines[#Lines + 1] = { Object = Line, Length = Length }
                 end
+    
+                PreviousPosition = Position
             end
     
         elseif Mode == "Scatter" then
             for Shot = 1, 4 do
-                local OffsetRight = (math.random() - 0.5) * Radius * 2
-                local OffsetUp = (math.random() - 0.5) * Radius * 2
-                local Offset = Right * OffsetRight + Up * OffsetUp
+                local Alpha = (Shot - 1) / 3
+                local Offset = Right * ((Alpha - 0.5) * Radius * 2) + Up * math.sin(Alpha * Pi) * Radius
     
                 local Line = Utility.Create("LineHandleAdornment", {
                     Adornee = Tracer,
-                    AlwaysOnTop = true,
+                    AlwaysOnTop = AlwaysOnTop,
                     ZIndex = 10,
-                    Thickness = 1.5,
+                    Thickness = Thickness,
                     Color3 = Color,
                     Length = Distance,
                     CFrame = NewCFrame(Offset, Offset + Direction),
                     Parent = Tracer
                 })
     
-                Lines[#Lines + 1] = {
-                    Object = Line,
-                    Length = Distance
-                }
+                Lines[#Lines + 1] = { Object = Line, Length = Distance }
             end
         end
     
         local StartTime = os.clock()
-        local TravelDuration = TravelTime or 0
     
         while Tracer.Parent do
-            local Alpha = TravelDuration <= 0 and 1 or Clamp((os.clock() - StartTime) / TravelDuration, 0, 1)
+            local Alpha = TravelTime <= 0 and 1 or Clamp((os.clock() - StartTime) / TravelTime, 0, 1)
     
-            if Mode == "Pulse" then
-                local Pulse = 0.5 + math.sin(Alpha * Pi * 8) * 0.5
-                Lines[1].Object.Length = Distance * Pulse * Alpha
-            elseif Mode == "Default" then
-                Lines[1].Object.Length = Distance * Alpha
-            elseif Mode == "Double" or Mode == "Cross" or Mode == "Scatter" then
+            if Animated then
+                if Mode == "Pulse" then
+                    local Pulse = 0.5 + math.sin(os.clock() * Waves * 2) * 0.5
+                    Lines[1].Object.Length = Distance * Pulse * Alpha
+                elseif Mode == "Default" then
+                    Lines[1].Object.Length = Distance * Alpha
+                else
+                    local Progress = #Lines * Alpha
+                    local FullSegments = Floor(Progress)
+                    local Partial = Progress - FullSegments
+    
+                    for Index = 1, #Lines do
+                        local Data = Lines[Index]
+    
+                        if Index <= FullSegments then
+                            Data.Object.Length = Data.Length
+                        elseif Index == FullSegments + 1 then
+                            Data.Object.Length = Data.Length * Partial
+                        else
+                            Data.Object.Length = 0
+                        end
+                    end
+                end
+            else
                 for Index = 1, #Lines do
                     Lines[Index].Object.Length = Lines[Index].Length * Alpha
                 end
-            else
-                local Progress = #Lines * Alpha
-                local FullSegments = Floor(Progress)
-                local Partial = Progress - FullSegments
+            end
+    
+            if Alpha >= 1 then
+                break
+            end
+    
+            RunService.PreRender:Wait()
+        end
+    
+        local LifeStart = os.clock()
+    
+        while Tracer.Parent and os.clock() - LifeStart < LifeTime do
+            RunService.PreRender:Wait()
+        end
+    
+        if FadeTime > 0 then
+            local FadeStart = os.clock()
+    
+            while Tracer.Parent do
+                local Alpha = Clamp((os.clock() - FadeStart) / FadeTime, 0, 1)
     
                 for Index = 1, #Lines do
-                    local Data = Lines[Index]
-    
-                    if Index <= FullSegments then
-                        Data.Object.Length = Data.Length
-                    elseif Index == FullSegments + 1 then
-                        Data.Object.Length = Data.Length * Partial
-                    else
-                        Data.Object.Length = 0
-                    end
+                    Lines[Index].Object.Transparency = Alpha
                 end
+    
+                if Alpha >= 1 then
+                    break
+                end
+    
+                RunService.PreRender:Wait()
             end
-    
-            if Alpha >= 1 then
-                break
-            end
-    
-            RunService.PreRender:Wait()
-        end
-    
-        local FadeDuration = FadeTime or 0
-    
-        if FadeDuration <= 0 then
-            Tracer:Destroy()
-            return Tracer
-        end
-    
-        local FadeStart = os.clock()
-    
-        while Tracer.Parent do
-            local Alpha = Clamp((os.clock() - FadeStart) / FadeDuration, 0, 1)
-    
-            for Index = 1, #Lines do
-                Lines[Index].Object.Transparency = Alpha
-            end
-    
-            if Alpha >= 1 then
-                break
-            end
-    
-            RunService.PreRender:Wait()
         end
     
         Tracer:Destroy()
-    
-        return Tracer
     end
 end
 
@@ -1346,9 +1256,9 @@ if moehack.data.game_name == "Arsenal" then
         end
         return Fallback
     end
-    
+    local CanSex = false
     NetLogger:On("Outgoing", "HitPart", function(Target, GunId, Flags, Pen, CamPos, HitPos, Dt)
-        if Toggles["visuals/world/bullettracers"].Value then
+        if Toggles["visuals/world/bullettracers"].Value and CanSex then
             Visuals:BulletTracers(
                 GetMuzzlePos(CamPos), HitPos,
                 Options["visuals/world/bullettracers/lifetime"].Value,
@@ -1359,6 +1269,12 @@ if moehack.data.game_name == "Arsenal" then
             )
         end
     end)
+
+    Library:GiveSignal(
+        LocalPlayer.Damage.Changed:Connect(function()
+            CanSex = true
+        end)
+    )
 end
 
 function Visuals.Tick()
