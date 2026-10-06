@@ -897,7 +897,7 @@ do -- Other funcs
             CanTouch = false,
             Transparency = 1,
             Size = Vector3.one,
-            CFrame = NewCFrame(Origin, Origin + Direction),
+            CFrame = NewCFrame(Origin),
             Parent = Camera
         })
     
@@ -916,88 +916,57 @@ do -- Other funcs
             Attachment1 = Attachment1,
             Color = ColorSequence.new(Color),
             Transparency = NumberSequence.new(0),
-            WidthScale = NumberSequence.new(1),
-            Lifetime = 0.1,
+            WidthScale = NumberSequence.new(Thickness),
+            Lifetime = 20,
             MinLength = 0,
             FaceCamera = true,
+            AlwaysOnTop = AlwaysOnTop,
             Enabled = true,
             Parent = Tracer
         })
-    
-        if not AlwaysOnTop then
-            Trail.LightEmission = 0
-        end
     
         local StartTime = os.clock()
     
         while Tracer.Parent do
             local Now = os.clock()
             local Alpha = TravelTime <= 0 and 1 or Clamp((Now - StartTime) / TravelTime, 0, 1)
-            local Position = Distance * Alpha
     
-            if Mode == "Default" then
-                Attachment0.Position = Vector3.zero
-                Attachment1.Position = Direction * Position
+            local Position = Direction * (Distance * Alpha)
+            local Offset = Vector3.zero
     
-            elseif Mode == "Spiral" or Mode == "Helix" then
+            if Mode == "Spiral" or Mode == "Helix" then
                 local Angle = Alpha * Turns * Pi * 2
-                local Offset = (Right * math.cos(Angle) + Up * math.sin(Angle)) * Radius
-    
-                Attachment0.Position = Vector3.zero
-                Attachment1.Position = Direction * Position + Offset
+                Offset = (Right * math.cos(Angle) + Up * math.sin(Angle)) * Radius
     
             elseif Mode == "Wave" or Mode == "ZigZag" then
-                local Offset = Right * math.sin(Alpha * Waves * Pi * 2) * Radius
-    
-                Attachment0.Position = Vector3.zero
-                Attachment1.Position = Direction * Position + Offset
+                Offset = Right * math.sin(Alpha * Waves * Pi * 2) * Radius
     
             elseif Mode == "Lightning" then
                 local Falloff = math.sin(Alpha * Pi)
-                local Offset = (Right * math.sin(Alpha * Waves * Pi * 2) + Up * math.cos(Alpha * Waves * Pi * 2)) * LightningJitter * Falloff
-    
-                Attachment0.Position = Vector3.zero
-                Attachment1.Position = Direction * Position + Offset
+                Offset = (Right * math.sin(Alpha * Waves * Pi * 2) + Up * math.cos(Alpha * Waves * Pi * 2)) * LightningJitter * Falloff
     
             elseif Mode == "Double" then
-                local Offset = Right * Radius
-    
-                Attachment0.Position = Offset
-                Attachment1.Position = Direction * Position + Offset
+                Offset = Right * Radius
     
             elseif Mode == "Cross" then
-                local Offset = (Right + Up).Unit * Radius
-    
-                Attachment0.Position = Offset
-                Attachment1.Position = Direction * Position + Offset
+                Offset = (Right + Up).Unit * Radius
     
             elseif Mode == "Pulse" then
                 local Pulse = 0.5 + math.sin(Now * Waves * 2) * 0.5
-    
-                Attachment0.Position = Vector3.zero
-                Attachment1.Position = Direction * (Position * Pulse)
-    
-            elseif Mode == "Taper" then
-                Attachment0.Position = Vector3.zero
-                Attachment1.Position = Direction * Position
+                Position *= Pulse
     
             elseif Mode == "Dash" then
                 local DashPosition = (Now * Distance / math.max(TravelTime, 0.01)) % Distance
-                local DashLength = Radius
-    
-                Attachment0.Position = Direction * DashPosition
-                Attachment1.Position = Direction * math.min(DashPosition + DashLength, Distance)
+                Position = Direction * DashPosition
     
             elseif Mode == "Scatter" then
-                local Scatter = math.sin(Alpha * Pi) * Radius
-    
-                Attachment0.Position = Right * Scatter
-                Attachment1.Position = Direction * Position + Right * Scatter
+                Offset = Right * math.sin(Alpha * Pi) * Radius
             end
     
+            Tracer.CFrame = NewCFrame(Origin + Position + Offset)
+    
             if DynamicThickness then
-                local Width = Thickness * (1 - Alpha)
-                Trail.WidthScale = NumberSequence.new(Width)
+                Trail.WidthScale = NumberSequence.new(Thickness * (1 - Alpha))
             end
     
             if Alpha >= 1 then
