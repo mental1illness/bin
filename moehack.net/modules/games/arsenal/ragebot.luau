@@ -145,20 +145,26 @@ function Ragebot:OriginScan(TargetCharacter)
 
     OriginParams.FilterDescendantsInstances = { Character }
 
-    for Index = 1, Options["combat/originscan/maxorigin"].Value do
-        local Offset = Vector3.new(
-            math.random(-1500, 1500) / 100,
-            math.random(-1500, 1500) / 100,
-            math.random(-1500, 1500) / 100
-        )
+    local MaxOrigins = Options["combat/originscan/maxorigin"].Value
+    local MaxDistance = Options["combat/originscan/maxdist"].Value
+    local MaxDistanceSq = MaxDistance * MaxDistance
 
-        if Offset.Magnitude > Options["combat/originscan/maxdist"].Value then
-            Offset = Offset.Unit * Options["combat/originscan/maxdist"].Value
+    local RootPosition = RootPart.Position
+    local TargetPosition = TargetRoot.Position
+
+    for Index = 1, MaxOrigins do
+        local X = math.random(-1500, 1500) * 0.01
+        local Y = math.random(-1500, 1500) * 0.01
+        local Z = math.random(-1500, 1500) * 0.01
+
+        local Offset = Vector3.new(X, Y, Z)
+
+        if Offset:Dot(Offset) > MaxDistanceSq then
+            Offset = Offset.Unit * MaxDistance
         end
 
-        local Origin = RootPart.Position + Offset
-        local Direction = TargetRoot.Position - Origin
-        local Result = Raycast(workspace, Origin, Direction, OriginParams)
+        local Origin = RootPosition + Offset
+        local Result = Raycast(workspace, Origin, TargetPosition - Origin, OriginParams)
 
         if Result and Result.Instance:IsDescendantOf(TargetCharacter) then
             return Origin

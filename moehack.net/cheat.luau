@@ -440,8 +440,8 @@ local Library, SaveManager, ThemeManager = moehack.load_module("moehack.net/inte
                         local DepBox = Camera:AddDependencyBox()
 
                         DepBox:AddInput("visuals/camera/waifu/link", { Text = "Image / GIF URL", Min = 10, Max = 20, Rounding = 0, Default = 10 })
-                        DepBox:AddSlider("visuals/camera/waifu/x", { Text = "X", Min = -1920, Max = 1920, Rounding = 0, Default = 0 })
-                        DepBox:AddSlider("visuals/camera/waifu/y", { Text = "Y", Min = -1080, Max = 1080, Rounding = 0, Default = 0 })
+                        DepBox:AddSlider("visuals/camera/waifu/x", { Text = "X", Min = 0, Max = 1, Rounding = 2, Default = 0 })
+                        DepBox:AddSlider("visuals/camera/waifu/y", { Text = "Y", Min = 0, Max = 1, Rounding = 2, Default = 0 })
                         DepBox:AddSlider("visuals/camera/waifu/transparency", { Text = "Transparency", Min = 0, Max = 1, Rounding = 1, Default = 0.5 })
                         DepBox:AddSlider("visuals/camera/waifu/scale", { Text = "Scale", Min = 0, Max = 1, Rounding = 1, Default = 0.5 })
 
