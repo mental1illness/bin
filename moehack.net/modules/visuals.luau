@@ -933,15 +933,12 @@ end))
 
 if moehack.data.game_name == "Arsenal" then
     local function GetMuzzlePos(Fallback)
-    local Cam = workspace.CurrentCamera
-    if Cam then
-        local Arms = Cam:FindFirstChild("Arms")
+        local Arms = FindFirstChild(Camera, "Arms")
         if Arms then
-        local Part = Arms:FindFirstChild("Particles") or Arms:FindFirstChild("Flash")
-        if Part and Part:IsA("BasePart") then return Part.Position end
+            local Part = FindFirstChild(Arms, "Particles") or FindFirstChild(Arms, "Flash")
+            if Part and Part:IsA("BasePart") then return Part.Position end
         end
-    end
-    return Fallback
+        return Fallback
     end
     
     NetLogger:On("Outgoing", "HitPart", function(Target, GunId, Flags, Pen, CamPos, HitPos, Dt)
