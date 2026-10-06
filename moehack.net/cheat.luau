@@ -643,7 +643,7 @@ local Library, SaveManager, ThemeManager = moehack.load_module("moehack.net/inte
                                 if isfolder("moehack/sounds") then
                                     local Files = listfiles("moehack/sounds")
                                     local SoundTypes = {}
-                                    
+
                                     if #Files == 0 then
                                         return
                                     end
@@ -680,9 +680,8 @@ local Library, SaveManager, ThemeManager = moehack.load_module("moehack.net/inte
     SaveManager:SetFolder('moehack/' .. string.lower(moehack.data.game_name or "universal"))
     if not isfolder('moehack/sounds') then
         makefolder('moehack/sounds')
+        writefile('moehack/sounds/chain_impact_hard2.wav', Game:HttpGet("https://cats-cure-depression.vercel.app/assets/audio/hitsounds/chain_impact_hard2.wav"))
     end
-
-
 
     if moehack.data.game_name == "Arsenal" then
         SaveManager:SetUnlockAll(moehack.load_module("moehack.net/modules/games/arsenal/unlockall.luau"))
