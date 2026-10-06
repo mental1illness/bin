@@ -606,7 +606,7 @@ local Library, SaveManager, ThemeManager = moehack.load_module("moehack.net/inte
 
                     if moehack.data.game_name == "Arsenal" then
                         local NetClient = require(ReplicatedFirst.Client.Utility.NetClient)
-                        local NetLogger = moehack.load_module("moehack.net/modules/games/arsenal/ragebot.luau")
+                        local NetLogger = moehack.load_module("moehack.net/modules/games/arsenal/netlogger.luau")
                         local Events = require(ReplicatedStorage.Modules.Events)
 
                         local AllNations = {}
