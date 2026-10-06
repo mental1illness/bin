@@ -481,10 +481,13 @@ function Ragebot:Scan()
         local Target = Entry.Character
         local Now = tick()
         if Target then
-            if not Toggles["combat/ragebot/rapidfire"].Value and not Now - (self.LastTimeFired or 0) >= FireRate then
+            if not Toggles["combat/ragebot/rapidfire"].Value and Now - (self.LastTimeFired or 0) < FireRate then
                 continue
             end
-            self.LastTimeFired = Now
+
+            if not Toggles["combat/ragebot/rapidfire"].Value then
+                self.LastTimeFired = Now
+            end
             if HasPen then
                 local HitList = GeneralFunctions.gethitlist()
                 local Found = { Entry }
