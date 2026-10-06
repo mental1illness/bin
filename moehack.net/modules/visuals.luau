@@ -881,9 +881,9 @@ do -- Other funcs
         local Turns = Options["visuals/world/bullettracers/turns"].Value
         local Waves = Options["visuals/world/bullettracers/waves"].Value
         local LightningJitter = Distance * (Options["visuals/world/bullettracers/lightning"].Value / 100)
-        local AlwaysOnTop = Options["visuals/world/bullettracers/alwaysontop"].Value
-        local DynamicThickness = Options["visuals/world/bullettracers/dynamicthickness"].Value
-        local Animated = Options["visuals/world/bullettracers/animated"].Value
+        local AlwaysOnTop = Toggles["visuals/world/bullettracers/alwaysontop"].Value
+        local DynamicThickness = Toggles["visuals/world/bullettracers/dynamicthickness"].Value
+        local Animated = Toggles["visuals/world/bullettracers/animated"].Value
         local LifeTime = Options["visuals/world/bullettracers/lifetime"].Value
         local FadeTime = Options["visuals/world/bullettracers/fadetime"].Value
         local TravelTime = Options["visuals/world/bullettracers/traveltime"].Value
