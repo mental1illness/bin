@@ -932,6 +932,8 @@ Library:GiveSignal(Lighting.ChildAdded:Connect(function(Object)
 end))
 
 if moehack.data.game_name == "Arsenal" then
+    local NetLogger = moehack.load_module("moehack.net/modules/games/arsenal/netlogger.luau")
+
     local function GetMuzzlePos(Fallback)
         local Arms = FindFirstChild(Camera, "Arms")
         if Arms then
@@ -942,13 +944,13 @@ if moehack.data.game_name == "Arsenal" then
     end
     
     NetLogger:On("Outgoing", "HitPart", function(Target, GunId, Flags, Pen, CamPos, HitPos, Dt)
-    if Toggles["visuals/world/bullettracers"].Value then
-        Visuals:BulletTracers(
-        GetMuzzlePos(CamPos), HitPos,
-        Options["visuals/world/bullettracers/lifetime"].Value,
-        Options["visuals/world/bullettracers/fadetime"].Value
-        )
-    end
+        if Toggles["visuals/world/bullettracers"].Value then
+            Visuals:BulletTracers(
+            GetMuzzlePos(CamPos), HitPos,
+            Options["visuals/world/bullettracers/lifetime"].Value,
+            Options["visuals/world/bullettracers/fadetime"].Value
+            )
+        end
     end)
 end
 
