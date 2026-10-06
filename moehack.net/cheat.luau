@@ -447,6 +447,11 @@ local Library, SaveManager, ThemeManager = moehack.load_module("moehack.net/inte
                             { Toggles["visuals/camera/waifu"], true } 
                         });
                     end
+                    if moehack.data.game_name == "Arsenal" then
+                        Camera:AddToggle("visuals/camera/thirdperson", { Text = "Third Person", Default = false })
+                            :AddKeyPicker("visuals/camera/thirdperson/key", { Text = "Third Person Key", SyncToggleState = false, Mode = "Toggle", Default = "T" })
+                        Camera:AddSlider("visuals/camera/thirdperson/dist", {Text = "Distance", Min = 1, Max = 500, Rounding = 0, Default = 8})
+                    end
                 end
             end
         end

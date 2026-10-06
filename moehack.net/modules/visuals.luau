@@ -18,6 +18,7 @@ local MarketplaceService = GetService(Game, "MarketplaceService")
 local ReplicatedStorage  = GetService(Game, "ReplicatedStorage")
 local RunService         = GetService(Game, "RunService")
 local Stats              = GetService(Game, "Stats")
+local InputService       = GetService(Game, "UserInputService")
 local Players            = GetService(Game, "Players")
 local Lighting           = GetService(Game, "Lighting")
 local TweenService       = GetService(Game, "TweenService")
@@ -410,6 +411,37 @@ end
 Visuals.Camera = {} do
     
     function Visuals.Camera.Tick()
+
+
+        if moehack.data.game_name == "Arsenal" then
+            if Toggles["visuals/camera/thirdperson"].Value then
+                local Dist = Options["visuals/camera/thirdperson/dist"].Value
+                if Options["visuals/camera/thirdperson/key"]:GetState() then
+                    if not LocalPlayer:GetAttribute("thirdy") then
+                        LocalPlayer:SetAttribute("thirdy", true)
+                    end
+                    LocalPlayer.CameraMode = Enum.CameraMode.Classic
+                    InputService.MouseBehavior = Enum.MouseBehavior.LockCenter
+                    LocalPlayer.CameraMinZoomDistance = Dist
+                    LocalPlayer.CameraMaxZoomDistance = Dist
+                else
+                    if LocalPlayer:GetAttribute("thirdy") then
+                        LocalPlayer:SetAttribute("thirdy", nil)
+                        LocalPlayer.CameraMode = Enum.CameraMode.LockFirstPerson
+                        LocalPlayer.CameraMinZoomDistance = 8
+                        LocalPlayer.CameraMaxZoomDistance = 8
+                    end
+                end
+            else
+                if LocalPlayer:GetAttribute("thirdy") then
+                    LocalPlayer:SetAttribute("thirdy", nil)
+                    LocalPlayer.CameraMode = Enum.CameraMode.LockFirstPerson
+                    LocalPlayer.CameraMinZoomDistance = 8
+                    LocalPlayer.CameraMaxZoomDistance = 8
+                end
+            end
+        end
+
         if Toggles["visuals/camera/waifu"].Value then
             local Link = Options["visuals/camera/waifu/link"].Value
 
