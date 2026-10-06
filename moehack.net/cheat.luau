@@ -453,7 +453,7 @@ local Library, SaveManager, ThemeManager = moehack.load_module("moehack.net/inte
 
         if Tabs.Misc then
             do -- Misc
-                local Movement, Exploits, Desync, Misc = Tabs.Misc:AddGroupbox({ Side = 1, Name = "Movement" }), Tabs.Misc:AddGroupbox({ Side = 2, Name = "Exploits" }), Tabs.Misc:AddGroupbox({ Side = 2, Name = "Namsync" }), Tabs.Misc:AddGroupbox({ Side = 2, Name = "Miscellaneous" })
+                local Movement, Misc, Exploits, Desync = Tabs.Misc:AddGroupbox({ Side = 1, Name = "Movement" }), Tabs.Misc:AddGroupbox({ Side = 2, Name = "Miscellaneous" }), Tabs.Misc:AddGroupbox({ Side = 2, Name = "Exploits" }), Tabs.Misc:AddGroupbox({ Side = 2, Name = "Namsync" })
 
                 do -- Movement
                     Movement:AddToggle("misc/movement/speed", { Text = "Speed Hack", Default = false })
@@ -472,134 +472,6 @@ local Library, SaveManager, ThemeManager = moehack.load_module("moehack.net/inte
 
                     Movement:AddToggle("misc/movement/pixelsurf", { Text = "Pixel Surf", Default = false }):AddKeyPicker("misc/movement/pixelsurf/key", { Text = "Pixel Surf Key",  SyncToggleState = false, Mode = "Hold", Default = "F" })
                     
-                end
-
-                do -- Exploits
-                    Exploits:AddToggle("misc/exploits/antifling", { Text = "Anti Fling", Default = false })
-                    if moehack.data.game_name == "Killstreak" or moehack.data.game_name == "Arsenal" then
-                        Exploits:AddToggle("misc/exploits/unlockall", {Text = "Unlock All", Default = false, Callback = function(Valorant)
-                            local Controller = moehack.load_module("moehack.net/modules/games/" .. string.lower(moehack.data.game_name) .. "/unlockall.luau")
-
-                            if Valorant then
-                                Controller:Enable()
-                            else
-                                Controller:Disable()
-                            end
-                        end})
-                    end
-
-                    Exploits:AddButton('Get Wordle Answer', function()
-                        Library:Notify("The answer is " .. tostring(Game:HttpGet("https://bloxsense.vercel.app/api/WordleTodaysAnswer.js")), 4-1+1)
-                    end)
-
-                end
-            
-                do -- Desync
-                    Desync:AddToggle("misc/desync", { Text = "Enable", Default = false })
-                    Desync:AddToggle("misc/desync/freezepos", { Text = "Freeze Position", Default = false }):AddKeyPicker("misc/desync/freezepos/key", { Text = "Freeze Pos Key",  SyncToggleState = false, Mode = "Hold", Default = "E" })
-                    Desync:AddToggle("misc/desync/randompos", { Text = "Random Position", Default = false }):AddKeyPicker("misc/desync/randompos/key", { Text = "Random Pos Key",  SyncToggleState = false, Mode = "Toggle", Default = "F" }) do
-                        local DepBox = Desync:AddDependencyBox()
-
-                        DepBox:AddSlider("misc/desync/randompos/x", { Text = "X", Min = -360, Max = 360, Rounding = 0, Default = 0 })
-                        DepBox:AddSlider("misc/desync/randompos/y", { Text = "Y", Min = -360, Max = 360, Rounding = 0, Default = 0 })
-                        DepBox:AddSlider("misc/desync/randompos/z", { Text = "Z", Min = -360, Max = 360, Rounding = 0, Default = 0 })
-
-                        DepBox:SetupDependencies({
-                            { Toggles["misc/desync/randompos"], true } 
-                        });
-                    end
-
-                    Desync:AddToggle("misc/desync/offset", { Text = "Offset", Default = false }) do
-                        local DepBox = Desync:AddDependencyBox()
-
-                        DepBox:AddSlider("misc/desync/offset/x", { Text = "X", Min = -360, Max = 360, Rounding = 0, Default = 0 })
-                        DepBox:AddSlider("misc/desync/offset/y", { Text = "Y", Min = -360, Max = 360, Rounding = 0, Default = 0 })
-                        DepBox:AddSlider("misc/desync/offset/z", { Text = "Z", Min = -360, Max = 360, Rounding = 0, Default = 0 })
-                        DepBox:AddSlider("misc/desync/offset/speed", { Text = "Animation Speed", Min = 0, Max = 100, Rounding = 1, Default = 10 })
-                        DepBox:AddDropdown("misc/desync/offset/animation", {
-                            Text = "Animation",
-                            Default = 1,
-                            Values = {
-                                "None",
-                                "Sine",
-                                "Cosine",
-                                "Triangle",
-                                "Square",
-                                "Sawtooth",
-                                "SmoothStep",
-                                "Circle",
-                                "Figure8",
-                                "Spiral",
-                            }
-                        })
-
-                        DepBox:SetupDependencies({
-                            { Toggles["misc/desync/offset"], true } 
-                        });
-                        DepBox:AddDivider()
-                    end
-
-                    Desync:AddToggle("misc/desync/jitter", { Text = "Jitter", Default = false }) do
-                        local DepBox = Desync:AddDependencyBox()
-                        DepBox:AddSlider("misc/desync/jitter/x", { Text = "X", Min = -360, Max = 360, Rounding = 0, Default = 0 })
-                        DepBox:AddSlider("misc/desync/jitter/y", { Text = "Y", Min = -360, Max = 360, Rounding = 0, Default = 0 })
-                        DepBox:AddSlider("misc/desync/jitter/z", { Text = "Z", Min = -360, Max = 360, Rounding = 0, Default = 0 })
-                        DepBox:AddSlider("misc/desync/jitter/speed", { Text = "Speed", Min = 1, Max = 60, Rounding = 0, Default = 10 })
-                        DepBox:SetupDependencies({
-                            { Toggles["misc/desync/jitter"], true }
-                        });
-                        DepBox:AddDivider()
-                    end
-
-                    Desync:AddToggle("misc/desync/rotation", { Text = "Rotation Offset", Default = false }) do
-                        local DepBox = Desync:AddDependencyBox()
-                        DepBox:AddSlider("misc/desync/rotation/x", { Text = "Pitch", Min = -180, Max = 180, Rounding = 0, Default = 0 })
-                        DepBox:AddSlider("misc/desync/rotation/y", { Text = "Yaw", Min = -180, Max = 180, Rounding = 0, Default = 0 })
-                        DepBox:AddSlider("misc/desync/rotation/z", { Text = "Roll", Min = -180, Max = 180, Rounding = 0, Default = 0 })
-                        DepBox:AddToggle("misc/desync/rotation/randomize", { Text = "Randomize Rotation", Default = false })
-                        DepBox:AddSlider("misc/desync/rotation/speed", { Text = "Animation Speed", Min = 0, Max = 100, Rounding = 1, Default = 10 })
-                        DepBox:AddDropdown("misc/desync/rotation/animation", {
-                            Text = "Animation",
-                            Default = 1,
-                            Values = {
-                                "None",
-                                "Sine",
-                                "Cosine",
-                                "Triangle",
-                                "Square",
-                                "Sawtooth",
-                                "SmoothStep",
-                            }
-                        })
-                        DepBox:SetupDependencies({
-                            { Toggles["misc/desync/rotation"], true }
-                        });
-
-                        DepBox:AddDivider()
-                    end
-                    
-                    Desync:AddSlider("misc/desync/speed", { Text = "Speed", Min = 0, Max = 100, Rounding = 1, Default = 1 })
-                    Desync:AddToggle("misc/desync/useeasingstyle", { Text = "Use Easing Style", Default = false })
-                    Desync:AddDropdown("misc/desync/easingstyle", { Text = "Easing Style", Default = 1, Values = {
-                        "Sine",
-                        "Quad",
-                        "Cubic",
-                        "Quart",
-                        "Quint",
-                        "Exponential",
-                        "Circular",
-                        "Linear",
-                        "SmoothStep",
-                        "SmootherStep",
-                        "Back",
-                        "Elastic",
-                        "Bounce",
-                    } })
-                    Desync:AddDropdown("misc/desync/easingdirection", { Text = "Easing Direction", Default = 3, Values = {
-                        "In",
-                        "Out",
-                        "InOut",
-                    } })
                 end
 
                 do -- Misc
@@ -624,15 +496,6 @@ local Library, SaveManager, ThemeManager = moehack.load_module("moehack.net/inte
                             });
                         end
 
-                        Misc:AddToggle("misc/hitsound", { Text = "Hit Sound", Default = false }) do
-                            local DepBox = Misc:AddDependencyBox()
-                            DepBox:AddDropdown("misc/hitsound/type", { Text = "Type", Default = 1, Values = Storage.SoundsKey, Multi = true })
-                            DepBox:AddToggle("misc/hitsound/custom", { Text = "Use Custom Sound", Default = false })
-                            DepBox:AddDropdown("misc/hitsound/custom/type", { Text = "Custom Type", Default = 1, Values = {}, Multi = true })
-                            DepBox:SetupDependencies({
-                                { Toggles["misc/hitsound"], true } 
-                            });
-                        end
                         local DeviceIds = { Keyboard = 0, Gamepad = 1, Mobile = 2 }
                         Misc:AddToggle("misc/devicespoofer", { Text = "Device Spoofer", Default = false })
                         Misc:AddDropdown("misc/devicespoofer/type", { Text = "Devices", Default = 1, Values = {"Keyboard", "Gamepad", "Mobile", "Unknown"}, Callback = function(Value)
@@ -655,6 +518,18 @@ local Library, SaveManager, ThemeManager = moehack.load_module("moehack.net/inte
                                 NetClient.unlock()
                             end
                         end)
+
+                        Misc:AddDivider()
+
+                        Misc:AddToggle("misc/hitsound", { Text = "Hit Sound", Default = false }) do
+                            local DepBox = Misc:AddDependencyBox()
+                            DepBox:AddDropdown("misc/hitsound/type", { Text = "Type", Default = 1, Values = Storage.SoundsKey, Multi = true })
+                            DepBox:AddToggle("misc/hitsound/custom", { Text = "Use Custom Sound", Default = false })
+                            DepBox:AddDropdown("misc/hitsound/custom/type", { Text = "Custom Type", Default = 1, Values = {}, Multi = true })
+                            DepBox:SetupDependencies({
+                                { Toggles["misc/hitsound"], true } 
+                            });
+                        end
 
                         Misc:AddToggle("misc/killsound", { Text = "Kill Sound", Default = false }) do
                             local DepBox = Misc:AddDependencyBox()
@@ -797,6 +672,134 @@ local Library, SaveManager, ThemeManager = moehack.load_module("moehack.net/inte
                         )
                     end
 
+                end
+
+                do -- Exploits
+                    Exploits:AddToggle("misc/exploits/antifling", { Text = "Anti Fling", Default = false })
+                    if moehack.data.game_name == "Killstreak" or moehack.data.game_name == "Arsenal" then
+                        Exploits:AddToggle("misc/exploits/unlockall", {Text = "Unlock All", Default = false, Callback = function(Valorant)
+                            local Controller = moehack.load_module("moehack.net/modules/games/" .. string.lower(moehack.data.game_name) .. "/unlockall.luau")
+
+                            if Valorant then
+                                Controller:Enable()
+                            else
+                                Controller:Disable()
+                            end
+                        end})
+                    end
+
+                    Exploits:AddButton('Get Wordle Answer', function()
+                        Library:Notify("The answer is " .. tostring(Game:HttpGet("https://bloxsense.vercel.app/api/WordleTodaysAnswer.js")), 4-1+1)
+                    end)
+
+                end
+            
+                do -- Desync
+                    Desync:AddToggle("misc/desync", { Text = "Enable", Default = false })
+                    Desync:AddToggle("misc/desync/freezepos", { Text = "Freeze Position", Default = false }):AddKeyPicker("misc/desync/freezepos/key", { Text = "Freeze Pos Key",  SyncToggleState = false, Mode = "Hold", Default = "E" })
+                    Desync:AddToggle("misc/desync/randompos", { Text = "Random Position", Default = false }):AddKeyPicker("misc/desync/randompos/key", { Text = "Random Pos Key",  SyncToggleState = false, Mode = "Toggle", Default = "F" }) do
+                        local DepBox = Desync:AddDependencyBox()
+
+                        DepBox:AddSlider("misc/desync/randompos/x", { Text = "X", Min = -360, Max = 360, Rounding = 0, Default = 0 })
+                        DepBox:AddSlider("misc/desync/randompos/y", { Text = "Y", Min = -360, Max = 360, Rounding = 0, Default = 0 })
+                        DepBox:AddSlider("misc/desync/randompos/z", { Text = "Z", Min = -360, Max = 360, Rounding = 0, Default = 0 })
+
+                        DepBox:SetupDependencies({
+                            { Toggles["misc/desync/randompos"], true } 
+                        });
+                    end
+
+                    Desync:AddToggle("misc/desync/offset", { Text = "Offset", Default = false }) do
+                        local DepBox = Desync:AddDependencyBox()
+
+                        DepBox:AddSlider("misc/desync/offset/x", { Text = "X", Min = -360, Max = 360, Rounding = 0, Default = 0 })
+                        DepBox:AddSlider("misc/desync/offset/y", { Text = "Y", Min = -360, Max = 360, Rounding = 0, Default = 0 })
+                        DepBox:AddSlider("misc/desync/offset/z", { Text = "Z", Min = -360, Max = 360, Rounding = 0, Default = 0 })
+                        DepBox:AddSlider("misc/desync/offset/speed", { Text = "Animation Speed", Min = 0, Max = 100, Rounding = 1, Default = 10 })
+                        DepBox:AddDropdown("misc/desync/offset/animation", {
+                            Text = "Animation",
+                            Default = 1,
+                            Values = {
+                                "None",
+                                "Sine",
+                                "Cosine",
+                                "Triangle",
+                                "Square",
+                                "Sawtooth",
+                                "SmoothStep",
+                                "Circle",
+                                "Figure8",
+                                "Spiral",
+                            }
+                        })
+
+                        DepBox:SetupDependencies({
+                            { Toggles["misc/desync/offset"], true } 
+                        });
+                        DepBox:AddDivider()
+                    end
+
+                    Desync:AddToggle("misc/desync/jitter", { Text = "Jitter", Default = false }) do
+                        local DepBox = Desync:AddDependencyBox()
+                        DepBox:AddSlider("misc/desync/jitter/x", { Text = "X", Min = -360, Max = 360, Rounding = 0, Default = 0 })
+                        DepBox:AddSlider("misc/desync/jitter/y", { Text = "Y", Min = -360, Max = 360, Rounding = 0, Default = 0 })
+                        DepBox:AddSlider("misc/desync/jitter/z", { Text = "Z", Min = -360, Max = 360, Rounding = 0, Default = 0 })
+                        DepBox:AddSlider("misc/desync/jitter/speed", { Text = "Speed", Min = 1, Max = 60, Rounding = 0, Default = 10 })
+                        DepBox:SetupDependencies({
+                            { Toggles["misc/desync/jitter"], true }
+                        });
+                        DepBox:AddDivider()
+                    end
+
+                    Desync:AddToggle("misc/desync/rotation", { Text = "Rotation Offset", Default = false }) do
+                        local DepBox = Desync:AddDependencyBox()
+                        DepBox:AddSlider("misc/desync/rotation/x", { Text = "Pitch", Min = -180, Max = 180, Rounding = 0, Default = 0 })
+                        DepBox:AddSlider("misc/desync/rotation/y", { Text = "Yaw", Min = -180, Max = 180, Rounding = 0, Default = 0 })
+                        DepBox:AddSlider("misc/desync/rotation/z", { Text = "Roll", Min = -180, Max = 180, Rounding = 0, Default = 0 })
+                        DepBox:AddToggle("misc/desync/rotation/randomize", { Text = "Randomize Rotation", Default = false })
+                        DepBox:AddSlider("misc/desync/rotation/speed", { Text = "Animation Speed", Min = 0, Max = 100, Rounding = 1, Default = 10 })
+                        DepBox:AddDropdown("misc/desync/rotation/animation", {
+                            Text = "Animation",
+                            Default = 1,
+                            Values = {
+                                "None",
+                                "Sine",
+                                "Cosine",
+                                "Triangle",
+                                "Square",
+                                "Sawtooth",
+                                "SmoothStep",
+                            }
+                        })
+                        DepBox:SetupDependencies({
+                            { Toggles["misc/desync/rotation"], true }
+                        });
+
+                        DepBox:AddDivider()
+                    end
+                    
+                    Desync:AddSlider("misc/desync/speed", { Text = "Speed", Min = 0, Max = 100, Rounding = 1, Default = 1 })
+                    Desync:AddToggle("misc/desync/useeasingstyle", { Text = "Use Easing Style", Default = false })
+                    Desync:AddDropdown("misc/desync/easingstyle", { Text = "Easing Style", Default = 1, Values = {
+                        "Sine",
+                        "Quad",
+                        "Cubic",
+                        "Quart",
+                        "Quint",
+                        "Exponential",
+                        "Circular",
+                        "Linear",
+                        "SmoothStep",
+                        "SmootherStep",
+                        "Back",
+                        "Elastic",
+                        "Bounce",
+                    } })
+                    Desync:AddDropdown("misc/desync/easingdirection", { Text = "Easing Direction", Default = 3, Values = {
+                        "In",
+                        "Out",
+                        "InOut",
+                    } })
                 end
             end
         end
