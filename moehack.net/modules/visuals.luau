@@ -863,24 +863,41 @@ Visuals.Players = {} do
 end
 
 do -- Other funcs
-    function Visuals:BulletTracers(Origin, HitPos)
+    function Visuals:BulletTracers(Origin, HitPos, LifeTime, FadeTime)
         local Direction = HitPos - Origin
         local Distance = Direction.Magnitude
-
+    
         if Distance <= 0 then
             return
         end
-
-        local Tracer = Instance.new("Part")
-        Tracer.Name = "BulletTracer"
-        Tracer.Anchored = true
-        Tracer.CanCollide = false
-        Tracer.CanQuery = false
-        Tracer.CanTouch = false
-        Tracer.Material = Enum.Material.Neon
-        Tracer.Size = Vector3.new(0.05, 0.05, Distance)
-        Tracer.CFrame = CFrame.lookAt(Origin, HitPos) * CFrame.new(0, 0, -Distance / 2)
-        Tracer.Parent = workspace
+    
+        local Tracer = Utility.Create("Part", {
+            Anchored = true,
+            CanCollide = false,
+            CanQuery = false,
+            CanTouch = false,
+            Material = Enum.Material.Neon,
+            Size = Vector3.new(0.05, 0.05, Distance),
+            CFrame = CFrame.lookAt(Origin, HitPos) * CFrame.new(0, 0, -Distance / 2),
+            Parent = Camera
+        })
+    
+        task.delay(LifeTime or 0, function()
+            if not Tracer.Parent then
+                return
+            end
+    
+            local Tween = TweenService:Create(Tracer, TweenInfo.new(FadeTime or 0), {
+                Transparency = 1
+            })
+    
+            Tween:Play()
+            Tween.Completed:Once(function()
+                Tracer:Destroy()
+            end)
+        end)
+    
+        return Tracer
     end
 end
 
@@ -894,7 +911,7 @@ if moehack.data.game_name == "Arsenal" then
     local NetLogger = moehack.load_module("moehack.net/modules/games/arsenal/netlogger.luau")
     NetLogger:On("Outgoing", "HitPart", function(Target, GunId, Flags, Pen, CamPos, HitPos, Dt, Entry)
         if Toggles["visuals/world/bullettracers"].Value then
-            Visuals:BulletTracers(CamPos, HitPos)
+            Visuals:BulletTracers(CamPos, HitPos, Options["visuals/world/bullettracers/lifetime"].Value, Options["visuals/world/bullettracers/fadetime"].Value)
         end
     end)
 end

@@ -45,6 +45,9 @@ local Utility = moehack.load_module("moehack.net/modules/utility.luau")
 
 --# Cache
 
+local Wkspc = ReplicatedStorage:WaitForChild("wkspc")
+local Status = Wkspc:WaitForChild("Status")
+
 local KnifebotOverlapParams = OverlapParams.new()
 KnifebotOverlapParams.FilterType = Enum.RaycastFilterType.Exclude
 KnifebotOverlapParams.FilterDescendantsInstances = { Character }
@@ -445,6 +448,8 @@ function Ragebot:Knifebot()
 end
 
 function Ragebot:Scan()
+    if Status.Preparation.Value then return end
+
     if not Toggles["combat/ragebot"].Value then return end
     local Gun = State.gun
     if not Gun then return end

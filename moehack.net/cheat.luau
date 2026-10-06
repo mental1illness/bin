@@ -406,7 +406,9 @@ local Library, SaveManager, ThemeManager = moehack.load_module("moehack.net/inte
 
                     do -- Arsenal
                         if moehack.data.game_name == "Arsenal" then
-                            Player:AddToggle("visuals/world/bullettracers", { Text = "Bullet Tracers", Default = false })
+                            World:AddToggle("visuals/world/bullettracers", { Text = "Bullet Tracers", Default = false })
+                            World:AddSlider("visuals/world/bullettracers/lifetime", { Text = "Life Time", Min = 1, Max = 10, Rounding = 0, Default = 3 })
+                            World:AddSlider("visuals/world/bullettracers/fadetime", { Text = "Fade Time", Min = 1, Max = 10, Rounding = 0, Default = 3 })
                         end
                     end
                 end
