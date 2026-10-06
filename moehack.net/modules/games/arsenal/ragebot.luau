@@ -61,12 +61,11 @@ local LastRootTick = 0
 -- local Offset = NewCFrame(0, 0, -1)
 
 local EmptyVec3 = NewVector3()
-
 --# Main
 local Ragebot = { LastTimeFired = 0 }
 Ragebot.__index = Ragebot
 
-function Ragebot:GetOrigin()
+function Ragebot:Origin()
     local Character = LocalPlayer.Character
     local Root = Character and (Character.PrimaryPart or FindFirstChild(Character, "HumanoidRootPart"))
     local Origin = Camera.CFrame.Position
@@ -124,7 +123,52 @@ function Ragebot:HitFX(Head: BasePart, Origin: Vector3, HeadBits: number)
     Particles.CreateTrail(Origin, Head.Position, Override)
 end
 
-function Ragebot:Hit(Character, PenIndex, SharedCFrame)
+function Ragebot:OriginScan(TargetCharacter)
+    local Character = LocalPlayer.Character
+    local RootPart = Character and Character.PrimaryPart
+    local TargetRoot = TargetCharacter and TargetCharacter.PrimaryPart
+
+    if not RootPart or not TargetRoot then
+        return nil
+    end
+
+    local Params = RaycastParams.new()
+    Params.FilterType = Enum.RaycastFilterType.Exclude
+    Params.FilterDescendantsInstances = { Character }
+    Params.IgnoreWater = true
+
+    for Index = 1, Options["combat/originscan/maxorigin"].Value do
+        local Offset = Vector3.new(
+            math.random(-1500, 1500) / 100,
+            math.random(-1500, 1500) / 100,
+            math.random(-1500, 1500) / 100
+        )
+
+        if Offset.Magnitude > Options["combat/originscan/maxdist"].Value then
+            Offset = Offset.Unit * Options["combat/originscan/maxdist"].Value
+        end
+
+        local Origin = RootPart.Position + Offset
+        local Direction = TargetRoot.Position - Origin
+        local Result = Raycast(workspace, Origin, Direction, Params)
+
+        if Result and Result.Instance:IsDescendantOf(TargetCharacter) then
+            return Origin
+        end
+    end
+
+    return nil
+end
+
+function Ragebot:GetOrigin(TargetCharacter)
+    if Toggles["combat/originscan"] and Toggles["combat/originscan"].Value and TargetCharacter then
+        local Scanned = self:OriginScan(TargetCharacter)
+        if Scanned then return Scanned end
+    end
+    return self:Origin()
+end
+
+function Ragebot:Hit(Character, PenIndex, SharedCFrame, ForcedOrigin)
     if not Character then return end
     local Self = self
     local Head = FindFirstChild(Character, "HeadHB") or FindFirstChild(Character, "Head")
@@ -155,13 +199,12 @@ function Ragebot:Hit(Character, PenIndex, SharedCFrame)
         local GunId = Gun:GetAttribute("Id") or 4
         local Speed = FindFirstChild(Gun, "Speed") and Gun.Speed.Value * 0.07 or 100
         if Speed == 0 then Speed = 0.01 end
-
         Speed *= Options["combat/ragebot/projectilespeedmult"].Value
 
-        local Origin = self:GetOrigin()
+        local Origin = ForcedOrigin or self:GetOrigin(Character)
         local Aim = Head.Position
-        local LegitTarget = Origin + Camera.CFrame.LookVector * 1000
-        local Muzzle = (Camera.CFrame * CFrame.new(1.5, -0.65, 0)).Position
+        local LegitTarget = Camera.CFrame.Position + Camera.CFrame.LookVector * 1000
+        local Muzzle = (Camera.CFrame * NewCFrame(1.5, -0.65, 0)).Position
 
         NetClient.lock()
         NetClient.u16(Events.ReplicateProjectile)
@@ -176,17 +219,16 @@ function Ragebot:Hit(Character, PenIndex, SharedCFrame)
         NetClient.unlock()
 
         local Travel = (Aim - Origin).Magnitude / Speed
-        local FireOrigin = self:GetOrigin()
         local FireAds = State.ads
         local FireJump = State.jumping
         local FireSpell = State.currentSpell or 1
         task.delay(Travel, function()
             if Head.Parent == nil then return end
-            local Spoofed = CFrame.new(FireOrigin, Head.Position)
+            local Spoofed = NewCFrame(Origin, Head.Position)
             local Cx, Cy, Cz, R00, R01, R02, R10, R11, R12, R20, R21, R22 = Spoofed:GetComponents()
             local HeadBits = ProjectileName == "Arrow" and 2 or 0
             local Flags = bit32.replace(bit32.replace(bit32.bor(0, FireAds and 2 or 0, FireJump and 4 or 0), FireSpell, 3, 3), HeadBits, 6, 2)
-            local N = (Head.Position - FireOrigin).Unit
+            local N = (Head.Position - Origin).Unit
             NetClient.lock()
             NetClient.u16(Events.HitPart)
             NetClient.inst(Head)
@@ -209,14 +251,14 @@ function Ragebot:Hit(Character, PenIndex, SharedCFrame)
             NetClient.f32(N.X) NetClient.f32(N.Y) NetClient.f32(N.Z)
             NetClient.unlock()
 
-            Self:HitFX(Head, FireOrigin, HeadBits)
+            Self:HitFX(Head, Origin, HeadBits)
         end)
         return
     end
 
     local GunId = Gun:GetAttribute("Id") or 4
-    local Origin = self:GetOrigin()
-    local Spoofed = SharedCFrame or CFrame.new(Origin, Head.Position)
+    local Origin = ForcedOrigin or self:GetOrigin(Character)
+    local Spoofed = SharedCFrame or NewCFrame(Origin, Head.Position)
     local Cx, Cy, Cz, R00, R01, R02, R10, R11, R12, R20, R21, R22 = Spoofed:GetComponents()
     local IsCrit = FindFirstChild(Gun, "Scoped") or FindFirstChild(Gun, "Crit")
     local HeadBits = IsCrit and 2 or 1
@@ -228,13 +270,6 @@ function Ragebot:Hit(Character, PenIndex, SharedCFrame)
     local Pen = PenIndex or 1
     if Pen < 1 then Pen = 1 end
     if Pen > 3 then Pen = 3 end
-
-    -- if LocalPlayer.Character then
-    --     local RootPart = LocalPlayer.Character.PrimaryPart
-    --     if RootPart then
-    --         RootPart.AssemblyLinearVelocity = EmptyVec3
-    --     end
-    -- end
 
     for _ = 1, Bullets do
         NetClient.lock()
@@ -250,15 +285,14 @@ function Ragebot:Hit(Character, PenIndex, SharedCFrame)
         NetClient.f32(Head.Position.X) NetClient.f32(Head.Position.Y) NetClient.f32(Head.Position.Z)
         NetClient.f32(DeltaTime)
         NetClient.unlock()
-
         self:HitFX(Head, Origin, HeadBits)
     end
 
     if FindFirstChild(Gun, "ThrowWeapon") then
         local TSpeed = FindFirstChild(Gun, "Speed") and Gun.Speed.Value * 0.07 or 100
         if TSpeed == 0 then TSpeed = 0.01 end
-        local LegitTarget = Origin + Camera.CFrame.LookVector * 1000
-        local Muzzle = (Camera.CFrame * CFrame.new(1.5, -0.65, 0)).Position
+        local LegitTarget = Camera.CFrame.Position + Camera.CFrame.LookVector * 1000
+        local Muzzle = (Camera.CFrame * NewCFrame(1.5, -0.65, 0)).Position
         NetClient.lock()
         NetClient.u16(Events.ReplicateProjectile)
         NetClient.str("Baseball")
@@ -271,10 +305,6 @@ function Ragebot:Hit(Character, PenIndex, SharedCFrame)
         NetClient.u8(bit32.bor(State.jumping and 1 or 0, State.ads and 2 or 0))
         NetClient.unlock()
     end
-end
-
-function Ragebot:TeleportScan()
-
 end
 
 function Ragebot:ReplicateShoot()
@@ -312,7 +342,7 @@ function Ragebot:ReplicateShoot()
     end
 end
 
-function Ragebot:Stab(Character)
+function Ragebot:Stab(Character, ForcedOrigin)
     if not Character then return end
     local Head = FindFirstChild(Character, "HeadHB") or FindFirstChild(Character, "Head")
         or FindFirstChild(Character, "Hitbox")
@@ -325,9 +355,10 @@ function Ragebot:Stab(Character)
     if State.equipping == true then return end
 
     local Range = FindFirstChild(Gun, "Range") and Gun.Range.Value + 1 or 7
-    local Origin = self:GetOrigin()
-    if (Head.Position - Origin).Magnitude > Range + 1 then return end
+    local RealOrigin = self:Origin()
+    if (Head.Position - RealOrigin).Magnitude > Range + 1 then return end
 
+    local Origin = ForcedOrigin or self:GetOrigin(Character)
     local FakeOrigin = Origin
     local Root = Character.PrimaryPart
     if Root then
@@ -335,7 +366,7 @@ function Ragebot:Stab(Character)
     end
 
     local GunId = Gun:GetAttribute("Id") or 125
-    local Spoofed = CFrame.new(FakeOrigin, Head.Position)
+    local Spoofed = NewCFrame(FakeOrigin, Head.Position)
     local Cx, Cy, Cz, R00, R01, R02, R10, R11, R12, R20, R21, R22 = Spoofed:GetComponents()
     local Flags = bit32.replace(bit32.replace(bit32.bor(1, State.ads and 2 or 0, State.jumping and 4 or 0), State.currentSpell or 1, 3, 3), 0, 6, 2)
     local DeltaTime = (State.btick == 0 and 0 or (tick() - State.btick))
@@ -401,112 +432,78 @@ function Ragebot:Knifebot()
 end
 
 function Ragebot:Scan()
-
     if not Toggles["combat/ragebot"].Value then return end
-
     local Gun = State.gun
     if not Gun then return end
     local FireRate = Gun and FindFirstChild(Gun, "FireRate") and Gun.FireRate.Value or 0
-
     if Toggles["combat/ragebot/rapidfire"].Value then
         FireRate = Options["combat/ragebot/rapidfire/tick"].Value
     end
-
     if not FireRate then return end
-    --if FindFirstChild(Gun, "Projectile") ~= nil then return end
     if not Toggles["combat/ragebot/removeextrachecks"].Value then
         if FindFirstChild(Gun, "Melee") ~= nil then return end
         if State.ammocount ~= nil and State.ammocount <= 0 then return end
         if State.DISABLED == true then return end
     end
 
-
-    local Origin = self:GetOrigin()
     local HasPen = FindFirstChild(Gun, "Penetration") ~= nil
     local Sorted = {}
-
     for _, Player in PlayersCache do
         if Player == LocalPlayer then continue end
         local Character = Player.Character
         if Character and not Utility.IsTeammate(LocalPlayer, Player) then
+            local CheckOrigin = self:GetOrigin(Character)
             local MaxHealth, Health = Utility.GetHealth(Player, Character)
             if Health and Health > 0 then
                 local Head = FindFirstChild(Character, "HeadHB") or FindFirstChild(Character, "Head")
                 if not Head then continue end
                 if Character:FindFirstChildOfClass("ForceField") then continue end
-
-                if self:IsVisible(Head) then
-                    Insert(Sorted, { Character = Character, Head = Head, Dist = (Head.Position - Origin).Magnitude })
+                if self:IsVisible(Head, CheckOrigin) then
+                    Insert(Sorted, {Character=Character,Head=Head,Dist=(Head.Position-CheckOrigin).Magnitude,Origin=CheckOrigin})
                 end
             end
         end
     end
+    table.sort(Sorted, function(A, B) return A.Dist < B.Dist end)
 
-    table.sort(Sorted, function(A, B)
-        return A.Dist < B.Dist
-    end)
-
-    local Target = nil
     for _, Entry in Sorted do
-        Target = Entry.Character
-
+        local Target = Entry.Character
         local Now = tick()
         if Target and Now - (self.LastTimeFired or 0) >= FireRate then
             self.LastTimeFired = Now
             if HasPen then
-                local Shared = CFrame.new(Origin, Entry.Head.Position)
                 local HitList = GeneralFunctions.gethitlist()
                 local Found = { Entry }
-
                 for Index = 2, #Sorted do
                     if #Found >= 3 then break end
                     local Behind = Sorted[Index]
                     VisibilityParams.FilterType = Enum.RaycastFilterType.Exclude
                     VisibilityParams.FilterDescendantsInstances = HitList
                     VisibilityParams.IgnoreWater = true
-                    local Result = Raycast(workspace, Origin, Behind.Head.Position - Origin, VisibilityParams)
+                    local Result = Raycast(workspace, Entry.Origin, Behind.Head.Position - Entry.Origin, VisibilityParams)
                     if Result and Result.Instance:IsDescendantOf(Behind.Character) then
                         Insert(Found, Behind)
                         Insert(HitList, Behind.Character)
                     end
                 end
-
                 for Pen, Pierce in Found do
                     if FindFirstChild(Gun, "Melee") ~= nil then
-                        self:Stab(Pierce.Character)
+                        self:Stab(Pierce.Character, Pierce.Origin)
                     else
-                        self:Hit(Pierce.Character, Pen, Shared)
+                        self:Hit(Pierce.Character, Pen, NewCFrame(Pierce.Origin, Pierce.Head.Position), Pierce.Origin)
                     end
-
                 end
                 self:ReplicateShoot()
                 break
             else
-
-                --[[if Toggles["combat/ragebot/tptoenemy"].Value then
-                    local PrimaryPart = LocalPlayer.Character.PrimaryPart
-                    if PrimaryPart then
-                        local PrimaryPart2 = Target.PrimaryPart
-                        if PrimaryPart2 then
-                            PrimaryPart.CFrame = PrimaryPart2.CFrame * Offset
-                        end
-                    end
-                end]]
-
                 if FindFirstChild(Gun, "Melee") ~= nil then
-                    self:Stab(Target)
+                    self:Stab(Target, Entry.Origin)
                 else
-                    self:Hit(Target)
+                    self:Hit(Target, nil, nil, Entry.Origin)
                 end
-
                 self:ReplicateShoot()
-
-                if not Toggles["combat/ragebot/multitarget"].Value then
-                    break
-                end
+                if not Toggles["combat/ragebot/multitarget"].Value then break end
             end
-        else
-            continue
         end
     end
 end

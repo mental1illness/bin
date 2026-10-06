@@ -152,6 +152,9 @@ local Library, SaveManager, ThemeManager = moehack.load_module("moehack.net/inte
                         -- Ragebot:AddToggle("combat/ragebot/tptoenemy", { Text = "Teleport To Enemy", Default = false })
                         Ragebot:AddToggle("combat/ragebot/removeextrachecks", { Text = "Remove Extra Checks", Default = false })
                         Ragebot:AddToggle("combat/knifebot", { Text = "Knifebot", Default = false })
+                        Ragebot:AddToggle("combat/originscan", { Text = "Origin Scan", Default = false })
+                        Ragebot:AddSlider("combat/originscan/maxorigin", { Text = "Max Origin", Min = 10, Max = 60, Rounding = 0, Default = 10 })
+                        Ragebot:AddSlider("combat/originscan/maxdist", { Text = "Max Distance", Min = 1, Max = 18, Rounding = 0, Default = 15 })
                     end
                 end
 
