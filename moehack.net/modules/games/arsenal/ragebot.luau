@@ -118,7 +118,7 @@ function Ragebot:HitFX(Head: BasePart, Origin: Vector3, HeadBits: number)
     local Gun = State.gun
     if not Gun then return end
     local Normal = (Head.Position - Origin).Unit
-    Bridge.HitObject:Fire(Head, Head.Position, Normal, Gun, HeadBits or 1, false, false, false)
+    -- Bridge.HitObject:Fire(Head, Head.Position, Normal, Gun, HeadBits or 1, false, false, false)
     local Override = GeneralFunctions.getTrailColorOverride(LocalPlayer, Gun)
     Particles.CreateTrail(Origin, Head.Position, Override)
 end
