@@ -63,6 +63,8 @@ local NAN = 0/0
 local LastRootPos = nil
 local LastRootTick = 0
 
+local OldDamage = 0
+
 -- local Offset = NewCFrame(0, 0, -1)
 
 local EmptyVec3 = NewVector3()
@@ -118,7 +120,19 @@ function Ragebot:IsVisible(Target: BasePart, Origin: Vector3?): boolean
     return Result.Instance:IsDescendantOf(Character)
 end
 
+function Ragebot:DamageDealt()
+    local NewDamage = LocalPlayer.Damage.Value
+    if OldDamage ~= NewDamage then
+        OldDamage = NewDamage
+        return true
+    end
+    return false
+end
+
 function Ragebot:HitFX(Head: BasePart, Origin: Vector3, HeadBits: number)
+    
+    if not self:DamageDealt() then return end
+
     if not Head or not Origin then return end
     local Gun = State.gun
     if not Gun then return end
@@ -310,6 +324,9 @@ function Ragebot:Hit(Character, PenIndex, SharedCFrame, ForcedOrigin)
 end
 
 function Ragebot:ReplicateShoot()
+
+    if not self:DamageDealt() then return end
+
     local Character = LocalPlayer.Character
     if Character == nil then return end
 
