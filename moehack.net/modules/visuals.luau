@@ -872,7 +872,6 @@ do -- Other funcs
         end
     
         local Tracer = Utility.Create("Part", {
-            Name = "BulletTracer",
             Anchored = true,
             CanCollide = false,
             CanQuery = false,
@@ -880,11 +879,10 @@ do -- Other funcs
             Transparency = 1,
             Size = Vector3.one,
             CFrame = CFrame.new(Origin),
-            Parent = workspace
+            Parent = Camera
         })
     
         local Line = Utility.Create("LineHandleAdornment", {
-            Name = "Tracer",
             Adornee = Tracer,
             AlwaysOnTop = true,
             ZIndex = 10,
@@ -934,11 +932,26 @@ Library:GiveSignal(Lighting.ChildAdded:Connect(function(Object)
 end))
 
 if moehack.data.game_name == "Arsenal" then
-    local NetLogger = moehack.load_module("moehack.net/modules/games/arsenal/netlogger.luau")
-    NetLogger:On("Outgoing", "HitPart", function(Target, GunId, Flags, Pen, CamPos, HitPos, Dt, Entry)
-        if Toggles["visuals/world/bullettracers"].Value then
-            Visuals:BulletTracers(CamPos, HitPos, Options["visuals/world/bullettracers/lifetime"].Value, Options["visuals/world/bullettracers/fadetime"].Value)
+    local function GetMuzzlePos(Fallback)
+    local Cam = workspace.CurrentCamera
+    if Cam then
+        local Arms = Cam:FindFirstChild("Arms")
+        if Arms then
+        local Part = Arms:FindFirstChild("Particles") or Arms:FindFirstChild("Flash")
+        if Part and Part:IsA("BasePart") then return Part.Position end
         end
+    end
+    return Fallback
+    end
+    
+    NetLogger:On("Outgoing", "HitPart", function(Target, GunId, Flags, Pen, CamPos, HitPos, Dt)
+    if Toggles["visuals/world/bullettracers"].Value then
+        Visuals:BulletTracers(
+        GetMuzzlePos(CamPos), HitPos,
+        Options["visuals/world/bullettracers/lifetime"].Value,
+        Options["visuals/world/bullettracers/fadetime"].Value
+        )
+    end
     end)
 end
 
