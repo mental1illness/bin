@@ -58,7 +58,7 @@ local NAN = 0/0
 local LastRootPos = nil
 local LastRootTick = 0
 
-local Offset = NewCFrame(0, 0, -1)
+-- local Offset = NewCFrame(0, 0, -1)
 
 local EmptyVec3 = NewVector3()
 
@@ -477,7 +477,7 @@ function Ragebot:Scan()
                 break
             else
 
-                if Toggles["combat/ragebot/tptoenemy"].Value then
+                --[[if Toggles["combat/ragebot/tptoenemy"].Value then
                     local PrimaryPart = LocalPlayer.Character.PrimaryPart
                     if PrimaryPart then
                         local PrimaryPart2 = Target.PrimaryPart
@@ -485,7 +485,7 @@ function Ragebot:Scan()
                             PrimaryPart.CFrame = PrimaryPart2.CFrame * Offset
                         end
                     end
-                end
+                end]]
 
                 if FindFirstChild(Gun, "Melee") ~= nil then
                     self:Stab(Target)
