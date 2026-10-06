@@ -508,7 +508,7 @@ function Ragebot:Scan()
     end
 end
 
-Library:GiveSignal(RunService.PreRender:Connect(function()
+Library:GiveSignal(RunService.Stepped:Connect(function()
     Ragebot:Scan()
     Ragebot:Knifebot()
 end))
