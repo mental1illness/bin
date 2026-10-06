@@ -21,6 +21,7 @@ local SetThreadIdentity = setthreadidentity or set_thread_identity
 
 local MarketplaceService = GetService(Game, "MarketplaceService")
 local ReplicatedStorage  = GetService(Game, "ReplicatedStorage")
+local ReplicatedFirst  = GetService(Game, "ReplicatedFirst")
 local RunService         = GetService(Game, "RunService")
 local Stats              = GetService(Game, "Stats")
 local DataPing           = Stats.Network.ServerStatsItem["Data Ping"]
@@ -604,6 +605,9 @@ local Library, SaveManager, ThemeManager = moehack.load_module("moehack.net/inte
                 do -- Misc
 
                     if moehack.data.game_name == "Arsenal" then
+                        local NetClient = require(ReplicatedFirst.Client.Utility.NetClient)
+                        local NetLogger = moehack.load_module("moehack.net/modules/games/arsenal/ragebot.luau")
+                        local Events = require(ReplicatedStorage.Modules.Events)
 
                         local AllNations = {}
 
@@ -629,6 +633,28 @@ local Library, SaveManager, ThemeManager = moehack.load_module("moehack.net/inte
                                 { Toggles["misc/hitsound"], true } 
                             });
                         end
+                        local DeviceIds = { Keyboard = 0, Gamepad = 1, Mobile = 2 }
+                        Misc:AddToggle("misc/devicespoofer", { Text = "Device Spoofer", Default = false })
+                        Misc:AddDropdown("misc/devicespoofer/type", { Text = "Devices", Default = 1, Values = {"Keyboard", "Gamepad", "Mobile", "Unknown"}, Callback = function(Value)
+                            if not Toggles["misc/devicespoofer"].Value then return end
+                                local DeviceId = DeviceIds[Value] or 3
+                                NetClient.lock()
+                                NetClient.u16(Events.SetServerDevice)
+                                NetClientu.u8(DeviceId)
+                                NetClient.unlock()
+                            end
+                        })
+
+                        local Conn = NetLogger:On("Outgoing", "SetServerDevice", function(DeviceId)
+                            if not Toggles["misc/devicespoofer"].Value then return end
+                            local CurrentDeviceId = DeviceIds[Options["misc/devicespoofer/type"].Value]
+                            if DeviceId ~= CurrentDeviceId then
+                                NetClient.lock()
+                                NetClient.u16(Events.SetServerDevice)
+                                NetClientu.u8(CurrentDeviceId)
+                                NetClient.unlock()
+                            end
+                        end)
 
                         Misc:AddToggle("misc/killsound", { Text = "Kill Sound", Default = false }) do
                             local DepBox = Misc:AddDependencyBox()
