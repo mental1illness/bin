@@ -863,7 +863,7 @@ Visuals.Players = {} do
 end
 
 do -- Other funcs
-    function Visuals:BulletTracers(Origin, HitPos, LifeTime, FadeTime, TravelSpeed)
+    function Visuals:BulletTracers(Origin, HitPos, LifeTime, FadeTime, TravelTime)
         local Direction = HitPos - Origin
         local Distance = Direction.Magnitude
     
@@ -872,9 +872,6 @@ do -- Other funcs
         end
     
         Direction = Direction.Unit
-    
-        local TracerLength = Minimum(2, Distance)
-        local TravelTime = TravelSpeed or 0
     
         local Tracer = Utility.Create("Part", {
             Anchored = true,
@@ -892,18 +889,18 @@ do -- Other funcs
             AlwaysOnTop = true,
             ZIndex = 10,
             Thickness = 2,
-            Length = TracerLength,
+            Length = 0,
             CFrame = CFrame.lookAt(Vector3.zero, Direction),
             Parent = Tracer
         })
     
         local StartTime = os.clock()
+        local Duration = TravelTime or 0
     
         while Line.Parent do
-            local Alpha = TravelTime <= 0 and 1 or Clamp((os.clock() - StartTime) / TravelTime, 0, 1)
-            local Position = Origin + Direction * (Distance * Alpha)
+            local Alpha = Duration <= 0 and 1 or math.clamp((os.clock() - StartTime) / Duration, 0, 1)
     
-            Tracer.CFrame = NewCFrame(Position)
+            Line.Length = Distance * Alpha
     
             if Alpha >= 1 then
                 break
@@ -927,7 +924,7 @@ do -- Other funcs
             local StartTime = os.clock()
     
             while Line.Parent do
-                local Alpha = Clamp((os.clock() - StartTime) / Duration, 0, 1)
+                local Alpha = math.clamp((os.clock() - StartTime) / Duration, 0, 1)
                 Line.Transparency = Alpha
     
                 if Alpha >= 1 then
