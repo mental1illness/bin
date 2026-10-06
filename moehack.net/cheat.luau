@@ -839,6 +839,8 @@ local Library, SaveManager, ThemeManager = moehack.load_module("moehack.net/inte
     ThemeManager:SetLibrary(Library)
     SaveManager:SetLibrary(Library)
 
+    Library.KeybindFrame.Visible = true
+
     SaveManager:IgnoreThemeSettings()
     SaveManager:SetIgnoreIndexes({ 'MenuKeybind' })
 
