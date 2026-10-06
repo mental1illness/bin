@@ -42,16 +42,17 @@ local GetFileName = function(path)
     return name
 end
 
-
 local Intro = moehack.load_module("globals/intro.luau").Create()
 Intro:FadeIn(0.5)
 
 --# Variables
 
 local Identity = GetThreadIdentity()
+local HiddenUI = gethui()
 
 local FrameRate, Ping = 0, 0
 moehack.load_module("moehack.net/modules/bypass.luau")
+local Storage = moehack.load_module("globals/storage.luau")
 
 --# UI Library
 local Library, SaveManager, ThemeManager = moehack.load_module("moehack.net/interface/library.luau", true), moehack.load_module("moehack.net/interface/addons/SaveManager.lua", true), moehack.load_module("moehack.net/interface/addons/ThemeManager.lua", true) do
@@ -620,9 +621,9 @@ local Library, SaveManager, ThemeManager = moehack.load_module("moehack.net/inte
 
                         Misc:AddToggle("misc/hitsound", { Text = "Hit Sound", Default = false }) do
                             local DepBox = Misc:AddDependencyBox()
-                            DepBox:AddDropdown("misc/hitsound/type", { Text = "Type", Default = 1, Values = {} })
+                            DepBox:AddDropdown("misc/hitsound/type", { Text = "Type", Default = 1, Values = Storage.SoundsKey, Multi = true })
                             DepBox:AddToggle("misc/hitsound/custom", { Text = "Use Custom Sound", Default = false })
-                            DepBox:AddDropdown("misc/hitsound/custom/type", { Text = "Custom Type", Default = 1, Values = {} })
+                            DepBox:AddDropdown("misc/hitsound/custom/type", { Text = "Custom Type", Default = 1, Values = {}, Multi = true })
                             DepBox:SetupDependencies({
                                 { Toggles["misc/hitsound"], true } 
                             });
@@ -630,9 +631,9 @@ local Library, SaveManager, ThemeManager = moehack.load_module("moehack.net/inte
 
                         Misc:AddToggle("misc/killsound", { Text = "Kill Sound", Default = false }) do
                             local DepBox = Misc:AddDependencyBox()
-                            DepBox:AddDropdown("misc/killsound/type", { Text = "Type", Default = 1, Values = {} })
+                            DepBox:AddDropdown("misc/killsound/type", { Text = "Type", Default = 1, Values = Storage.SoundsKey, Multi = true })
                             DepBox:AddToggle("misc/killsound/custom", { Text = "Use Custom Sound", Default = false })
-                            DepBox:AddDropdown("misc/killsound/custom/type", { Text = "Custom Type", Default = 1, Values = {} })
+                            DepBox:AddDropdown("misc/killsound/custom/type", { Text = "Custom Type", Default = 1, Values = {}, Multi = true })
                             DepBox:SetupDependencies({
                                 { Toggles["misc/killsound"], true } 
                             });
@@ -661,6 +662,112 @@ local Library, SaveManager, ThemeManager = moehack.load_module("moehack.net/inte
                                 end
                             end
                         end)
+
+                        local SoundCache = {}
+
+                        Library:GiveSignal(
+                            LocalPlayer.Damage.Changed:Connect(function()
+                                local Damage = LocalPlayer.Damage.Value
+                                if Damage > 0 then
+                                    if Toggles["misc/hitsound"].Value then
+                                        local Path = "moehack/sounds/"
+                                        if Toggles["misc/hitsound/custom"].Value then
+                                            local Assets = {}
+
+                                            for Name, Enabled in Options["misc/hitsound/custom/type"].Value do
+                                                if Enabled then
+                                                    Insert(Assets, Path .. Name)
+                                                end
+                                            end
+                                            
+                                            local RandomSound = #Assets > 0 and Assets[math.random(1, #Assets)] or nil
+                                            if not RandomSound then return end
+
+                                            if not SoundCache[RandomSound] then
+                                                SoundCache[RandomSound] = getcustomasset(RandomSound)
+                                            end
+
+                                            local Sound = Instance.new("Sound")
+                                            Sound.SoundId = SoundCache[RandomSound]
+                                            Sound.Volume = 1
+                                            Sound.PlayOnRemove = true
+                                            Sound.Parent = HiddenUI
+                                            Sound:Destroy()
+                                        else
+                                            local Assets = {}
+
+                                            for Name, Enabled in Options["misc/hitsound/type"].Value do
+                                                local Id = Enabled and Storage.Sounds[Name]
+                                                if Id then
+                                                    Insert(Assets, Id)
+                                                end
+                                            end
+                                            
+                                            if #Assets == 0 then return end
+                                        
+                                            local Sound = Instance.new("Sound")
+                                            Sound.SoundId = "rbxassetid://" .. Assets[math.random(1, #Assets)]
+                                            Sound.Volume = 1
+                                            Sound.PlayOnRemove = true
+                                            Sound.Parent = HiddenUI
+                                            Sound:Destroy()
+                                        end
+                                    end
+                                end
+                            end)
+                        )
+
+                        Library:GiveSignal(
+                            LocalPlayer.Status.SessionKills.Changed:Connect(function()
+                                local Kills = LocalPlayer.SessionKills.Value
+                                if Kills > 0 then
+                                    if Toggles["misc/killsound"].Value then
+                                        local Path = "moehack/sounds/"
+                                        if Toggles["misc/killsound/custom"].Value then
+                                            local Assets = {}
+
+                                            for Name, Enabled in Options["misc/killsound/custom/type"].Value do
+                                                if Enabled then
+                                                    Insert(Assets, Path .. Name)
+                                                end
+                                            end
+                                            
+                                            local RandomSound = #Assets > 0 and Assets[math.random(1, #Assets)] or nil
+                                            if not RandomSound then return end
+
+                                            if not SoundCache[RandomSound] then
+                                                SoundCache[RandomSound] = getcustomasset(RandomSound)
+                                            end
+
+                                            local Sound = Instance.new("Sound")
+                                            Sound.SoundId = SoundCache[RandomSound]
+                                            Sound.Volume = 1
+                                            Sound.PlayOnRemove = true
+                                            Sound.Parent = HiddenUI
+                                            Sound:Destroy()
+                                        else
+                                            local Assets = {}
+
+                                            for Name, Enabled in Options["misc/killsound/type"].Value do
+                                                local Id = Enabled and Storage.Sounds[Name]
+                                                if Id then
+                                                    Insert(Assets, Id)
+                                                end
+                                            end
+                                            
+                                            if #Assets == 0 then return end
+                                        
+                                            local Sound = Instance.new("Sound")
+                                            Sound.SoundId = "rbxassetid://" .. Assets[math.random(1, #Assets)]
+                                            Sound.Volume = 1
+                                            Sound.PlayOnRemove = true
+                                            Sound.Parent = HiddenUI
+                                            Sound:Destroy()
+                                        end
+                                    end
+                                end
+                            end)
+                        )
                     end
 
                 end
