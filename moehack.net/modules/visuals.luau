@@ -531,7 +531,7 @@ Visuals.Camera = {} do
                     LastLinkData.Loading = false
                 end)
             end
-            
+
             local ImageLabel = LastLinkData.CurrentImageLabel
 
             if ImageLabel then
@@ -541,6 +541,7 @@ Visuals.Camera = {} do
                 local Scale = Options["visuals/camera/waifu/scale"].Value
             
                 ImageLabel.Position = FromScale(X, Y)
+                ImageLabel.AnchorPoint = Vector2.new(X, Y)
                 ImageLabel.ImageTransparency = Transparency
             
                 if LastLinkData.Resolution then
