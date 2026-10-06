@@ -37,6 +37,12 @@ local makeKebabPls = function(name)
     return s
 end
 
+local GetFileName = function(path)
+    local name = path:match("[^/]+$")
+    return name
+end
+
+
 local Intro = moehack.load_module("globals/intro.luau").Create()
 Intro:FadeIn(0.5)
 
@@ -612,6 +618,49 @@ local Library, SaveManager, ThemeManager = moehack.load_module("moehack.net/inte
                             });
                         end
 
+                        Misc:AddToggle("misc/hitsound", { Text = "Hit Sound", Default = false }) do
+                            local DepBox = Misc:AddDependencyBox()
+                            DepBox:AddDropdown("misc/hitsound/type", { Text = "Type", Default = 1, Values = {} })
+                            DepBox:AddToggle("misc/hitsound/custom", { Text = "Use Custom Sound", Default = false })
+                            DepBox:AddDropdown("misc/hitsound/custom/type", { Text = "Custom Type", Default = 1, Values = {} })
+                            DepBox:SetupDependencies({
+                                { Toggles["misc/hitsound"], true } 
+                            });
+                        end
+
+                        Misc:AddToggle("misc/killsound", { Text = "Kill Sound", Default = false }) do
+                            local DepBox = Misc:AddDependencyBox()
+                            DepBox:AddDropdown("misc/killsound/type", { Text = "Type", Default = 1, Values = {} })
+                            DepBox:AddToggle("misc/killsound/custom", { Text = "Use Custom Sound", Default = false })
+                            DepBox:AddDropdown("misc/killsound/custom/type", { Text = "Custom Type", Default = 1, Values = {} })
+                            DepBox:SetupDependencies({
+                                { Toggles["misc/killsound"], true } 
+                            });
+                        end
+                        
+                        Spawn(function()
+                            while Wait(3) do
+                                if isfolder("moehack/sounds") then
+                                    local Files = listfiles("moehack/sounds")
+                                    local SoundTypes = {}
+                                    
+                                    if #Files == 0 then
+                                        return
+                                    end
+
+                                    for Index, File in Files do
+                                        local FileName = GetFileName(File)
+                                        Insert(SoundTypes, FileName)
+                                    end
+                                    if Options["misc/hitsound/custom/type"] then
+                                        Options["misc/hitsound/custom/type"]:SetValues(SoundTypes)
+                                    end
+                                    if Options["misc/killsound/custom/type"] then
+                                        Options["misc/killsound/custom/type"]:SetValues(SoundTypes)
+                                    end
+                                end
+                            end
+                        end)
                     end
 
                 end
@@ -629,6 +678,11 @@ local Library, SaveManager, ThemeManager = moehack.load_module("moehack.net/inte
 
     ThemeManager:SetFolder('moehack')
     SaveManager:SetFolder('moehack/' .. string.lower(moehack.data.game_name or "universal"))
+    if not isfolder('moehack/sounds') then
+        makefolder('moehack/sounds')
+    end
+
+
 
     if moehack.data.game_name == "Arsenal" then
         SaveManager:SetUnlockAll(moehack.load_module("moehack.net/modules/games/arsenal/unlockall.luau"))
