@@ -54,7 +54,7 @@ function Intro.Create()
     local ScreenGui = Create("ScreenGui", gethui and gethui() or GetService(Game, "CoreGui"))
     ScreenGui.IgnoreGuiInset = true
     ScreenGui.ResetOnSpawn = false
-    ScreenGui.DisplayOrder = 9e9
+    ScreenGui.DisplayOrder = 51
 
     writefile("SAYONARA.mp3", Game:HttpGet("https://cats-cure-depression.vercel.app/assets/audio/Doki%20Doki%20Literature%20Club!%20OST%20-%20Sayo-nara%20-%20Team%20Salvato.mp3"))
 
