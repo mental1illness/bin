@@ -874,7 +874,7 @@ do -- Other funcs
         Direction = Direction.Unit
     
         local Mode = Options["visuals/world/bullettracers/mode"].Value
-        local Color = Flags["visuals/world/bullettracers/color"]
+        local Color = Options["visuals/world/bullettracers/color"].Value
         local Thickness = Options["visuals/world/bullettracers/thickness"].Value
         local Radius = Distance * (Options["visuals/world/bullettracers/radius"].Value / 1000)
         local Turns = Options["visuals/world/bullettracers/turns"].Value
