@@ -640,7 +640,7 @@ local Library, SaveManager, ThemeManager = moehack.load_module("moehack.net/inte
                                 local DeviceId = DeviceIds[Value] or 3
                                 NetClient.lock()
                                 NetClient.u16(Events.SetServerDevice)
-                                NetClientu.u8(DeviceId)
+                                NetClient.u8(DeviceId)
                                 NetClient.unlock()
                             end
                         })
@@ -651,7 +651,7 @@ local Library, SaveManager, ThemeManager = moehack.load_module("moehack.net/inte
                             if DeviceId ~= CurrentDeviceId then
                                 NetClient.lock()
                                 NetClient.u16(Events.SetServerDevice)
-                                NetClientu.u8(CurrentDeviceId)
+                                NetClient.u8(CurrentDeviceId)
                                 NetClient.unlock()
                             end
                         end)
