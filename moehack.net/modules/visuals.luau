@@ -863,13 +863,18 @@ Visuals.Players = {} do
 end
 
 do -- Other funcs
-    function Visuals:BulletTracers(Origin, HitPos, LifeTime, FadeTime)
+    function Visuals:BulletTracers(Origin, HitPos, LifeTime, FadeTime, TravelSpeed)
         local Direction = HitPos - Origin
         local Distance = Direction.Magnitude
     
         if Distance <= 0 then
             return
         end
+    
+        Direction = Direction.Unit
+    
+        local TracerLength = Minimum(2, Distance)
+        local TravelTime = TravelSpeed or 0
     
         local Tracer = Utility.Create("Part", {
             Anchored = true,
@@ -878,7 +883,7 @@ do -- Other funcs
             CanTouch = false,
             Transparency = 1,
             Size = Vector3.one,
-            CFrame = CFrame.new(Origin),
+            CFrame = NewCFrame(Origin),
             Parent = Camera
         })
     
@@ -887,29 +892,43 @@ do -- Other funcs
             AlwaysOnTop = true,
             ZIndex = 10,
             Thickness = 2,
-            Length = Distance,
+            Length = TracerLength,
             CFrame = CFrame.lookAt(Vector3.zero, Direction),
             Parent = Tracer
         })
+    
+        local StartTime = os.clock()
+    
+        while Line.Parent do
+            local Alpha = TravelTime <= 0 and 1 or Clamp((os.clock() - StartTime) / TravelTime, 0, 1)
+            local Position = Origin + Direction * (Distance * Alpha)
+    
+            Tracer.CFrame = NewCFrame(Position)
+    
+            if Alpha >= 1 then
+                break
+            end
+    
+            RunService.PreRender:Wait()
+        end
     
         task.delay(LifeTime or 0, function()
             if not Line.Parent then
                 return
             end
     
-            local StartThickness = Line.Thickness
-            local StartTime = os.clock()
             local Duration = FadeTime or 0
     
             if Duration <= 0 then
-                Line:Destroy()
                 Tracer:Destroy()
                 return
             end
     
+            local StartTime = os.clock()
+    
             while Line.Parent do
-                local Alpha = math.clamp((os.clock() - StartTime) / Duration, 0, 1)
-                Line.Thickness = StartThickness * (1 - Alpha)
+                local Alpha = Clamp((os.clock() - StartTime) / Duration, 0, 1)
+                Line.Transparency = Alpha
     
                 if Alpha >= 1 then
                     break
@@ -938,7 +957,7 @@ if moehack.data.game_name == "Arsenal" then
         local Arms = FindFirstChild(Camera, "Arms")
         if Arms then
             local Part = FindFirstChild(Arms, "Particles") or FindFirstChild(Arms, "Flash")
-            if Part and Part:IsA("BasePart") then return Part.Position end
+            if Part and IsA(Part, "BasePart") then return Part.Position end
         end
         return Fallback
     end
@@ -946,9 +965,10 @@ if moehack.data.game_name == "Arsenal" then
     NetLogger:On("Outgoing", "HitPart", function(Target, GunId, Flags, Pen, CamPos, HitPos, Dt)
         if Toggles["visuals/world/bullettracers"].Value then
             Visuals:BulletTracers(
-            GetMuzzlePos(CamPos), HitPos,
-            Options["visuals/world/bullettracers/lifetime"].Value,
-            Options["visuals/world/bullettracers/fadetime"].Value
+                GetMuzzlePos(CamPos), HitPos,
+                Options["visuals/world/bullettracers/lifetime"].Value,
+                Options["visuals/world/bullettracers/fadetime"].Value,
+                Options["visuals/world/bullettracers/traveltime"].Value
             )
         end
     end)
