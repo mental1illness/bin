@@ -1,3 +1,32 @@
+--!native
+--!optimize 2
+
+--# Aliases
+
+local FromOffset, FromScale, UDim2New = UDim2.fromOffset, UDim2.fromScale, UDim2.new
+local Atan2, Rad, Pi, Abs, Minimum, Maximum, Floor, Clamp = math.atan2, math.rad, math.pi, math.abs, math.min, math.max, math.floor, math.clamp
+local NewVector, NewVector3, NewCFrame = vector.create, Vector3.new, CFrame.new
+local Create, IsA = Instance.new, workspace.IsA
+local Spawn, Wait = task.spawn, task.wait
+local ForEach, Insert, RemoveTable, TableFind = table.foreach, table.insert, table.remove, table.find
+local FindFirstChild, WaitForChild = workspace.FindFirstChild, workspace.WaitForChild
+local WorldToViewportPoint = workspace.CurrentCamera.WorldToViewportPoint
+local Lower = string.lower
+local GetService = Game.GetService
+
+local GetThreadIdentity = getthreadidentity or get_thread_identity
+local SetThreadIdentity = setthreadidentity or set_thread_identity
+
+--# Services
+
+local MarketplaceService = GetService(Game, "MarketplaceService")
+local ReplicatedStorage  = GetService(Game, "ReplicatedStorage")
+local RunService         = GetService(Game, "RunService")
+local Stats              = GetService(Game, "Stats")
+local Players            = GetService(Game, "Players")
+
+--# Main
+
 local Storage = {}
 
 Storage.Sounds = {
@@ -117,8 +146,24 @@ Storage.SoundsKey = {}
 
 do 
     for i,v in Storage.Sounds do
-        table.insert(Storage.SoundsKey, i)
+        Insert(Storage.SoundsKey, i)
     end
+end
+
+function Storage.Preload(Names)
+    Spawn(function()
+        for _, Name in Names or Storage.SoundsKey do
+            local Id = Storage.Sounds[Name]
+            if not Id then continue end
+
+            local Sound = Instance.new("Sound")
+            Sound.SoundId = "rbxassetid://" .. Id
+            Sound.Volume = 0
+            Sound.PlayOnRemove = true
+            Sound.Parent = HiddenUI
+            Sound:Destroy()
+        end
+    end)
 end
 
 return Storage

@@ -38,8 +38,8 @@ local makeKebabPls = function(name)
 end
 
 local GetFileName = function(path)
-    local name = path:match("[^/]+$")
-    return name
+    path = path:gsub("[/\\]+$", "")
+    return path:match("[^/\\]+$") or ""
 end
 
 local Intro = moehack.load_module("globals/intro.luau").Create()
@@ -55,6 +55,7 @@ moehack.load_module("moehack.net/modules/bypass.luau")
 local Storage = moehack.load_module("globals/storage.luau")
 
 --# UI Library
+Storage.Preload()
 local Library, SaveManager, ThemeManager = moehack.load_module("moehack.net/interface/library.luau", true), moehack.load_module("moehack.net/interface/addons/SaveManager.lua", true), moehack.load_module("moehack.net/interface/addons/ThemeManager.lua", true) do
     local Window = Library:CreateWindow({ Title = 'moehack.net', Center = true, AutoShow = false, TabPadding = 1, MenuFadeTime = 0.2, BackgroundImage = "https://cats-cure-depression.vercel.app/assets/images/flandre_scarlet_halloween.jpg", BackgroundImageTransparency = 0.9, BackgroundImageScaleType = Enum.ScaleType.Stretch })
     
@@ -719,7 +720,7 @@ local Library, SaveManager, ThemeManager = moehack.load_module("moehack.net/inte
 
                         Library:GiveSignal(
                             LocalPlayer.Status.SessionKills.Changed:Connect(function()
-                                local Kills = LocalPlayer.SessionKills.Value
+                                local Kills = LocalPlayer.Status.SessionKills.Value
                                 if Kills > 0 then
                                     if Toggles["misc/killsound"].Value then
                                         local Path = "moehack/sounds/"
