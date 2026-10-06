@@ -252,155 +252,163 @@ local Library, SaveManager, ThemeManager = moehack.load_module("moehack.net/inte
                 local World, Player, Camera = Tabs.Visuals:AddGroupbox({ Side = 1, Name = "World" }), Tabs.Visuals:AddGroupbox({ Side = 2, Name = "Player" }) , Tabs.Visuals:AddGroupbox({ Side = 2, Name = "Camera" })
 
                 do -- World
-                    local Ambient = World:AddToggle("visuals/world/ambient", { Text = "Ambient", Default = false }) do
-                        Ambient:AddColorPicker('visuals/world/ambient/outdoorcolor', { Default = Color3.fromRGB(200, 100, 60), Title = 'Outdoor Color' })
-                        Ambient:AddColorPicker('visuals/world/ambient/color', { Default = Color3.fromRGB(140, 90, 70), Title = 'Ambient Color' })
-                    end
-
-                    local Brightness = World:AddToggle("visuals/world/brightness", { Text = "Brightness", Default = false }) do
-                        local DepBox = World:AddDependencyBox()
-
-                        DepBox:AddSlider("visuals/world/brightness/level", { Text = "Brightness Level", Min = 0, Max = 10, Rounding = 1, Default = 1.6 })
-                        DepBox:AddSlider("visuals/world/brightness/envdiffscale", { Text = "Environment Diffuse Scale", Min = 0, Max = 1, Rounding = 2, Default = 1 })
-                        DepBox:AddSlider("visuals/world/brightness/envspecscale", { Text = "Environment Specular Scale", Min = 0, Max = 1, Rounding = 2, Default = 0.9 })
-                        DepBox:AddSlider("visuals/world/brightness/exposure", { Text = "Exposure Compensation", Min = 0, Max = 1, Rounding = 2, Default = 0.15 })
-
-                        DepBox:SetupDependencies({
-                            { Toggles["visuals/world/brightness"], true }
-                        })
-                    end
-
-                    local Fog = World:AddToggle("visuals/world/fog", { Text = "Fog", Default = false }) do
-                        Fog:AddColorPicker('visuals/world/fog/color', { Default = Color3.fromRGB(255, 255, 255), Title = 'Fog Color' })
-                        local DepBox = World:AddDependencyBox()
-                        DepBox:AddSlider("visuals/world/fog/near", { Text = "Fog Near", Min = 0, Max = 1000, Rounding = 1, Default = 0 })
-                        DepBox:AddSlider("visuals/world/fog/far", { Text = "Fog Far", Min = 0, Max = 1000, Rounding = 1, Default = 1000 })
-                        DepBox:SetupDependencies({
-                            { Toggles["visuals/world/fog"], true }
-                        })
-                    end
-
-                    local Shadow = World:AddToggle("visuals/world/shadow", { Text = "Shadow Modification", Default = false }) do
-                        Shadow:AddColorPicker('visuals/world/shadow/color', { Default = Color3.fromRGB(0, 0, 0), Title = 'Shadow Color (theres a property for it not sure if it works)' })
-                        local DepBox = World:AddDependencyBox()
-                        DepBox:AddSlider("visuals/world/shadow/softness", { Text = "Shadow Softness", Min = 0, Max = 1, Rounding = 2, Default = 0.5 })
-                        DepBox:AddToggle("visuals/world/shadow/globalshadows", { Text = "Enable Shadows", Default = true })
-                        DepBox:SetupDependencies({
-                            { Toggles["visuals/world/shadow"], true }
-                        })
-                    end
-
-                    local Lighting = World:AddToggle("visuals/world/lighting", { Text = "Lighting", Default = false }) do
-                        local DepBox = World:AddDependencyBox()
-                        DepBox:AddSlider("visuals/world/lighting/time", { Text = "Clock Time", Min = 0, Max = 23, Rounding = 2, Default = 1 })
-                        DepBox:AddSlider("visuals/world/lighting/latitude", { Text = "Geographic Latitude", Min = -90, Max = 90, Rounding = 1, Default = 0 })
-                        DepBox:AddLabel("ColorShift Bottom"):AddColorPicker('visuals/world/lighting/colorshiftbottom', { Default = Color3.fromRGB(255, 255, 255), Title = 'ColorShift Bottom' })
-                        DepBox:AddLabel("ColorShift Top"):AddColorPicker('visuals/world/lighting/colorshifttop', { Default = Color3.fromRGB(255, 255, 255), Title = 'ColorShift Top' })
-
-                        local TechOptions = {}
-                        for _, EnumItem in Enum.Technology:GetEnumItems() do
-                            Insert(TechOptions, EnumItem.Name)
+                    do -- 3D, Lighting Related
+                        local Ambient = World:AddToggle("visuals/world/ambient", { Text = "Ambient", Default = false }) do
+                            Ambient:AddColorPicker('visuals/world/ambient/outdoorcolor', { Default = Color3.fromRGB(200, 100, 60), Title = 'Outdoor Color' })
+                            Ambient:AddColorPicker('visuals/world/ambient/color', { Default = Color3.fromRGB(140, 90, 70), Title = 'Ambient Color' })
                         end
-                        DepBox:AddDropdown("visuals/world/lighting/technology", { Text = "Technology", Default = 1, Values = TechOptions })
-
-                        DepBox:SetupDependencies({
-                            { Toggles["visuals/world/lighting"], true }
-                        })
-                    end
-
-                    World:AddToggle("visuals/world/lighting/colorgrading", { Text = "Color Grading", Default = false }) do
-                        local DepBox = World:AddDependencyBox()
-                        local TonemapOptions = {}
-                        for _, EnumItem in Enum.TonemapperPreset:GetEnumItems() do
-                            Insert(TonemapOptions, EnumItem.Name)
+    
+                        local Brightness = World:AddToggle("visuals/world/brightness", { Text = "Brightness", Default = false }) do
+                            local DepBox = World:AddDependencyBox()
+    
+                            DepBox:AddSlider("visuals/world/brightness/level", { Text = "Brightness Level", Min = 0, Max = 10, Rounding = 1, Default = 1.6 })
+                            DepBox:AddSlider("visuals/world/brightness/envdiffscale", { Text = "Environment Diffuse Scale", Min = 0, Max = 1, Rounding = 2, Default = 1 })
+                            DepBox:AddSlider("visuals/world/brightness/envspecscale", { Text = "Environment Specular Scale", Min = 0, Max = 1, Rounding = 2, Default = 0.9 })
+                            DepBox:AddSlider("visuals/world/brightness/exposure", { Text = "Exposure Compensation", Min = 0, Max = 1, Rounding = 2, Default = 0.15 })
+    
+                            DepBox:SetupDependencies({
+                                { Toggles["visuals/world/brightness"], true }
+                            })
                         end
-
-                        DepBox:AddDropdown("visuals/world/lighting/colorgrading/tonemap", { Text = "Tone Map Preset", Default = 1, Values = TonemapOptions })
-                        DepBox:SetupDependencies({
-                            { Toggles["visuals/world/lighting/colorgrading"], true }
-                        })
-                    end
-
-                    local CC = World:AddToggle("visuals/world/lighting/cc", { Text = "Color Correction", Default = false }) do
-                        local DepBox = World:AddDependencyBox()
-                        DepBox:AddSlider("visuals/world/lighting/cc/saturation", { Text = "Saturation", Min = 0, Max = 1, Rounding = 2, Default = 0.5 })
-                        DepBox:AddSlider("visuals/world/lighting/cc/contrast", { Text = "Contrast", Min = 0, Max = 1, Rounding = 2, Default = 0.5 })
-                        DepBox:AddSlider("visuals/world/lighting/cc/brightness", { Text = "Brightness", Min = -1, Max = 1, Rounding = 2, Default = 0 })
-                        CC:AddColorPicker('visuals/world/lighting/cc/tint', { Default = Color3.fromRGB(255, 255, 255), Title = 'Tint Color' })
-                        DepBox:SetupDependencies({
-                            { Toggles["visuals/world/lighting/cc"], true }
-                        })
-                    end
-
-                    World:AddToggle("visuals/world/lighting/bloom", { Text = "Bloom", Default = false }) do
-                        local DepBox = World:AddDependencyBox()
-                        DepBox:AddSlider("visuals/world/lighting/bloom/intensity", { Text = "Intensity", Min = 0, Max = 1, Rounding = 2, Default = 0.5 })
-                        DepBox:AddSlider("visuals/world/lighting/bloom/size", { Text = "Size", Min = 0, Max = 56, Rounding = 2, Default = 0.5 })
-                        DepBox:AddSlider("visuals/world/lighting/bloom/threshold", { Text = "Threshold", Min = 0, Max = 1, Rounding = 2, Default = 0.5 })
-                        DepBox:SetupDependencies({
-                            { Toggles["visuals/world/lighting/bloom"], true }
-                        })
-                    end
-
-                    World:AddToggle("visuals/world/sunrays", { Text = "Sun Rays", Default = false }) do
-                        local DepBox = World:AddDependencyBox()
-                        DepBox:AddSlider("visuals/world/sunrays/intensity", { Text = "Intensity", Min = 0, Max = 1, Rounding = 2, Default = 0.1 })
-                        DepBox:AddSlider("visuals/world/sunrays/spread", { Text = "Spread", Min = 0, Max = 1, Rounding = 2, Default = 0.5 })
-                        DepBox:SetupDependencies({
-                            { Toggles["visuals/world/sunrays"], true }
-                        })
-                    end
-
-                    World:AddToggle("visuals/world/atmosphere", { Text = "Atmosphere", Default = false }) do
-                        local DepBox = World:AddDependencyBox()
-                        DepBox:AddSlider("visuals/world/atmosphere/density", { Text = "Density", Min = 0, Max = 1, Rounding = 2, Default = 0.3 })
-                        DepBox:AddSlider("visuals/world/atmosphere/offset", { Text = "Offset", Min = -1, Max = 1, Rounding = 2, Default = 0 })
-                        DepBox:AddLabel("Color"):AddColorPicker("visuals/world/atmosphere/color", { Default = Color3.fromRGB(199, 170, 107), Title = "Atmosphere Color" })
-                        DepBox:AddLabel("Decay"):AddColorPicker("visuals/world/atmosphere/decay", { Default = Color3.fromRGB(106, 112, 125), Title = "Atmosphere Decay" })
-                        DepBox:AddSlider("visuals/world/atmosphere/glare", { Text = "Glare", Min = 0, Max = 1, Rounding = 2, Default = 0 })
-                        DepBox:AddSlider("visuals/world/atmosphere/haze", { Text = "Haze", Min = 0, Max = 1, Rounding = 2, Default = 0 })
-                        DepBox:SetupDependencies({
-                            { Toggles["visuals/world/atmosphere"], true }
-                        })
-                    end
-
-                    World:AddToggle("visuals/world/dof", { Text = "Depth of Field", Default = false }) do
-                        local DepBox = World:AddDependencyBox()
-                        DepBox:AddSlider("visuals/world/dof/farintens", { Text = "Far Intensity", Min = 0, Max = 1, Rounding = 2, Default = 0.28 })
-                        DepBox:AddSlider("visuals/world/dof/nearintens", { Text = "Near Intensity", Min = 0, Max = 1, Rounding = 2, Default = 0.7 })
-                        DepBox:AddSlider("visuals/world/dof/focusdist", { Text = "Focus Distance", Min = 0, Max = 100, Rounding = 2, Default = 20 })
-                        DepBox:AddSlider("visuals/world/dof/focusinradius", { Text = "In Focus Radius", Min = -100, Max = 100, Rounding = 2, Default = 20 })
-                        DepBox:SetupDependencies({
-                            { Toggles["visuals/world/dof"], true }
-                        })
-                    end
-
-                    World:AddToggle("visuals/world/weather", { Text = "Weather", Default = false }) do
-                        local DepBox = World:AddDependencyBox()
-                        DepBox:AddDropdown("visuals/world/weather/type", { Text = "Type", Default = 1, Values = {"Rain", "Snow"} })
-                        DepBox:AddSlider("visuals/world/snow/rate", { Text = "Snow Rate", Min = 1, Max = 2000, Rounding = 0, Default = 1000 })
-                        DepBox:SetupDependencies({
-                            { Toggles["visuals/world/weather"], true }
-                        })
-                    end
-
-                    World:AddToggle("visuals/world/customskybox", { Text = "Custom Sky Box", Default = false }) do
-                        local DepBox = World:AddDependencyBox()
-
-                        DepBox:AddDropdown("visuals/world/customskybox/type", { Text = "Type", Default = 1, Values = moehack.load_module("moehack.net/modules/skyboxes.luau").SkiesKeys }) -- now its in cache
-
-                        DepBox:SetupDependencies({
-                            { Toggles["visuals/world/customskybox"], true }
-                        })
-                    end
-
-                    World:AddToggle("visuals/world/its,driving,me,crazy,i,just,need,your,affection", {
-                        Text = "Use 2022 Materials",
-                        Default = gethiddenproperty(GetService(Game, "MaterialService"), "Use2022Materials"),
-                        Callback = function(Var)
-                            sethiddenproperty(GetService(Game, "MaterialService"), "Use2022Materials", Var)
+    
+                        local Fog = World:AddToggle("visuals/world/fog", { Text = "Fog", Default = false }) do
+                            Fog:AddColorPicker('visuals/world/fog/color', { Default = Color3.fromRGB(255, 255, 255), Title = 'Fog Color' })
+                            local DepBox = World:AddDependencyBox()
+                            DepBox:AddSlider("visuals/world/fog/near", { Text = "Fog Near", Min = 0, Max = 1000, Rounding = 1, Default = 0 })
+                            DepBox:AddSlider("visuals/world/fog/far", { Text = "Fog Far", Min = 0, Max = 1000, Rounding = 1, Default = 1000 })
+                            DepBox:SetupDependencies({
+                                { Toggles["visuals/world/fog"], true }
+                            })
                         end
-                    })
+    
+                        local Shadow = World:AddToggle("visuals/world/shadow", { Text = "Shadow Modification", Default = false }) do
+                            Shadow:AddColorPicker('visuals/world/shadow/color', { Default = Color3.fromRGB(0, 0, 0), Title = 'Shadow Color (theres a property for it not sure if it works)' })
+                            local DepBox = World:AddDependencyBox()
+                            DepBox:AddSlider("visuals/world/shadow/softness", { Text = "Shadow Softness", Min = 0, Max = 1, Rounding = 2, Default = 0.5 })
+                            DepBox:AddToggle("visuals/world/shadow/globalshadows", { Text = "Enable Shadows", Default = true })
+                            DepBox:SetupDependencies({
+                                { Toggles["visuals/world/shadow"], true }
+                            })
+                        end
+    
+                        local Lighting = World:AddToggle("visuals/world/lighting", { Text = "Lighting", Default = false }) do
+                            local DepBox = World:AddDependencyBox()
+                            DepBox:AddSlider("visuals/world/lighting/time", { Text = "Clock Time", Min = 0, Max = 23, Rounding = 2, Default = 1 })
+                            DepBox:AddSlider("visuals/world/lighting/latitude", { Text = "Geographic Latitude", Min = -90, Max = 90, Rounding = 1, Default = 0 })
+                            DepBox:AddLabel("ColorShift Bottom"):AddColorPicker('visuals/world/lighting/colorshiftbottom', { Default = Color3.fromRGB(255, 255, 255), Title = 'ColorShift Bottom' })
+                            DepBox:AddLabel("ColorShift Top"):AddColorPicker('visuals/world/lighting/colorshifttop', { Default = Color3.fromRGB(255, 255, 255), Title = 'ColorShift Top' })
+    
+                            local TechOptions = {}
+                            for _, EnumItem in Enum.Technology:GetEnumItems() do
+                                Insert(TechOptions, EnumItem.Name)
+                            end
+                            DepBox:AddDropdown("visuals/world/lighting/technology", { Text = "Technology", Default = 1, Values = TechOptions })
+    
+                            DepBox:SetupDependencies({
+                                { Toggles["visuals/world/lighting"], true }
+                            })
+                        end
+    
+                        World:AddToggle("visuals/world/lighting/colorgrading", { Text = "Color Grading", Default = false }) do
+                            local DepBox = World:AddDependencyBox()
+                            local TonemapOptions = {}
+                            for _, EnumItem in Enum.TonemapperPreset:GetEnumItems() do
+                                Insert(TonemapOptions, EnumItem.Name)
+                            end
+    
+                            DepBox:AddDropdown("visuals/world/lighting/colorgrading/tonemap", { Text = "Tone Map Preset", Default = 1, Values = TonemapOptions })
+                            DepBox:SetupDependencies({
+                                { Toggles["visuals/world/lighting/colorgrading"], true }
+                            })
+                        end
+    
+                        local CC = World:AddToggle("visuals/world/lighting/cc", { Text = "Color Correction", Default = false }) do
+                            local DepBox = World:AddDependencyBox()
+                            DepBox:AddSlider("visuals/world/lighting/cc/saturation", { Text = "Saturation", Min = 0, Max = 1, Rounding = 2, Default = 0.5 })
+                            DepBox:AddSlider("visuals/world/lighting/cc/contrast", { Text = "Contrast", Min = 0, Max = 1, Rounding = 2, Default = 0.5 })
+                            DepBox:AddSlider("visuals/world/lighting/cc/brightness", { Text = "Brightness", Min = -1, Max = 1, Rounding = 2, Default = 0 })
+                            CC:AddColorPicker('visuals/world/lighting/cc/tint', { Default = Color3.fromRGB(255, 255, 255), Title = 'Tint Color' })
+                            DepBox:SetupDependencies({
+                                { Toggles["visuals/world/lighting/cc"], true }
+                            })
+                        end
+    
+                        World:AddToggle("visuals/world/lighting/bloom", { Text = "Bloom", Default = false }) do
+                            local DepBox = World:AddDependencyBox()
+                            DepBox:AddSlider("visuals/world/lighting/bloom/intensity", { Text = "Intensity", Min = 0, Max = 1, Rounding = 2, Default = 0.5 })
+                            DepBox:AddSlider("visuals/world/lighting/bloom/size", { Text = "Size", Min = 0, Max = 56, Rounding = 2, Default = 0.5 })
+                            DepBox:AddSlider("visuals/world/lighting/bloom/threshold", { Text = "Threshold", Min = 0, Max = 1, Rounding = 2, Default = 0.5 })
+                            DepBox:SetupDependencies({
+                                { Toggles["visuals/world/lighting/bloom"], true }
+                            })
+                        end
+    
+                        World:AddToggle("visuals/world/sunrays", { Text = "Sun Rays", Default = false }) do
+                            local DepBox = World:AddDependencyBox()
+                            DepBox:AddSlider("visuals/world/sunrays/intensity", { Text = "Intensity", Min = 0, Max = 1, Rounding = 2, Default = 0.1 })
+                            DepBox:AddSlider("visuals/world/sunrays/spread", { Text = "Spread", Min = 0, Max = 1, Rounding = 2, Default = 0.5 })
+                            DepBox:SetupDependencies({
+                                { Toggles["visuals/world/sunrays"], true }
+                            })
+                        end
+    
+                        World:AddToggle("visuals/world/atmosphere", { Text = "Atmosphere", Default = false }) do
+                            local DepBox = World:AddDependencyBox()
+                            DepBox:AddSlider("visuals/world/atmosphere/density", { Text = "Density", Min = 0, Max = 1, Rounding = 2, Default = 0.3 })
+                            DepBox:AddSlider("visuals/world/atmosphere/offset", { Text = "Offset", Min = -1, Max = 1, Rounding = 2, Default = 0 })
+                            DepBox:AddLabel("Color"):AddColorPicker("visuals/world/atmosphere/color", { Default = Color3.fromRGB(199, 170, 107), Title = "Atmosphere Color" })
+                            DepBox:AddLabel("Decay"):AddColorPicker("visuals/world/atmosphere/decay", { Default = Color3.fromRGB(106, 112, 125), Title = "Atmosphere Decay" })
+                            DepBox:AddSlider("visuals/world/atmosphere/glare", { Text = "Glare", Min = 0, Max = 1, Rounding = 2, Default = 0 })
+                            DepBox:AddSlider("visuals/world/atmosphere/haze", { Text = "Haze", Min = 0, Max = 1, Rounding = 2, Default = 0 })
+                            DepBox:SetupDependencies({
+                                { Toggles["visuals/world/atmosphere"], true }
+                            })
+                        end
+    
+                        World:AddToggle("visuals/world/dof", { Text = "Depth of Field", Default = false }) do
+                            local DepBox = World:AddDependencyBox()
+                            DepBox:AddSlider("visuals/world/dof/farintens", { Text = "Far Intensity", Min = 0, Max = 1, Rounding = 2, Default = 0.28 })
+                            DepBox:AddSlider("visuals/world/dof/nearintens", { Text = "Near Intensity", Min = 0, Max = 1, Rounding = 2, Default = 0.7 })
+                            DepBox:AddSlider("visuals/world/dof/focusdist", { Text = "Focus Distance", Min = 0, Max = 100, Rounding = 2, Default = 20 })
+                            DepBox:AddSlider("visuals/world/dof/focusinradius", { Text = "In Focus Radius", Min = -100, Max = 100, Rounding = 2, Default = 20 })
+                            DepBox:SetupDependencies({
+                                { Toggles["visuals/world/dof"], true }
+                            })
+                        end
+    
+                        World:AddToggle("visuals/world/weather", { Text = "Weather", Default = false }) do
+                            local DepBox = World:AddDependencyBox()
+                            DepBox:AddDropdown("visuals/world/weather/type", { Text = "Type", Default = 1, Values = {"Rain", "Snow"} })
+                            DepBox:AddSlider("visuals/world/snow/rate", { Text = "Snow Rate", Min = 1, Max = 2000, Rounding = 0, Default = 1000 })
+                            DepBox:SetupDependencies({
+                                { Toggles["visuals/world/weather"], true }
+                            })
+                        end
+    
+                        World:AddToggle("visuals/world/customskybox", { Text = "Custom Sky Box", Default = false }) do
+                            local DepBox = World:AddDependencyBox()
+    
+                            DepBox:AddDropdown("visuals/world/customskybox/type", { Text = "Type", Default = 1, Values = moehack.load_module("moehack.net/modules/skyboxes.luau").SkiesKeys }) -- now its in cache
+    
+                            DepBox:SetupDependencies({
+                                { Toggles["visuals/world/customskybox"], true }
+                            })
+                        end
+    
+                        World:AddToggle("visuals/world/its,driving,me,crazy,i,just,need,your,affection", {
+                            Text = "Use 2022 Materials",
+                            Default = gethiddenproperty(GetService(Game, "MaterialService"), "Use2022Materials"),
+                            Callback = function(Var)
+                                sethiddenproperty(GetService(Game, "MaterialService"), "Use2022Materials", Var)
+                            end
+                        })
+                    end
+
+                    do -- Arsenal
+                        if moehack.data.game_name == "Arsenal" then
+                            Player:AddToggle("visuals/world/bullettracers", { Text = "Bullet Tracers", Default = false })
+                        end
+                    end
                 end
 
                 do -- Player

@@ -862,11 +862,42 @@ Visuals.Players = {} do
 
 end
 
+do -- Other funcs
+    function Visuals:BulletTracers(Origin, HitPos)
+        local Direction = HitPos - Origin
+        local Distance = Direction.Magnitude
+
+        if Distance <= 0 then
+            return
+        end
+
+        local Tracer = Instance.new("Part")
+        Tracer.Name = "BulletTracer"
+        Tracer.Anchored = true
+        Tracer.CanCollide = false
+        Tracer.CanQuery = false
+        Tracer.CanTouch = false
+        Tracer.Material = Enum.Material.Neon
+        Tracer.Size = Vector3.new(0.05, 0.05, Distance)
+        Tracer.CFrame = CFrame.lookAt(Origin, HitPos) * CFrame.new(0, 0, -Distance / 2)
+        Tracer.Parent = workspace
+    end
+end
+
 Library:GiveSignal(Lighting.ChildAdded:Connect(function(Object)
     if Visuals.World.Sky then
         Visuals.World.Sky:Remove()
     end
 end))
+
+if moehack.data.game_name == "Arsenal" then
+    local NetLogger = moehack.load_module("moehack.net/modules/games/arsenal/netlogger.luau")
+    NetLogger:On("Outgoing", "HitPart", function(Target, GunId, Flags, Pen, CamPos, HitPos, Dt, Entry)
+        if Toggles["visuals/world/bullettracers"].Value then
+            Visuals:BulletTracers(CamPos, HitPos)
+        end
+    end)
+end
 
 function Visuals.Tick()
     Visuals.Players.Tick()
