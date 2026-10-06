@@ -29,10 +29,10 @@ local NetClient = require(ReplicatedFirst.Client.Utility.NetClient)
 local Events = require(ReplicatedStorage.Modules.Events)
 local State = require(ReplicatedFirst.Client.Utility.State)
 local Bridge = require(ReplicatedFirst.Client.Utility.Bridge)
-local Particles = require(game.ReplicatedFirst.Client.Game.Particles)
-local HumanoidInstanceWrapper = require(game.ReplicatedStorage.Modules.HumanoidInstanceWrapper)
-local General = require(game:GetService("ReplicatedFirst").Client.Utility.General)
-local GeneralFunctions = require(game.ReplicatedStorage.Modules.GeneralFunctions)
+local Particles = require(ReplicatedFirst.Client.Game.Particles)
+local HumanoidInstanceWrapper = require(ReplicatedStorage.Modules.HumanoidInstanceWrapper)
+local General = require(ReplicatedFirst.Client.Utility.General)
+local GeneralFunctions = require(ReplicatedStorage.Modules.GeneralFunctions)
 
 local PlayersCache = Players:GetPlayers()
 
@@ -351,47 +351,49 @@ function Ragebot:Stab(Character)
     self:HitFX(Head, Origin, 0)
 end
 
-function Ragebot:Knifebot()
+function Ragebot:Stab(Character)
+    if not Character then return end
+    local Head = FindFirstChild(Character, "HeadHB") or FindFirstChild(Character, "Head")
+        or FindFirstChild(Character, "Hitbox")
+    if not Head then return end
 
-    if not Toggles["combat/knifebot"].Value then return end
-    if Toggles["combat/ragebot/removeextrachecks"].Value then return end
     local Gun = State.gun
     if not Gun then return end
     if FindFirstChild(Gun, "Melee") == nil then return end
-
-    local Character = LocalPlayer.Character
-    local RootPart = Character and Character.PrimaryPart
-    if not RootPart then return end
+    if State.DISABLED == true then return end
+    if State.equipping == true then return end
 
     local Range = FindFirstChild(Gun, "Range") and Gun.Range.Value + 1 or 7
+    local Origin = self:GetOrigin()
+    if (Head.Position - Origin).Magnitude > Range + 1 then return end
 
-    local Parts = workspace:GetPartBoundsInRadius(RootPart.Position, Range, KnifebotOverlapParams)
-
-    local Target = nil
-    for _, Part in Parts do
-        local TargetCharacter = Part:FindFirstAncestorOfClass("Model")
-        if not TargetCharacter then continue end
-
-        local Player = Players:GetPlayerFromCharacter(TargetCharacter)
-        if not Player or Player == LocalPlayer then continue end
-
-        if Utility.IsTeammate(LocalPlayer, Player) then continue end
-
-        local MaxHealth, Health = Utility.GetHealth(Player, TargetCharacter)
-        if Health <= 0 then continue end
-
-        if TargetCharacter:FindFirstChildOfClass("ForceField") then continue end
-
-        if TargetCharacter then
-            self:Stab(TargetCharacter)
-            self:ReplicateShoot()
-            if not Toggles["combat/ragebot/multitarget"].Value then
-                break
-            end
-        end
+    local FakeOrigin = Origin
+    local Root = Character.PrimaryPart
+    if Root then
+        FakeOrigin = Head.Position - Root.CFrame.LookVector * 4
     end
 
+    local GunId = Gun:GetAttribute("Id") or 125
+    local Spoofed = CFrame.new(FakeOrigin, Head.Position)
+    local Cx, Cy, Cz, R00, R01, R02, R10, R11, R12, R20, R21, R22 = Spoofed:GetComponents()
+    local Flags = bit32.replace(bit32.replace(bit32.bor(1, State.ads and 2 or 0, State.jumping and 4 or 0), State.currentSpell or 1, 3, 3), 0, 6, 2)
+    local DeltaTime = (State.btick == 0 and 0 or (tick() - State.btick))
 
+    NetClient.lock()
+    NetClient.u16(Events.HitPart)
+    NetClient.inst(Head)
+    NetClient.u8(GunId)
+    NetClient.u8(Flags)
+    NetClient.u8(0)
+    NetClient.f32(Cx) NetClient.f32(Cy) NetClient.f32(Cz)
+    NetClient.f32(R00) NetClient.f32(R01) NetClient.f32(R02)
+    NetClient.f32(R10) NetClient.f32(R11) NetClient.f32(R12)
+    NetClient.f32(R20) NetClient.f32(R21) NetClient.f32(R22)
+    NetClient.f32(Head.Position.X) NetClient.f32(Head.Position.Y) NetClient.f32(Head.Position.Z)
+    NetClient.f32(DeltaTime)
+    NetClient.unlock()
+
+    self:HitFX(Head, Origin, 0, true)
 end
 
 function Ragebot:Scan()
