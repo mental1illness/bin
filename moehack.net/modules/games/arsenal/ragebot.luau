@@ -53,6 +53,11 @@ local VisibilityParams = RaycastParams.new()
 VisibilityParams.FilterType = Enum.RaycastFilterType.Exclude
 VisibilityParams.IgnoreWater = true
 
+local OriginParams = RaycastParams.new()
+OriginParams.FilterType = Enum.RaycastFilterType.Exclude
+OriginParams.FilterDescendantsInstances = { Character }
+OriginParams.IgnoreWater = true
+
 local NAN = 0/0
 
 local LastRootPos = nil
@@ -132,10 +137,7 @@ function Ragebot:OriginScan(TargetCharacter)
         return nil
     end
 
-    local Params = RaycastParams.new()
-    Params.FilterType = Enum.RaycastFilterType.Exclude
-    Params.FilterDescendantsInstances = { Character }
-    Params.IgnoreWater = true
+    OriginParams.FilterDescendantsInstances = { Character }
 
     for Index = 1, Options["combat/originscan/maxorigin"].Value do
         local Offset = Vector3.new(
@@ -150,7 +152,7 @@ function Ragebot:OriginScan(TargetCharacter)
 
         local Origin = RootPart.Position + Offset
         local Direction = TargetRoot.Position - Origin
-        local Result = Raycast(workspace, Origin, Direction, Params)
+        local Result = Raycast(workspace, Origin, Direction, OriginParams)
 
         if Result and Result.Instance:IsDescendantOf(TargetCharacter) then
             return Origin
