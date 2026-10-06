@@ -880,7 +880,6 @@ do -- Other funcs
         local Turns = Options["visuals/world/bullettracers/turns"].Value
         local Waves = Options["visuals/world/bullettracers/waves"].Value
         local LightningJitter = Distance * (Options["visuals/world/bullettracers/lightning"].Value / 100)
-        local AlwaysOnTop = Toggles["visuals/world/bullettracers/alwaysontop"].Value
         local DynamicThickness = Toggles["visuals/world/bullettracers/dynamicthickness"].Value
         local LifeTime = Options["visuals/world/bullettracers/lifetime"].Value
         local FadeTime = Options["visuals/world/bullettracers/fadetime"].Value
@@ -920,7 +919,6 @@ do -- Other funcs
             Lifetime = 20,
             MinLength = 0,
             FaceCamera = true,
-            AlwaysOnTop = AlwaysOnTop,
             Enabled = true,
             Parent = Tracer
         })
