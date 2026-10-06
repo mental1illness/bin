@@ -406,7 +406,25 @@ local Library, SaveManager, ThemeManager = moehack.load_module("moehack.net/inte
 
                     do -- Arsenal
                         if moehack.data.game_name == "Arsenal" then
-                            World:AddToggle("visuals/world/bullettracers", { Text = "Bullet Tracers", Default = false }):AddColorPicker('visuals/world/bullettracers/color', { Default = Color3.fromRGB(255, 255, 255), Title = 'Tracers Color' })
+                            World:AddToggle("visuals/world/bullettracers", { Text = "Bullet Tracers", Default = false }):AddColorPicker("visuals/world/bullettracers/color", { Default = Color3.fromRGB(255, 255, 255), Title = "Tracers Color" })
+                            World:AddDropdown("visuals/world/bullettracers/mode", {
+                                Text = "Tracer Mode",
+                                Values = {
+                                    "Default",
+                                    "Spiral",
+                                    "Wave",
+                                    "ZigZag",
+                                    "Double",
+                                    "Cross",
+                                    "Dash",
+                                    "Pulse",
+                                    "Taper",
+                                    "Helix",
+                                    "Lightning",
+                                    "Scatter"
+                                },
+                                Default = "Default"
+                            })
                             World:AddSlider("visuals/world/bullettracers/lifetime", { Text = "Life Time", Min = 1, Max = 10, Rounding = 0, Default = 3 })
                             World:AddSlider("visuals/world/bullettracers/fadetime", { Text = "Fade Time", Min = 1, Max = 10, Rounding = 0, Default = 3 })
                             World:AddSlider("visuals/world/bullettracers/traveltime", { Text = "Travel Time", Min = 1, Max = 10, Rounding = 0, Default = 3 })
