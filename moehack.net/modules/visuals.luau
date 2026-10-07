@@ -985,17 +985,17 @@ if moehack.data.game_name == "Arsenal" then
         return Camera.CFrame.Position
     end
     
-    local HitObj; HitObj = Utility:Hook(Bridge.HitObject.Fire, function(Target, HitPos, Normal, Gun, ...)
+    local HitObj; HitObj = Utility:Hook(Bridge.HitObject.Fire, function(Self, Target, HitPos, Normal, Gun, ...)
         if Toggles["visuals/world/bullettracers"].Value and HitPos then
             local Origin = GetOrigin()
             if Origin and Target ~= nil and typeof(Target) == "Instance" then
                 Visuals:BulletTracers(Origin, HitPos)
                 Handled = true
-                return HitObj(Target, HitPos, Normal, Gun, ...)
+                return HitObj(Self, Target, HitPos, Normal, Gun, ...)
             end
         end
         Handled = false
-        return HitObj(Target, HitPos, Normal, Gun, ...)
+        return HitObj(Self, Target, HitPos, Normal, Gun, ...)
     end)
 
     NetLogger:On("Incoming", "TrailBounce", function(StartPos, EndPos)
