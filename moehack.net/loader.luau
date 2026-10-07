@@ -104,9 +104,9 @@ if GameData["run_on_actor"] then
             current_sha = Commit.sha,
             old_sha = isfile("current_sha_moehack.txt") and readfile("current_sha_moehack.txt") or "NO SHA",
         }
-    ]] .. Game:HttpGet(
-        "https://cats-cure-depression.vercel.app/moehack.net/cheat.luau"
-    )
+
+        loadstring(Game:HttpGet("https://cats-cure-depression.vercel.app/moehack.net/cheat.luau"))()
+    ]]
     local Actor = Actors()[1]
     if Actor then
         RunFunc(Actor, Code)

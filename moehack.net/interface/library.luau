@@ -82,6 +82,12 @@ local Library = {
 	ScreenGui = ScreenGui,
 }
 
+local MouseKeys = {
+    MB1 = Enum.UserInputType.MouseButton1,
+    MB2 = Enum.UserInputType.MouseButton2,
+    MB3 = Enum.UserInputType.MouseButton3,
+}
+
 local RainbowStep = 0
 local Hue = 0
 
@@ -513,7 +519,7 @@ do
 		local PickerFrameOuter = Library:Create("Frame", {
 			Name = "Color",
 			BackgroundColor3 = Color3.new(1, 1, 1),
-		BorderColor3 = Color3.new(0, 0, 0),
+			BorderColor3 = Color3.new(0, 0, 0),
 			Position = UDim2.fromOffset(DisplayFrame.AbsolutePosition.X, DisplayFrame.AbsolutePosition.Y + 18),
 			Size = UDim2.fromOffset(230, Info.Transparency and 271 or 253),
 			Visible = false,
@@ -528,7 +534,7 @@ do
 
 		local PickerFrameInner = Library:Create("Frame", {
 			BackgroundColor3 = Library.BackgroundColor,
-		BorderColor3 = Library.OutlineColor,
+			BorderColor3 = Library.OutlineColor,
 			BorderMode = Enum.BorderMode.Inset,
 			Size = UDim2.new(1, 0, 1, 0),
 			ZIndex = 16,
@@ -1224,7 +1230,13 @@ do
 				ContainerLabel.Text = string.format("[%s] %s (%s)", KeyPicker.Value, Info.Text, KeyPicker.Mode)
 			end)
 
-			ContainerLabel.Visible = not KeyPicker.NoUI
+			local ParentEnabled = true
+
+			if ParentObj.Type == "Toggle" then
+				ParentEnabled = ParentObj.Value == true
+			end
+
+			ContainerLabel.Visible = (not KeyPicker.NoUI) and ParentEnabled
 			ContainerLabel.TextColor3 = State and Library.AccentColor or Library.FontColor
 
 			Library.RegistryMap[ContainerLabel].Properties.TextColor3 = State and "AccentColor" or "FontColor"
@@ -1254,9 +1266,10 @@ do
 
 				local Key = KeyPicker.Value
 
-				if Key == "MB1" or Key == "MB2" then
-					return Key == "MB1" and InputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton1)
-						or Key == "MB2" and InputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton2)
+				local MouseType = MouseKeys[Key]
+
+				if MouseType then
+					return InputService:IsMouseButtonPressed(MouseType)
 				else
 					return InputService:IsKeyDown(Enum.KeyCode[KeyPicker.Value])
 				end
@@ -1276,31 +1289,15 @@ do
 		function KeyPicker:SetNoUI(Bool)
 			KeyPicker.NoUI = Bool
 
-			if Bool then
-				if ContainerLabel then
-					ContainerLabel.Visible = false
-				end
-
-				if ModeSelectOuter then
-					ModeSelectOuter.Visible = false
-				end
-
-				if PickOuter then
-					PickOuter.Active = false
-				end
-
-				KeyPicker:Update()
-			else
-				if ContainerLabel then
-					ContainerLabel.Visible = true
-				end
-
-				if PickOuter then
-					PickOuter.Active = true
-				end
-
-				KeyPicker:Update()
+			if ModeSelectOuter and Bool then
+				ModeSelectOuter.Visible = false
 			end
+
+			if PickOuter then
+				PickOuter.Active = not Bool
+			end
+
+			KeyPicker:Update()
 		end
 
 		function KeyPicker:OnClick(Callback)
@@ -1361,6 +1358,8 @@ do
 						Key = "MB1"
 					elseif Input.UserInputType == Enum.UserInputType.MouseButton2 then
 						Key = "MB2"
+					elseif Input.UserInputType == Enum.UserInputType.MouseButton3 then
+						Key = "MB3"
 					end
 
 					Break = true
@@ -1386,11 +1385,10 @@ do
 				if KeyPicker.Mode == "Toggle" then
 					local Key = KeyPicker.Value
 
-					if Key == "MB1" or Key == "MB2" then
-						if
-							Key == "MB1" and Input.UserInputType == Enum.UserInputType.MouseButton1
-							or Key == "MB2" and Input.UserInputType == Enum.UserInputType.MouseButton2
-						then
+					local MouseType = MouseKeys[Key]
+
+					if MouseType then
+						if Input.UserInputType == MouseType then
 							KeyPicker.Toggled = not KeyPicker.Toggled
 							KeyPicker:DoClick()
 						end
@@ -1424,6 +1422,8 @@ do
 				KeyPicker:Update()
 			end
 		end))
+
+		KeyPicker:Update()
 
 		Options[Idx] = KeyPicker
 
@@ -2040,8 +2040,12 @@ do
 			Toggle:Display()
 
 			for _, Addon in next, Toggle.Addons do
-				if Addon.Type == "KeyPicker" and Addon.SyncToggleState then
-					Addon.Toggled = Bool
+				if Addon.Type == "KeyPicker" then
+					if Addon.SyncToggleState then
+						Addon.Toggled = Bool
+					end
+
+					-- refresh so the keybind list entry shows/hides with the toggle
 					Addon:Update()
 				end
 			end
@@ -3671,8 +3675,8 @@ function Library:CreateWindow(...)
 				ScrollBarImageColor3 = Library.AccentColor,
 				ScrollingDirection = Enum.ScrollingDirection.Y,
 				MidImage = getcustomasset("Scrollbar.png"),
-                TopImage = getcustomasset("Scrollbar.png"),
-                BottomImage = getcustomasset("Scrollbar.png"),
+				TopImage = getcustomasset("Scrollbar.png"),
+				BottomImage = getcustomasset("Scrollbar.png"),
 				BorderSizePixel = 0,
 				ZIndex = 5,
 				Parent = BoxInner,
