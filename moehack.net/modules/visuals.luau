@@ -970,7 +970,7 @@ if moehack.data.game_name == "Arsenal" then
     local function GetOrigin()
         local Arms = FindFirstChild(Camera, "Arms")
         if Arms then
-            local Muzzle = FindFirstChild(Arms, "Particles") or FindFirstChild(Arms, "Flash")
+            local Muzzle = FindFirstChild(Arms, "Particles", true) or FindFirstChild(Arms, "Flash", true)
             if Muzzle then
                 return Muzzle.Position
             end

@@ -508,7 +508,29 @@ local Library, SaveManager, ThemeManager = moehack.load_module("moehack.net/inte
                     
                 end
 
+
+
                 do -- Misc
+
+                    Misc:AddToggle("misc/hitsound", { Text = "Hit Sound", Default = false }) do
+                        local DepBox = Misc:AddDependencyBox()
+                        DepBox:AddDropdown("misc/hitsound/type", { Text = "Type", Default = 1, Values = Storage.SoundsKey, Multi = true })
+                        DepBox:AddToggle("misc/hitsound/custom", { Text = "Use Custom Sound", Default = false })
+                        DepBox:AddDropdown("misc/hitsound/custom/type", { Text = "Custom Type", Default = 1, Values = {}, Multi = true })
+                        DepBox:SetupDependencies({
+                            { Toggles["misc/hitsound"], true } 
+                        });
+                    end
+
+                    Misc:AddToggle("misc/killsound", { Text = "Kill Sound", Default = false }) do
+                        local DepBox = Misc:AddDependencyBox()
+                        DepBox:AddDropdown("misc/killsound/type", { Text = "Type", Default = 1, Values = Storage.SoundsKey, Multi = true })
+                        DepBox:AddToggle("misc/killsound/custom", { Text = "Use Custom Sound", Default = false })
+                        DepBox:AddDropdown("misc/killsound/custom/type", { Text = "Custom Type", Default = 1, Values = {}, Multi = true })
+                        DepBox:SetupDependencies({
+                            { Toggles["misc/killsound"], true } 
+                        });
+                    end
 
                     if moehack.data.game_name == "Arsenal" then
                         local NetClient = require(ReplicatedFirst.Client.Utility.NetClient)
@@ -552,58 +574,7 @@ local Library, SaveManager, ThemeManager = moehack.load_module("moehack.net/inte
                                 NetClient.unlock()
                             end
                         end)
-
-                        Misc:AddDivider()
-
-                        Misc:AddToggle("misc/hitsound", { Text = "Hit Sound", Default = false }) do
-                            local DepBox = Misc:AddDependencyBox()
-                            DepBox:AddDropdown("misc/hitsound/type", { Text = "Type", Default = 1, Values = Storage.SoundsKey, Multi = true })
-                            DepBox:AddToggle("misc/hitsound/custom", { Text = "Use Custom Sound", Default = false })
-                            DepBox:AddDropdown("misc/hitsound/custom/type", { Text = "Custom Type", Default = 1, Values = {}, Multi = true })
-                            DepBox:SetupDependencies({
-                                { Toggles["misc/hitsound"], true } 
-                            });
-                        end
-
-                        Misc:AddToggle("misc/killsound", { Text = "Kill Sound", Default = false }) do
-                            local DepBox = Misc:AddDependencyBox()
-                            DepBox:AddDropdown("misc/killsound/type", { Text = "Type", Default = 1, Values = Storage.SoundsKey, Multi = true })
-                            DepBox:AddToggle("misc/killsound/custom", { Text = "Use Custom Sound", Default = false })
-                            DepBox:AddDropdown("misc/killsound/custom/type", { Text = "Custom Type", Default = 1, Values = {}, Multi = true })
-                            DepBox:SetupDependencies({
-                                { Toggles["misc/killsound"], true } 
-                            });
-                        end
                         
-                        Spawn(function()
-                            local DoDis = function()
-                                if isfolder("moehack/sounds") then
-                                    local Files = listfiles("moehack/sounds")
-                                    local SoundTypes = {}
-
-                                    if #Files == 0 then
-                                        return
-                                    end
-
-                                    for Index, File in Files do
-                                        local FileName = GetFileName(File)
-                                        Insert(SoundTypes, FileName)
-                                    end
-                                    if Options["misc/hitsound/custom/type"] then
-                                        Options["misc/hitsound/custom/type"]:SetValues(SoundTypes)
-                                    end
-                                    if Options["misc/killsound/custom/type"] then
-                                        Options["misc/killsound/custom/type"]:SetValues(SoundTypes)
-                                    end
-                                end
-                            end
-                            DoDis()
-                            while Wait(3) do
-                                DoDis()
-                            end
-                            
-                        end)
-
                         local SoundCache = {}
 
                         Library:GiveSignal(
@@ -843,6 +814,37 @@ local Library, SaveManager, ThemeManager = moehack.load_module("moehack.net/inte
             end
         end
     end
+
+
+    Spawn(function()
+        local DoDis = function()
+            if isfolder("moehack/sounds") then
+                local Files = listfiles("moehack/sounds")
+                local SoundTypes = {}
+
+                if #Files == 0 then
+                    return
+                end
+
+                for Index, File in Files do
+                    local FileName = GetFileName(File)
+                    Insert(SoundTypes, FileName)
+                end
+                if Options["misc/hitsound/custom/type"] then
+                    Options["misc/hitsound/custom/type"]:SetValues(SoundTypes)
+                end
+                if Options["misc/killsound/custom/type"] then
+                    Options["misc/killsound/custom/type"]:SetValues(SoundTypes)
+                end
+            end
+        end
+        DoDis()
+        while Wait(3) do
+            DoDis()
+        end
+        
+    end)
+
 
     --# Managers
 
