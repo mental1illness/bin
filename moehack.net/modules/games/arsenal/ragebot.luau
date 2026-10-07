@@ -13,6 +13,8 @@ local FindFirstChild, WaitForChild, Raycast = workspace.FindFirstChild, workspac
 local WorldToViewportPoint = workspace.CurrentCamera.WorldToViewportPoint
 local Lower = string.lower
 local GetService = Game.GetService
+local Tick = tick
+local GetParts = workspace.GetPartBoundsInRadius
 
 --# Services
 local Players = GetService(Game, "Players")
@@ -47,10 +49,11 @@ local Utility = moehack.load_module("moehack.net/modules/utility.luau")
 
 local Wkspc = ReplicatedStorage:WaitForChild("wkspc")
 local Status = Wkspc:WaitForChild("Status")
+local StatusPreparation = Status.Preparation
 
 local KnifebotOverlapParams = OverlapParams.new()
 KnifebotOverlapParams.FilterType = Enum.RaycastFilterType.Exclude
-KnifebotOverlapParams.FilterDescendantsInstances = { Character }
+KnifebotOverlapParams.FilterDescendantsInstances = { LocalPlayer.Character }
 
 local VisibilityParams = RaycastParams.new()
 VisibilityParams.FilterType = Enum.RaycastFilterType.Exclude
@@ -58,17 +61,15 @@ VisibilityParams.IgnoreWater = true
 
 local OriginParams = RaycastParams.new()
 OriginParams.FilterType = Enum.RaycastFilterType.Exclude
-OriginParams.FilterDescendantsInstances = { Character }
+OriginParams.FilterDescendantsInstances = { LocalPlayer.Character }
 OriginParams.IgnoreWater = true
 
 local NAN = 0/0
 
-local LastRootPos = nil
+local LastRootPos: Vector3? = nil
 local LastRootTick = 0
 
 local CanHitFXPls = false
-
--- local Offset = NewCFrame(0, 0, -1)
 
 local EmptyVec3 = NewVector3()
 
@@ -98,47 +99,80 @@ local OriginPresets = {
     NewVector3(-3, 2, -3)
 }
 
+local OriginPresetSqMags = table.create(#OriginPresets)
+do
+    for i = 1, #OriginPresets do
+        local V = OriginPresets[i]
+        OriginPresetSqMags[i] = V.X * V.X + V.Y * V.Y + V.Z * V.Z
+    end
+end
+
+local CachedNow = 0
+local CachedCamCFrame: CFrame = Camera.CFrame
+local CachedCamPos: Vector3 = CachedCamCFrame.Position
+local CachedOrigin: Vector3 = CachedCamPos
+local CachedHitList: {Instance} = nil
+local CachedCharacter: Model? = nil
+local CachedRootPart: BasePart? = nil
+
 --# Main
 local Ragebot = { LastTimeFired = 0 }
 Ragebot.__index = Ragebot
 
-function Ragebot:Origin()
-    local Character = LocalPlayer.Character
-    local Root = Character and (Character.PrimaryPart or FindFirstChild(Character, "HumanoidRootPart"))
-    local Origin = Camera.CFrame.Position
+function Ragebot:UpdateFrameCache()
+    CachedNow = Tick()
+    CachedCamCFrame = Camera.CFrame
+    CachedCamPos = CachedCamCFrame.Position
+    CachedCharacter = LocalPlayer.Character
+    CachedRootPart = CachedCharacter and CachedCharacter.PrimaryPart or nil
+    CachedHitList = GeneralFunctions.gethitlist()
+
+    KnifebotOverlapParams.FilterDescendantsInstances = { CachedCharacter }
+    OriginParams.FilterDescendantsInstances = { CachedCharacter }
+    VisibilityParams.FilterDescendantsInstances = CachedHitList
+end
+
+function Ragebot:ComputeOrigin()
+    local Root = CachedRootPart or (CachedCharacter and FindFirstChild(CachedCharacter, "HumanoidRootPart"))
+    local Origin = CachedCamPos
+
     if Root then
-        local Now = tick()
+        local Now = CachedNow
         local Delta = Now - LastRootTick
         local Vel = Root.AssemblyLinearVelocity
         if LastRootPos and Delta > 0 and Delta < 1 then
-            local Measured = (Root.Position - LastRootPos) / Delta
+            local RootPos = Root.Position
+            local Measured = (RootPos - LastRootPos) / Delta
             if Measured.Magnitude > Vel.Magnitude then
                 Vel = Measured
             end
+            LastRootPos = RootPos
+        else
+            LastRootPos = Root.Position
         end
-        LastRootPos = Root.Position
         LastRootTick = Now
-        if Vel.Magnitude > 50 then
-            local Ping = LocalPlayer:GetNetworkPing() or 0
+
+        local VelMag = Vel.Magnitude
+        if VelMag > 50 then
+            local Ping = LocalPlayer:GetNetworkPing()
+            if not Ping then Ping = 0 end
             local Comp = Ping + 0.03
             if Comp < 0.03 then Comp = 0.03 end
             if Comp > 0.25 then Comp = 0.25 end
-            Origin = Camera.CFrame.Position + Vel * Comp
+            Origin = CachedCamPos + Vel * Comp
         end
     end
+
+    CachedOrigin = Origin
     return Origin
 end
 
 function Ragebot:IsVisible(Target: BasePart, Origin: Vector3?): boolean
     if not Target or not Target.Parent then return false end
-    Origin = Origin or Camera.CFrame.Position
+    Origin = Origin or CachedCamPos
 
     local Character = Target:FindFirstAncestorOfClass("Model")
     if not Character then return false end
-
-    VisibilityParams.FilterType = Enum.RaycastFilterType.Exclude
-    VisibilityParams.FilterDescendantsInstances = GeneralFunctions.gethitlist()
-    VisibilityParams.IgnoreWater = true
 
     local Direction = Target.Position - Origin
     local Result = Raycast(workspace, Origin, Direction, VisibilityParams)
@@ -152,46 +186,42 @@ end
 
 function Ragebot:HitFX(Head: BasePart, Origin: Vector3, HeadBits: number)
     if not CanHitFXPls then return end
-
     if not Head or not Origin then return end
     local Gun = State.gun
     if not Gun then return end
-    local Normal = (Head.Position - Origin).Unit
-    Bridge.HitObject:Fire(Head, Head.Position, Normal, Gun, HeadBits or 1, false, false, false)
+
+    local HeadPos = Head.Position
+    local Normal = (HeadPos - Origin).Unit
+    Bridge.HitObject:Fire(Head, HeadPos, Normal, Gun, HeadBits or 1, false, false, false)
     local Override = GeneralFunctions.getTrailColorOverride(LocalPlayer, Gun)
-    Particles.CreateTrail(Origin, Head.Position, Override)
+    Particles.CreateTrail(Origin, HeadPos, Override)
 
     CanHitFXPls = false
 end
 
 function Ragebot:OriginScan(TargetCharacter)
-    local Character = LocalPlayer.Character
-    local RootPart = Character and Character.PrimaryPart
+    local RootPart = CachedRootPart
     local TargetRoot = TargetCharacter and TargetCharacter.PrimaryPart
 
     if not RootPart or not TargetRoot then return nil end
 
-    OriginParams.FilterDescendantsInstances = { Character }
-
     local MaxOrigins = Minimum(Options["combat/originscan/maxorigin"].Value, #OriginPresets)
-    local MaxDistance = Options["combat/originscan/maxdist"].Value
-    local MaxDistanceSq = MaxDistance * MaxDistance
+    local MaxDistSq = Options["combat/originscan/maxdist"].Value
+    MaxDistSq = MaxDistSq * MaxDistSq
 
     local RootCFrame = RootPart.CFrame
     local RootPosition = RootPart.Position
     local TargetPosition = TargetRoot.Position
 
     for Index = 1, MaxOrigins do
-        local Offset = OriginPresets[Index]
-        local WorldOffset = RootCFrame:VectorToWorldSpace(Offset)
+        if OriginPresetSqMags[Index] > MaxDistSq then continue end
 
-        if WorldOffset:Dot(WorldOffset) <= MaxDistanceSq then
-            local Origin = RootPosition + WorldOffset
-            local Result = Raycast(workspace, Origin, TargetPosition - Origin, OriginParams)
+        local WorldOffset = RootCFrame:VectorToWorldSpace(OriginPresets[Index])
+        local Origin = RootPosition + WorldOffset
+        local Result = Raycast(workspace, Origin, TargetPosition - Origin, OriginParams)
 
-            if Result and Result.Instance:IsDescendantOf(TargetCharacter) then
-                return Origin
-            end
+        if Result and Result.Instance:IsDescendantOf(TargetCharacter) then
+            return Origin
         end
     end
 
@@ -203,7 +233,7 @@ function Ragebot:GetOrigin(TargetCharacter)
         local Scanned = self:OriginScan(TargetCharacter)
         if Scanned then return Scanned end
     end
-    return self:Origin()
+    return CachedOrigin
 end
 
 function Ragebot:Hit(Character, PenIndex, SharedCFrame, ForcedOrigin)
@@ -240,9 +270,10 @@ function Ragebot:Hit(Character, PenIndex, SharedCFrame, ForcedOrigin)
         Speed *= Options["combat/ragebot/projectilespeedmult"].Value
 
         local Origin = ForcedOrigin or self:GetOrigin(Character)
-        local Aim = Head.Position
-        local LegitTarget = Camera.CFrame.Position + Camera.CFrame.LookVector * 1000
-        local Muzzle = (Camera.CFrame * NewCFrame(1.5, -0.65, 0)).Position
+        local HeadPos = Head.Position
+        local Aim = HeadPos
+        local LegitTarget = CachedCamPos + CachedCamCFrame.LookVector * 1000
+        local Muzzle = (CachedCamCFrame * NewCFrame(1.5, -0.65, 0)).Position
 
         NetClient.lock()
         NetClient.u16(Events.ReplicateProjectile)
@@ -262,11 +293,12 @@ function Ragebot:Hit(Character, PenIndex, SharedCFrame, ForcedOrigin)
         local FireSpell = State.currentSpell or 1
         task.delay(Travel, function()
             if Head.Parent == nil then return end
-            local Spoofed = NewCFrame(Origin, Head.Position)
+            local HeadPos2 = Head.Position
+            local Spoofed = NewCFrame(Origin, HeadPos2)
             local Cx, Cy, Cz, R00, R01, R02, R10, R11, R12, R20, R21, R22 = Spoofed:GetComponents()
             local HeadBits = ProjectileName == "Arrow" and 2 or 0
             local Flags = bit32.replace(bit32.replace(bit32.bor(0, FireAds and 2 or 0, FireJump and 4 or 0), FireSpell, 3, 3), HeadBits, 6, 2)
-            local N = (Head.Position - Origin).Unit
+            local N = (HeadPos2 - Origin).Unit
             NetClient.lock()
             NetClient.u16(Events.HitPart)
             NetClient.inst(Head)
@@ -277,7 +309,7 @@ function Ragebot:Hit(Character, PenIndex, SharedCFrame, ForcedOrigin)
             NetClient.f32(R00) NetClient.f32(R01) NetClient.f32(R02)
             NetClient.f32(R10) NetClient.f32(R11) NetClient.f32(R12)
             NetClient.f32(R20) NetClient.f32(R21) NetClient.f32(R22)
-            NetClient.f32(Head.Position.X) NetClient.f32(Head.Position.Y) NetClient.f32(Head.Position.Z)
+            NetClient.f32(HeadPos2.X) NetClient.f32(HeadPos2.Y) NetClient.f32(HeadPos2.Z)
             NetClient.f32(0)
             NetClient.unlock()
 
@@ -285,7 +317,7 @@ function Ragebot:Hit(Character, PenIndex, SharedCFrame, ForcedOrigin)
             NetClient.u16(Events.ImpactParticleBounce)
             NetClient.u8(GunId)
             NetClient.inst(Head)
-            NetClient.f32(Head.Position.X) NetClient.f32(Head.Position.Y) NetClient.f32(Head.Position.Z)
+            NetClient.f32(HeadPos2.X) NetClient.f32(HeadPos2.Y) NetClient.f32(HeadPos2.Z)
             NetClient.f32(N.X) NetClient.f32(N.Y) NetClient.f32(N.Z)
             NetClient.unlock()
 
@@ -296,12 +328,13 @@ function Ragebot:Hit(Character, PenIndex, SharedCFrame, ForcedOrigin)
 
     local GunId = Gun:GetAttribute("Id") or 4
     local Origin = ForcedOrigin or self:GetOrigin(Character)
-    local Spoofed = SharedCFrame or NewCFrame(Origin, Head.Position)
+    local HeadPos = Head.Position
+    local Spoofed = SharedCFrame or NewCFrame(Origin, HeadPos)
     local Cx, Cy, Cz, R00, R01, R02, R10, R11, R12, R20, R21, R22 = Spoofed:GetComponents()
     local IsCrit = FindFirstChild(Gun, "Scoped") or FindFirstChild(Gun, "Crit")
     local HeadBits = IsCrit and 2 or 1
     local Flags = bit32.replace(bit32.replace(bit32.bor(0, State.ads and 2 or 0, State.jumping and 4 or 0), State.currentSpell or 1, 3, 3), HeadBits, 6, 2)
-    local DeltaTime = (State.btick == 0 and 0 or (tick() - State.btick))
+    local DeltaTime = (State.btick == 0 and 0 or (CachedNow - State.btick))
     local Bullets = FindFirstChild(Gun, "Bullets") and Gun.Bullets.Value or 1
     if Bullets < 1 then Bullets = 1 end
     if Bullets > 10 then Bullets = 10 end
@@ -320,7 +353,7 @@ function Ragebot:Hit(Character, PenIndex, SharedCFrame, ForcedOrigin)
         NetClient.f32(R00) NetClient.f32(R01) NetClient.f32(R02)
         NetClient.f32(R10) NetClient.f32(R11) NetClient.f32(R12)
         NetClient.f32(R20) NetClient.f32(R21) NetClient.f32(R22)
-        NetClient.f32(Head.Position.X) NetClient.f32(Head.Position.Y) NetClient.f32(Head.Position.Z)
+        NetClient.f32(HeadPos.X) NetClient.f32(HeadPos.Y) NetClient.f32(HeadPos.Z)
         NetClient.f32(DeltaTime)
         NetClient.unlock()
         self:HitFX(Head, Origin, HeadBits)
@@ -329,8 +362,8 @@ function Ragebot:Hit(Character, PenIndex, SharedCFrame, ForcedOrigin)
     if FindFirstChild(Gun, "ThrowWeapon") then
         local TSpeed = FindFirstChild(Gun, "Speed") and Gun.Speed.Value * 0.07 or 100
         if TSpeed == 0 then TSpeed = 0.01 end
-        local LegitTarget = Camera.CFrame.Position + Camera.CFrame.LookVector * 1000
-        local Muzzle = (Camera.CFrame * NewCFrame(1.5, -0.65, 0)).Position
+        local LegitTarget = CachedCamPos + CachedCamCFrame.LookVector * 1000
+        local Muzzle = (CachedCamCFrame * NewCFrame(1.5, -0.65, 0)).Position
         NetClient.lock()
         NetClient.u16(Events.ReplicateProjectile)
         NetClient.str("Baseball")
@@ -346,7 +379,7 @@ function Ragebot:Hit(Character, PenIndex, SharedCFrame, ForcedOrigin)
 end
 
 function Ragebot:ReplicateShoot()
-    local Character = LocalPlayer.Character
+    local Character = CachedCharacter
     if Character == nil then return end
 
     local Gun = HumanoidInstanceWrapper.Get(Character, "Gun")
@@ -358,7 +391,7 @@ function Ragebot:ReplicateShoot()
         FireTrack:Play()
     end
 
-    local Arms = Camera ~= nil and FindFirstChild(Camera, "Arms") or nil
+    local Arms = FindFirstChild(Camera, "Arms")
     if Arms ~= nil then
         local Flash = FindFirstChild(Arms, "Flash")
         if Flash ~= nil then
@@ -393,21 +426,22 @@ function Ragebot:Stab(Character, ForcedOrigin)
     if State.equipping == true then return end
 
     local Range = FindFirstChild(Gun, "Range") and Gun.Range.Value + 1 or 7
-    local RealOrigin = self:Origin()
-    if (Head.Position - RealOrigin).Magnitude > Range + 1 then return end
+    local RealOrigin = CachedOrigin
+    local HeadPos = Head.Position
+    if (HeadPos - RealOrigin).Magnitude > Range + 1 then return end
 
     local Origin = ForcedOrigin or self:GetOrigin(Character)
     local FakeOrigin = Origin
     local Root = Character.PrimaryPart
     if Root then
-        FakeOrigin = Head.Position - Root.CFrame.LookVector * 4
+        FakeOrigin = HeadPos - Root.CFrame.LookVector * 4
     end
 
     local GunId = Gun:GetAttribute("Id") or 125
-    local Spoofed = NewCFrame(FakeOrigin, Head.Position)
+    local Spoofed = NewCFrame(FakeOrigin, HeadPos)
     local Cx, Cy, Cz, R00, R01, R02, R10, R11, R12, R20, R21, R22 = Spoofed:GetComponents()
     local Flags = bit32.replace(bit32.replace(bit32.bor(1, State.ads and 2 or 0, State.jumping and 4 or 0), State.currentSpell or 1, 3, 3), 0, 6, 2)
-    local DeltaTime = (State.btick == 0 and 0 or (tick() - State.btick))
+    local DeltaTime = (State.btick == 0 and 0 or (CachedNow - State.btick))
 
     NetClient.lock()
     NetClient.u16(Events.HitPart)
@@ -419,30 +453,29 @@ function Ragebot:Stab(Character, ForcedOrigin)
     NetClient.f32(R00) NetClient.f32(R01) NetClient.f32(R02)
     NetClient.f32(R10) NetClient.f32(R11) NetClient.f32(R12)
     NetClient.f32(R20) NetClient.f32(R21) NetClient.f32(R22)
-    NetClient.f32(Head.Position.X) NetClient.f32(Head.Position.Y) NetClient.f32(Head.Position.Z)
+    NetClient.f32(HeadPos.X) NetClient.f32(HeadPos.Y) NetClient.f32(HeadPos.Z)
     NetClient.f32(DeltaTime)
     NetClient.unlock()
 
-    self:HitFX(Head, Origin, 0, true)
+    self:HitFX(Head, Origin, 0)
 end
 
 function Ragebot:Knifebot()
-
     if not Toggles["combat/knifebot"].Value then return end
     if Toggles["combat/ragebot/removeextrachecks"].Value then return end
     local Gun = State.gun
     if not Gun then return end
     if FindFirstChild(Gun, "Melee") == nil then return end
 
-    local Character = LocalPlayer.Character
-    local RootPart = Character and Character.PrimaryPart
+    local RootPart = CachedRootPart
     if not RootPart then return end
 
     local Range = FindFirstChild(Gun, "Range") and Gun.Range.Value + 1 or 7
+    local RootPos = RootPart.Position
 
-    local Parts = workspace:GetPartBoundsInRadius(RootPart.Position, Range, KnifebotOverlapParams)
+    local Parts = GetParts(workspace, RootPos, Range, KnifebotOverlapParams)
 
-    local Target = nil
+    local ShouldMulti = Toggles["combat/ragebot/multitarget"].Value
     for _, Part in Parts do
         local TargetCharacter = Part:FindFirstAncestorOfClass("Model")
         if not TargetCharacter then continue end
@@ -457,115 +490,140 @@ function Ragebot:Knifebot()
 
         if TargetCharacter:FindFirstChildOfClass("ForceField") then continue end
 
-        if TargetCharacter then
-            self:Stab(TargetCharacter)
-            if not Toggles["combat/ragebot/multitarget"].Value then
-                break
-            end
+        self:Stab(TargetCharacter)
+        if not ShouldMulti then
+            break
         end
     end
-
-
 end
 
 function Ragebot:Scan()
-    if Status.Preparation.Value then return end
+    if StatusPreparation.Value then return end
 
     if not Toggles["combat/ragebot"].Value then return end
     local Gun = State.gun
     if not Gun then return end
-    local FireRate = Gun and FindFirstChild(Gun, "FireRate") and Gun.FireRate.Value or 0
 
-    if not FireRate then return end
+    local IsMelee = FindFirstChild(Gun, "Melee") ~= nil
+    local FireRateObj = FindFirstChild(Gun, "FireRate")
+    local FireRate = FireRateObj and FireRateObj.Value or 0
+
     if not Toggles["combat/ragebot/removeextrachecks"].Value then
-        if FindFirstChild(Gun, "Melee") ~= nil then return end
+        if IsMelee then return end
         if State.ammocount ~= nil and State.ammocount <= 0 then return end
         if State.DISABLED == true then return end
     end
 
-    local HasPen = FindFirstChild(Gun, "Penetration") ~= nil
+    local HasPen = not IsMelee and FindFirstChild(Gun, "Penetration") ~= nil
+    local ShouldMulti = Toggles["combat/ragebot/multitarget"].Value
+    local ShouldRapid = Toggles["combat/ragebot/rapidfire"].Value
+    local Now = CachedNow
+
+    self:ComputeOrigin()
+
     local Sorted = {}
     for _, Player in PlayersCache do
         if Player == LocalPlayer then continue end
         local Character = Player.Character
-        if Character and not Utility.IsTeammate(LocalPlayer, Player) then
-            local CheckOrigin = self:GetOrigin(Character)
-            local MaxHealth, Health = Utility.GetHealth(Player, Character)
-            if Health and Health > 0 then
-                local Head = FindFirstChild(Character, "HeadHB") or FindFirstChild(Character, "Head")
-                if not Head then continue end
-                if Character:FindFirstChildOfClass("ForceField") then continue end
-                if self:IsVisible(Head, CheckOrigin) then
-                    Insert(Sorted, {Character=Character,Head=Head,Dist=(Head.Position-CheckOrigin).Magnitude,Origin=CheckOrigin})
-                end
-            end
+        if not Character then continue end
+        if Utility.IsTeammate(LocalPlayer, Player) then continue end
+
+        local MaxHealth, Health = Utility.GetHealth(Player, Character)
+        if not Health or Health <= 0 then continue end
+
+        if Character:FindFirstChildOfClass("ForceField") then continue end
+
+        local Head = FindFirstChild(Character, "HeadHB") or FindFirstChild(Character, "Head")
+        if not Head then continue end
+
+        local CheckOrigin = self:GetOrigin(Character)
+
+        if self:IsVisible(Head, CheckOrigin) then
+            local HeadPos = Head.Position
+            local Dx = HeadPos.X - CheckOrigin.X
+            local Dy = HeadPos.Y - CheckOrigin.Y
+            local Dz = HeadPos.Z - CheckOrigin.Z
+            Insert(Sorted, {
+                Character = Character,
+                Head = Head,
+                HeadPos = HeadPos,
+                DistSq = Dx * Dx + Dy * Dy + Dz * Dz,
+                Origin = CheckOrigin
+            })
         end
     end
-    table.sort(Sorted, function(A, B) return A.Dist < B.Dist end)
+    table.sort(Sorted, function(A, B) return A.DistSq < B.DistSq end)
 
     for _, Entry in Sorted do
         local Target = Entry.Character
-        local Now = tick()
-        if Target then
-            if not Toggles["combat/ragebot/rapidfire"].Value and Now - (self.LastTimeFired or 0) < FireRate then
-                continue
-            end
+        if not Target then continue end
 
-            if not Toggles["combat/ragebot/rapidfire"].Value then
-                self.LastTimeFired = Now
+        if not ShouldRapid and Now - (self.LastTimeFired or 0) < FireRate then
+            continue
+        end
+
+        if not ShouldRapid then
+            self.LastTimeFired = Now
+        end
+
+        if HasPen then
+            local HitList = table.clone(CachedHitList)
+            local Found = { Entry }
+            for Index = 2, #Sorted do
+                if #Found >= 3 then break end
+                local Behind = Sorted[Index]
+                local BehindHeadPos = Behind.Head.Position
+                local Direction = BehindHeadPos - Entry.Origin
+
+                VisibilityParams.FilterDescendantsInstances = HitList
+                local Result = Raycast(workspace, Entry.Origin, Direction, VisibilityParams)
+                if Result and Result.Instance:IsDescendantOf(Behind.Character) then
+                    Insert(Found, Behind)
+                    Insert(HitList, Behind.Character)
+                end
             end
-            if HasPen then
-                local HitList = GeneralFunctions.gethitlist()
-                local Found = { Entry }
-                for Index = 2, #Sorted do
-                    if #Found >= 3 then break end
-                    local Behind = Sorted[Index]
-                    VisibilityParams.FilterType = Enum.RaycastFilterType.Exclude
-                    VisibilityParams.FilterDescendantsInstances = HitList
-                    VisibilityParams.IgnoreWater = true
-                    local Result = Raycast(workspace, Entry.Origin, Behind.Head.Position - Entry.Origin, VisibilityParams)
-                    if Result and Result.Instance:IsDescendantOf(Behind.Character) then
-                        Insert(Found, Behind)
-                        Insert(HitList, Behind.Character)
-                    end
-                end
-                for Pen, Pierce in Found do
-                    if FindFirstChild(Gun, "Melee") ~= nil then
-                        self:Stab(Pierce.Character, Pierce.Origin)
-                    else
-                        self:Hit(Pierce.Character, Pen, NewCFrame(Pierce.Origin, Pierce.Head.Position), Pierce.Origin)
-                    end
-                end
-                break
-            else
-                if FindFirstChild(Gun, "Melee") ~= nil then
-                    self:Stab(Target, Entry.Origin)
+            VisibilityParams.FilterDescendantsInstances = CachedHitList
+
+            for Pen, Pierce in Found do
+                local PierceHeadPos = Pierce.HeadPos or Pierce.Head.Position
+                if IsMelee then
+                    self:Stab(Pierce.Character, Pierce.Origin)
                 else
-                    self:Hit(Target, nil, nil, Entry.Origin)
+                    self:Hit(Pierce.Character, Pen, NewCFrame(Pierce.Origin, PierceHeadPos), Pierce.Origin)
                 end
-                if not Toggles["combat/ragebot/multitarget"].Value then break end
             end
+            break
+        else
+            if IsMelee then
+                self:Stab(Target, Entry.Origin)
+            else
+                self:Hit(Target, nil, nil, Entry.Origin)
+            end
+            if not ShouldMulti then break end
         end
     end
 end
 
-Library:GiveSignal( LocalPlayer.Damage.Changed:Connect(function()
+Library:GiveSignal(LocalPlayer.Damage.Changed:Connect(function()
     Ragebot:ReplicateShoot()
     CanHitFXPls = true
-end) )
-
+end))
 
 Library:GiveSignal(RunService.Stepped:Connect(function()
+    Ragebot:UpdateFrameCache()
     Ragebot:Scan()
     Ragebot:Knifebot()
 end))
 
-Library:GiveSignal( Players.PlayerAdded:Connect(function(Player)
-    PlayersCache = Players:GetPlayers()
-end) )
+Library:GiveSignal(Players.PlayerAdded:Connect(function(Player)
+    Insert(PlayersCache, Player)
+end))
 
 Library:GiveSignal(Players.PlayerRemoving:Connect(function(Player)
-	PlayersCache = Players:GetPlayers()
+    local Index = TableFind(PlayersCache, Player)
+    if Index then
+        RemoveTable(PlayersCache, Index)
+    end
 end))
 
 return Ragebot
