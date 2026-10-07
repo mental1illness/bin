@@ -874,7 +874,7 @@ Visuals.Players = {} do
 
 end
 
-do -- Other funcs
+do -- Other funcs  M
     function Visuals:BulletTracers(Origin, HitPos)
         local LifeTime     = Options["visuals/world/bullettracers/lifetime"].Value
         local FadeTime     = Options["visuals/world/bullettracers/fadetime"].Value
