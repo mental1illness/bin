@@ -172,11 +172,12 @@ function Ragebot:HitFX(Head: BasePart, Origin: Vector3, HeadBits: number)
     CanHitFXPls = false
 end
 
-function Ragebot:OriginScan(TargetCharacter)
+function Ragebot:OriginScan(TargetCharacter, Hitbox)
     local RootPart = CachedRootPart
-    local TargetRoot = TargetCharacter and TargetCharacter.PrimaryPart
 
-    if not RootPart or not TargetRoot then return nil end
+    if not RootPart or not TargetCharacter or not Hitbox or not Hitbox.Parent then
+        return nil
+    end
 
     local MaxOrigins = Minimum(Options["combat/originscan/maxorigin"].Value, 24)
     local MaxDist = Options["combat/originscan/maxdist"].Value
@@ -186,13 +187,21 @@ function Ragebot:OriginScan(TargetCharacter)
     end
 
     local RootPosition = RootPart.Position
-    local TargetPosition = TargetRoot.Position
+    local TargetPosition = Hitbox.Position
 
-    local Direction = RootPosition - TargetPosition
+    local VerticalDifference = RootPosition.Y - TargetPosition.Y
+    local VerticalBias = 0
+
+    if VerticalDifference > 2 then
+        VerticalBias = Minimum(VerticalDifference, MaxDist)
+    end
+
+    local ScanPosition = RootPosition + NewVector3(0, VerticalBias, 0)
+    local Direction = ScanPosition - TargetPosition
     local Distance = Direction.Magnitude
 
     if Distance <= 0.001 then
-        return RootPosition
+        return ScanPosition
     end
 
     Direction /= Distance
@@ -221,7 +230,7 @@ function Ragebot:OriginScan(TargetCharacter)
 
         local Result = Raycast(workspace, Origin, TargetPosition - Origin, OriginParams)
 
-        if Result and Result.Instance:IsDescendantOf(TargetCharacter) then
+        if Result and Result.Instance == Hitbox then
             return Origin
         end
     end
@@ -229,9 +238,9 @@ function Ragebot:OriginScan(TargetCharacter)
     return nil
 end
 
-function Ragebot:GetOrigin(TargetCharacter)
-    if Toggles["combat/originscan"] and Toggles["combat/originscan"].Value and TargetCharacter then
-        local Scanned = self:OriginScan(TargetCharacter)
+function Ragebot:GetOrigin(TargetCharacter, Hitbox)
+    if Toggles["combat/originscan"] and Toggles["combat/originscan"].Value and TargetCharacter and Hitbox then
+        local Scanned = self:OriginScan(TargetCharacter, Hitbox)
 
         if Scanned then
             return Scanned
@@ -289,7 +298,7 @@ function Ragebot:Hit(Character, PenIndex, SharedCFrame, ForcedOrigin)
 
         Speed *= Options["combat/ragebot/projectilespeedmult"].Value
 
-        local Origin = ForcedOrigin or self:GetOrigin(Character)
+        local Origin = ForcedOrigin or self:GetOrigin(Character, Head)
         local HeadPos = Head.Position
         local Aim = HeadPos
         local LegitTarget = CachedCamPos + CachedCamCFrame.LookVector * 1000
@@ -369,7 +378,7 @@ function Ragebot:Hit(Character, PenIndex, SharedCFrame, ForcedOrigin)
     end
 
     local GunId = Gun:GetAttribute("Id") or 4
-    local Origin = ForcedOrigin or self:GetOrigin(Character)
+    local Origin = ForcedOrigin or self:GetOrigin(Character, Head)
     local HeadPos = Head.Position
     local Spoofed = SharedCFrame or NewCFrame(Origin, HeadPos)
     local Cx, Cy, Cz, R00, R01, R02, R10, R11, R12, R20, R21, R22 = Spoofed:GetComponents()
@@ -513,7 +522,7 @@ function Ragebot:Stab(Character, ForcedOrigin)
         return
     end
 
-    local Origin = ForcedOrigin or self:GetOrigin(Character)
+    local Origin = ForcedOrigin or self:GetOrigin(Character, Head)
     local FakeOrigin = Origin
     local Root = Character.PrimaryPart
 
@@ -663,7 +672,7 @@ function Ragebot:Scan()
             continue
         end
 
-        local CheckOrigin = self:GetOrigin(Character)
+        local CheckOrigin = self:GetOrigin(Character, Head)
 
         if self:IsVisible(Head, CheckOrigin) then
             local HeadPos = Head.Position
