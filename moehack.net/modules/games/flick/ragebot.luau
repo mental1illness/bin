@@ -102,7 +102,7 @@ function Ragebot:Scan()
         return
     end
 
-    local FireRate = Tool:GetAttribute("FireRate")
+    local FireRate = Tool:GetAttribute("FireRate") - 0.1
     local MaxAmmo = Tool:GetAttribute("Ammo")
     local Spread = Tool:GetAttribute("spread")
     local ReloadTime = Tool:GetAttribute("reloadTime")
@@ -113,7 +113,7 @@ function Ragebot:Scan()
     if FireRate == nil or MaxAmmo == nil or Spread == nil or ReloadTime == nil or Force == nil then return end
 
     local Now = Tick()
-    -- if Now - self.LastShot < FireRate then return end
+    if Now - self.LastShot < FireRate then return end
     if Now < self.ReloadingUntil then return end
 
     local Target = self:GetBestTarget()
