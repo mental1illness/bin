@@ -129,12 +129,27 @@ Storage.Sounds = {
 	WindowsXPDing       = "489390072",
 	YouSuck              = "1058417264",
 }
-
 Storage.SoundsKey = {}
+
+Storage.BulletTracers = {
+    ["Supremacy"] = "rbxassetid://446111271",
+    ["Coolant Laser"] = "rbxassetid://7136858729",
+    ["Lightning Bolt"] = "rbxassetid://12781806168",
+    ["Lightning Bolt2"] = "rbxassetid://7151778302",
+    ["Laser"] = "rbxassetid://5864341017",
+    ["Red Laser"] = "rbxassetid://6333823534",
+    ["DNA"] = "rbxassetid://6511613786"
+}
+Storage.BulletTracersKey = {
+}
 
 do 
     for i,v in Storage.Sounds do
         Insert(Storage.SoundsKey, i)
+    end
+
+    for i,v in Storage.BulletTracers do
+        Insert(Storage.BulletTracersKey, i)
     end
 end
 

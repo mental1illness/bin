@@ -72,6 +72,7 @@ local DefaultLighting = {
 }
 
 local Rain, IsRainEnabled = moehack.load_module("moehack.net/modules/rain.luau", true), false
+local Storage = moehack.load_module("globals/storage.luau")
 
 Rain:SetColor(Color3.fromRGB(220, 225, 235))
 Rain:SetTransparency(0.05)
@@ -867,10 +868,18 @@ end
 
 do -- Other funcs
     function Visuals:BulletTracers(Origin, HitPos)
-        local LifeTime   = Options["visuals/world/bullettracers/lifetime"].Value
-        local FadeTime   = Options["visuals/world/bullettracers/fadetime"].Value
-        local TravelTime = Options["visuals/world/bullettracers/traveltime"].Value
-        local Color      = Options["visuals/world/bullettracers/color"].Value
+        local LifeTime     = Options["visuals/world/bullettracers/lifetime"].Value
+        local FadeTime     = Options["visuals/world/bullettracers/fadetime"].Value
+        local TravelTime   = Options["visuals/world/bullettracers/traveltime"].Value
+        local Color        = Options["visuals/world/bullettracers/color"].Value
+        local Color2       = Options["visuals/world/bullettracers/color2"].Value
+        local Thickness    = Options["visuals/world/bullettracers/thickness"].Value
+        local Transparency = Options["visuals/world/bullettracers/transparency"].Value
+        local Taper        = Toggles["visuals/world/bullettracers/taper"].Value
+        local ShrinkFade   = Toggles["visuals/world/bullettracers/shrinkfade"].Value
+        local Texture      = Storage.BulletTracers[Options["visuals/world/bullettracers/texture"].Value]
+    
+        local EndThickness = Taper and 0 or Thickness
     
         local Start = Utility.Create("Attachment", {
             WorldPosition = Origin,
@@ -883,17 +892,19 @@ do -- Other funcs
         })
     
         local Beam = Utility.Create("Beam", {
-            Attachment0    = Start,
-            Attachment1    = End,
-            Color          = ColorSequence.new(Color),
-            Width0         = 0.1,
-            Width1         = 0.1,
-            FaceCamera     = true,
-            LightEmission  = 1,
-            LightInfluence = 0,
-            Segments       = 1,
-            Transparency   = NumberSequence.new(0),
-            Parent         = Terrain
+            Attachment0   = Start,
+            Attachment1   = End,
+            Color         = ColorSequence.new(Color, Color2),
+            Width0        = Thickness,
+            Width1        = EndThickness,
+            FaceCamera    = true,
+            Segments      = 1,
+            Texture       = Texture or "",
+            TextureMode   = Enum.TextureMode.Stretch,
+            TextureLength = 1,
+            TextureSpeed  = 0,
+            Transparency  = NumberSequence.new(Transparency),
+            Parent        = Terrain
         })
     
         local Elapsed = 0
@@ -917,7 +928,13 @@ do -- Other funcs
                     End:Destroy()
                     return
                 end
-                Beam.Transparency = NumberSequence.new(Alpha)
+    
+                if ShrinkFade then
+                    Beam.Width0 = Thickness * (1 - Alpha)
+                    Beam.Width1 = EndThickness * (1 - Alpha)
+                else
+                    Beam.Transparency = NumberSequence.new(Transparency + (1 - Transparency) * Alpha)
+                end
             end
         end)
     end

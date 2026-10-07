@@ -405,17 +405,20 @@ local Library, SaveManager, ThemeManager = moehack.load_module("moehack.net/inte
                     end
 
                     do -- Combat
-                       
-                        World:AddToggle("visuals/world/bullettracers", { Text = "Bullet Tracers", Default = false }):AddColorPicker("visuals/world/bullettracers/color", { Default = Color3.fromRGB(255, 255, 255), Title = "Tracers Color" })
-                        World:AddSlider("visuals/world/bullettracers/thickness", { Text = "Thickness", Min = 1, Max = 10, Rounding = 1, Default = 2 })
-                        World:AddSlider("visuals/world/bullettracers/radius", { Text = "Curve Radius", Min = 1, Max = 100, Rounding = 1, Default = 25 })
-                        World:AddSlider("visuals/world/bullettracers/turns", { Text = "Spiral Turns", Min = 1, Max = 20, Rounding = 1, Default = 5 })
-                        World:AddSlider("visuals/world/bullettracers/waves", { Text = "Wave Frequency", Min = 1, Max = 20, Rounding = 1, Default = 5 })
-                        World:AddSlider("visuals/world/bullettracers/lightning", { Text = "Lightning Jitter", Min = 0, Max = 100, Rounding = 1, Default = 25 })
-                        World:AddSlider("visuals/world/bullettracers/lifetime", { Text = "Life Time", Min = 1, Max = 10, Rounding = 0, Default = 3 })
-                        World:AddSlider("visuals/world/bullettracers/fadetime", { Text = "Fade Time", Min = 1, Max = 10, Rounding = 0, Default = 3 })
-                        World:AddSlider("visuals/world/bullettracers/traveltime", { Text = "Travel Time", Min = 1, Max = 10, Rounding = 0, Default = 3 })
-                        
+                        World:AddToggle("visuals/world/bullettracers", { Text = "Bullet Tracers", Default = false })
+                            :AddColorPicker("visuals/world/bullettracers/color", { Default = Color3.fromRGB(255, 255, 255), Title = "Tracers Color" })
+                            :AddColorPicker("visuals/world/bullettracers/color2", { Default = Color3.fromRGB(255, 255, 255), Title = "Tracers End Color" })
+                        World:AddDropdown("visuals/world/bullettracers/texture", { Text = "Texture", Default = 1, Values = Storage.BulletTracersKey })
+                        World:AddSlider("visuals/world/bullettracers/thickness", { Text = "Thickness", Min = 0.02, Max = 1, Rounding = 2, Default = 0.1 })
+                        World:AddSlider("visuals/world/bullettracers/transparency", { Text = "Transparency", Min = 0, Max = 1, Rounding = 2, Default = 0 })
+                        World:AddToggle("visuals/world/bullettracers/taper", { Text = "Taper", Default = false })
+                    
+                        World:AddSlider("visuals/world/bullettracers/traveltime", { Text = "Travel Time", Min = 0.01, Max = 1, Rounding = 2, Default = 0.1 })
+                        World:AddSlider("visuals/world/bullettracers/lifetime", { Text = "Life Time", Min = 0, Max = 10, Rounding = 1, Default = 2 })
+                        World:AddSlider("visuals/world/bullettracers/fadetime", { Text = "Fade Time", Min = 0, Max = 10, Rounding = 1, Default = 1 })
+                        World:AddToggle("visuals/world/bullettracers/shrinkfade", { Text = "Shrink Fade", Default = false })
+
+
                     end
                 end
 
