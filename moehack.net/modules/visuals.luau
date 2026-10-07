@@ -968,15 +968,8 @@ if moehack.data.game_name == "Arsenal" then
     local Handled = false
 
     local function GetOrigin()
-
         local Arms = FindFirstChild(Camera, "Arms")
         if Arms then
-            if State.Alt == 1 then
-                local SecondFlash = FindFirstChild(Arms, "2Flash")
-                if SecondFlash then
-                    return SecondFlash.Position
-                end
-            end
             local Muzzle = FindFirstChild(Arms, "Particles") or FindFirstChild(Arms, "Flash")
             if Muzzle then
                 return Muzzle.Position
