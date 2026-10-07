@@ -950,14 +950,6 @@ if moehack.data.game_name == "Arsenal" then
     local NetLogger = moehack.load_module("moehack.net/modules/games/arsenal/netlogger.luau")
     local Particles = require(ReplicatedFirst.Client.Game.Particles)
 
-    local CreateTrail; CreateTrail = hookfunction(Particles.CreateTrail, function(Origin, HitPos, ...)
-        if Toggles["visuals/world/bullettracers"].Value then
-            return
-        end
-
-        return CreateTrail(Origin, HitPos, ...)
-    end)
-
     NetLogger:On("Incoming", "TrailBounce", function(StartPos, EndPos)
         Visuals:BulletTracers( StartPos, EndPos )
     end)
