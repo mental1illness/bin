@@ -457,7 +457,7 @@ local Library, SaveManager, ThemeManager = moehack.load_module("moehack.net/inte
                 do -- Camera
 
                     Camera:AddToggle("visuals/camera/fovchanger", { Text = "FOV Changer", Default = false })
-                    Camera:AddSlider("visuals/camera/fovchanger/value", { Text = "FOV", Min = 0, Max = 120, Rounding = 0, Default = Camera.FieldOfView, Compact = true, Callback = function(fov)
+                    Camera:AddSlider("visuals/camera/fovchanger/value", { Text = "FOV", Min = 0, Max = 120, Rounding = 0, Default = tonumber(Camera.FieldOfView) or 70, Compact = true, Callback = function(fov)
                         if not Toggles["visuals/camera/fovchanger"].Value then return end
                         Camera.FieldOfView = fov
                     end })
