@@ -6,11 +6,9 @@
 local FromOffset, FromScale, UDim2New = UDim2.fromOffset, UDim2.fromScale, UDim2.new
 local Atan2, Rad, Pi, Abs, Minimum, Maximum, Floor, Clamp = math.atan2, math.rad, math.pi, math.abs, math.min, math.max, math.floor, math.clamp
 local NewVector, NewVector3, NewCFrame = vector.create, Vector3.new, CFrame.new
-local Create, IsA = Instance.new, workspace.IsA
+local Create = Instance.new
 local Spawn, Wait = task.spawn, task.wait
-local ForEach, Insert, RemoveTable, Clear = table.foreach, table.insert, table.remove, table.clear
-local FindFirstChild, WaitForChild = workspace.FindFirstChild, workspace.WaitForChild
-local WorldToViewportPoint = workspace.CurrentCamera.WorldToViewportPoint
+local Insert, RemoveTable, Clear = table.insert, table.remove, table.clear
 local GetService = Game.GetService
 
 --# Services
@@ -26,7 +24,6 @@ local LocalPlayer = Players.LocalPlayer
 local FadeInfo = TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
 
 --# Modules
-
 
 local Fonts = moehack.load_module("globals/fonts.luau", true)
 local Utility = moehack.load_module("moehack.net/modules/utility.luau", true)
@@ -97,6 +94,12 @@ end))
 
 Library:GiveSignal(Players.PlayerRemoving:Connect(function(Player)
     PlayersCache[Player] = nil
+
+    local Entity = ESP.Entities[Player]
+
+    if Entity then
+        ESP.RemoveTarget(Entity)
+    end
 end))
 
 --# Main
@@ -112,13 +115,9 @@ Viewport.BackgroundColor3 = Color3.fromRGB(-5000, -5000, -5000)
 function ESP.CreateElements(Entity: table)
     local Objects = {}
 
-    --# Holder
-
     Objects.Holder = Create("Frame")
     Objects.Holder.Parent = ScreenGui
     Objects.Holder.BackgroundTransparency = 1
-
-    --# Bounding Box
 
     Objects.BoundingBox = Create("CanvasGroup")
     Objects.BoundingBox.Parent = Objects.Holder
@@ -147,8 +146,6 @@ function ESP.CreateElements(Entity: table)
     Objects.BoundingBoxFill.BorderSizePixel = 0
     Objects.BoundingBoxFill.ZIndex = 1
 
-    --# Corner Box
-
     Objects.CornerBox = Create("CanvasGroup")
     Objects.CornerBox.BackgroundTransparency = 1
     Objects.CornerBox.Size = UDim2New(1, 6, 1, 6)
@@ -170,16 +167,8 @@ function ESP.CreateElements(Entity: table)
         CornerPart.BorderColor3 = Color3.fromRGB(0, 0, 0)
         CornerPart.BorderSizePixel = 0
         CornerPart.Size = UDim2New(0, 10, 0, 10)
-        CornerPart.AnchorPoint = Vector2.new(
-            IsRight and 1 or 0,
-            IsBottom and 1 or 0
-        )
-        CornerPart.Position = UDim2New(
-            IsRight and 1 or 0,
-            IsRight and -1 or 1,
-            IsBottom and 1 or 0,
-            IsBottom and -1 or 1
-        )
+        CornerPart.AnchorPoint = Vector2.new(IsRight and 1 or 0, IsBottom and 1 or 0)
+        CornerPart.Position = UDim2New(IsRight and 1 or 0, IsRight and -1 or 1, IsBottom and 1 or 0, IsBottom and -1 or 1)
         CornerPart.Parent = Objects.CornerBox
         Objects[Name] = CornerPart
 
@@ -220,8 +209,6 @@ function ESP.CreateElements(Entity: table)
         Objects[Name .. "OutlineVertical"] = OutlineVertical
     end
 
-    --# Glow
-
     Objects.GlowHolder = Create("CanvasGroup")
     Objects.GlowHolder.Parent = Objects.Holder
     Objects.GlowHolder.Size = UDim2New(1, 47, 1, 47)
@@ -241,10 +228,8 @@ function ESP.CreateElements(Entity: table)
         Size = UDim2New(1, 0, 1, 0),
         ZIndex = -10,
         BorderSizePixel = 0,
-        SliceCenter = Rect.new(Vector2.new(21, 21), Vector2.new(79, 79)),
+        SliceCenter = Rect.new(Vector2.new(21, 21), Vector2.new(79, 79))
     })
-
-    --# Health Bar
 
     Objects.HealthBar = Create("CanvasGroup")
     Objects.HealthBar.Parent = Objects.Holder
@@ -289,8 +274,6 @@ function ESP.CreateElements(Entity: table)
         ColorSequenceKeypoint.new(1, Options["esp/healthbar/colorb"].Value)
     })
 
-    --# Health Text
-
     Objects.HealthTextHolder = Create("CanvasGroup")
     Objects.HealthTextHolder.Parent = Objects.Holder
     Objects.HealthTextHolder.Size = FromOffset(11, 10)
@@ -314,8 +297,6 @@ function ESP.CreateElements(Entity: table)
     Objects.HealthTextStroke.LineJoinMode = Enum.LineJoinMode.Miter
     Objects.HealthTextStroke.Thickness = 1
     Objects.HealthTextStroke.Color = Color3.new(0, 0, 0)
-
-    --# Name
 
     Objects.NameHolder = Create("CanvasGroup")
     Objects.NameHolder.Parent = Objects.Holder
@@ -364,8 +345,6 @@ function ESP.CreateElements(Entity: table)
     Objects.NameStroke.Thickness = 1
     Objects.NameStroke.Color = Color3.new(0, 0, 0)
 
-    --# Sides Elements
-
     Objects.Bottom = Create("CanvasGroup")
     Objects.Bottom.Size = UDim2New(0, 500, 0, 500)
     Objects.Bottom.BackgroundTransparency = 1
@@ -382,8 +361,6 @@ function ESP.CreateElements(Entity: table)
     Layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
     Layout.Padding = UDim.new(0, -1)
     Layout.Parent = Objects.Bottom
-
-    --# Distance
 
     Objects.Distance = Create("TextLabel")
     Objects.Distance.Parent = Objects.Bottom
@@ -402,8 +379,6 @@ function ESP.CreateElements(Entity: table)
     Objects.DistStroke.LineJoinMode = Enum.LineJoinMode.Miter
     Objects.DistStroke.Thickness = 1
     Objects.DistStroke.Color = Color3.new(0, 0, 0)
-
-    --# Tool
 
     Objects.Tool = Create("TextLabel")
     Objects.Tool.Parent = Objects.Bottom
@@ -432,8 +407,6 @@ function ESP.CreateElements(Entity: table)
         Objects.NameHolder,
         Objects.Bottom
     }
-
-    --# Fade
 
     Objects.FadeValue = Create("NumberValue")
     Objects.FadeValue.Value = 1
@@ -475,108 +448,205 @@ function ESP.CreateElements(Entity: table)
     return Objects
 end
 
-do
-    function _ESPDisconnectTarget(Entity)
-        for _, Connection in Entity.TargetConnections do
-            Connection:Disconnect()
-        end
-
-        Clear(Entity.TargetConnections)
+local function DisconnectTarget(Entity)
+    for _, Connection in Entity.TargetConnections do
+        Connection:Disconnect()
     end
 
-    function _ESPRemoveBodyPart(Entity, Part)
-        for Index = #Entity.BodyParts, 1, -1 do
-            if Entity.BodyParts[Index] == Part then
-                RemoveTable(Entity.BodyParts, Index)
-                break
-            end
-        end
+    Clear(Entity.TargetConnections)
+end
 
-        if Entity.ChamsParts then
-            local ChamsPart = Entity.ChamsParts[Part]
-
-            if ChamsPart then
-                ChamsPart:Destroy()
-                Entity.ChamsParts[Part] = nil
-            end
+local function HasBodyPart(Entity, Part)
+    for _, ExistingPart in Entity.BodyParts do
+        if ExistingPart == Part then
+            return true
         end
     end
 
-    function _ESPConnectTarget(Target, Entity)
-        _ESPDisconnectTarget(Entity)
+    return false
+end
 
-        Entity.Target = Target
-        Clear(Entity.BodyParts)
+local function AddBodyPart(Entity, Part)
+    if not Part:IsA("BasePart") or HasBodyPart(Entity, Part) then
+        return
+    end
 
-        if not Target then
-            Entity.Humanoid = nil
-            return
+    Insert(Entity.BodyParts, Part)
+end
+
+local function RemoveBodyPart(Entity, Part)
+    for Index = #Entity.BodyParts, 1, -1 do
+        if Entity.BodyParts[Index] == Part then
+            RemoveTable(Entity.BodyParts, Index)
+            break
+        end
+    end
+
+    local ChamsPart = Entity.ChamsParts[Part]
+
+    if ChamsPart then
+        ChamsPart:Destroy()
+        Entity.ChamsParts[Part] = nil
+    end
+end
+
+local function ResolveHumanoid(Target)
+    if not Target then
+        return nil
+    end
+
+    if Target:IsA("Humanoid") then
+        return Target
+    end
+
+    return Target:FindFirstChildWhichIsA("Humanoid", true)
+end
+
+local function GetTargetRoot(Target, BodyParts)
+    if not Target then
+        return nil
+    end
+
+    if Target:IsA("BasePart") then
+        return Target
+    end
+
+    if Target:IsA("Model") then
+        local PrimaryPart = Target.PrimaryPart
+
+        if PrimaryPart and PrimaryPart.Parent then
+            return PrimaryPart
         end
 
-        if Target:IsA("BasePart") then
-            Entity.BodyParts[1] = Target
+        local RootPart = Target:FindFirstChild("HumanoidRootPart")
 
-            if not Entity.Humanoid then
-                Entity.Humanoid = Target:FindFirstChildWhichIsA("Humanoid", true)
-            end
-
-            Insert(Entity.TargetConnections, Target.AncestryChanged:Connect(function(_, Parent)
-                if not Parent then
-                    ESP.RemoveTarget(Entity)
-                end
-            end))
-
-            return
+        if RootPart and RootPart:IsA("BasePart") then
+            return RootPart
         end
+    end
 
-        for _, Object in Target:GetDescendants() do
-            if Object:IsA("BasePart") then
-                Insert(Entity.BodyParts, Object)
-            end
+    for _, Part in BodyParts do
+        if Part.Parent then
+            return Part
         end
+    end
 
-        if not Entity.Humanoid or not Entity.Humanoid:IsDescendantOf(Target) then
-            Entity.Humanoid = Target:FindFirstChildWhichIsA("Humanoid", true)
+    return nil
+end
+
+local function PopulateBodyParts(Entity, Target)
+    Clear(Entity.BodyParts)
+
+    if Target:IsA("BasePart") then
+        AddBodyPart(Entity, Target)
+        return
+    end
+
+    for _, Object in Target:GetDescendants() do
+        if Object:IsA("BasePart") then
+            AddBodyPart(Entity, Object)
         end
+    end
+end
 
-        Insert(Entity.TargetConnections, Target.DescendantAdded:Connect(function(Object)
-            if Object:IsA("BasePart") then
-                Insert(Entity.BodyParts, Object)
-            elseif Object:IsA("Humanoid") and not Entity.Humanoid then
-                Entity.Humanoid = Object
-            end
-        end))
+local function ConnectTarget(Target, Entity)
+    DisconnectTarget(Entity)
+    Clear(Entity.BodyParts)
 
-        Insert(Entity.TargetConnections, Target.DescendantRemoving:Connect(function(Object)
-            if Object:IsA("BasePart") then
-                _ESPRemoveBodyPart(Entity, Object)
-            elseif Object == Entity.Humanoid then
-                Entity.Humanoid = nil
-            end
-        end))
+    Entity.Target = Target
 
+    if not Target or not Target.Parent then
+        Entity.Humanoid = nil
+        return false
+    end
+
+    PopulateBodyParts(Entity, Target)
+
+    if not Entity.Humanoid or not Entity.Humanoid.Parent or not Entity.Humanoid:IsDescendantOf(Target) then
+        Entity.Humanoid = ResolveHumanoid(Target)
+    end
+
+    if Target:IsA("BasePart") then
         Insert(Entity.TargetConnections, Target.AncestryChanged:Connect(function(_, Parent)
             if not Parent then
                 ESP.RemoveTarget(Entity)
             end
         end))
+
+        return true
     end
 
-    function _ESPConnectCharacter(Player, Entity)
-        local Character = Utility.GetCharacter(Player)
+    Insert(Entity.TargetConnections, Target.DescendantAdded:Connect(function(Object)
+        if Object:IsA("BasePart") then
+            AddBodyPart(Entity, Object)
+            return
+        end
 
-        Entity.Target = Character
-        Entity.Humanoid = Character and Character:FindFirstChildWhichIsA("Humanoid", true) or nil
+        if Object:IsA("Humanoid") and not Entity.Humanoid then
+            Entity.Humanoid = Object
+        end
+    end))
 
-        _ESPConnectTarget(Character, Entity)
+    Insert(Entity.TargetConnections, Target.DescendantRemoving:Connect(function(Object)
+        if Object:IsA("BasePart") then
+            RemoveBodyPart(Entity, Object)
+            return
+        end
+
+        if Object == Entity.Humanoid then
+            Entity.Humanoid = ResolveHumanoid(Target)
+        end
+    end))
+
+    Insert(Entity.TargetConnections, Target.AncestryChanged:Connect(function(_, Parent)
+        if not Parent then
+            ESP.RemoveTarget(Entity)
+        end
+    end))
+
+    return true
+end
+
+local function ConnectCharacter(Player, Entity)
+    local Character = Utility.GetCharacter(Player)
+
+    if not Character then
+        DisconnectTarget(Entity)
+
+        Entity.Target = nil
+        Entity.Humanoid = nil
+
+        Clear(Entity.BodyParts)
+
+        ESP.ChamsRemove(Entity)
+
+        return
     end
+
+    Entity.Humanoid = nil
+    ConnectTarget(Character, Entity)
 end
 
 function ESP.AddTarget(Target, Settings)
     Settings = Settings or {}
 
     if not Target or not Target:IsA("Instance") then
-        return
+        return nil
+    end
+
+    local Humanoid = Settings.Humanoid
+
+    if Target:IsA("Humanoid") then
+        Humanoid = Target
+        Target = Target.Parent
+
+        if not Target then
+            return nil
+        end
+    end
+
+    if not Target:IsDescendantOf(workspace) then
+        return nil
     end
 
     local Existing = ESP.Entities[Target]
@@ -585,18 +655,8 @@ function ESP.AddTarget(Target, Settings)
         ESP.RemoveTarget(Existing)
     end
 
-    local Humanoid = Settings.Humanoid
-
-    if not Humanoid and not Target:IsA("BasePart") then
-        Humanoid = Target:FindFirstChildWhichIsA("Humanoid", true)
-    end
-
-    if not Humanoid and Target:IsA("BasePart") then
-        Humanoid = Target:FindFirstChildWhichIsA("Humanoid", true)
-    end
-
     local Entity = {
-        Target = Target,
+        Target = nil,
         Player = Settings.Player,
         Name = Settings.Name or Target.Name,
         Humanoid = Humanoid,
@@ -615,7 +675,19 @@ function ESP.AddTarget(Target, Settings)
     Entity.Objects = ESP.CreateElements(Entity)
     ESP.Entities[Target] = Entity
 
-    _ESPConnectTarget(Target, Entity)
+    if not ConnectTarget(Target, Entity) then
+        ESP.Entities[Target] = nil
+
+        if Entity.Objects.FadeValue then
+            Entity.Objects.FadeValue:Destroy()
+        end
+
+        if Entity.Objects.Holder then
+            Entity.Objects.Holder:Destroy()
+        end
+
+        return nil
+    end
 
     return Entity
 end
@@ -634,7 +706,12 @@ function ESP.RemoveTarget(TargetOrEntity)
         end
     end
 
-    _ESPDisconnectTarget(Entity)
+    DisconnectTarget(Entity)
+
+    if Entity.FadeTween then
+        Entity.FadeTween:Cancel()
+        Entity.FadeTween = nil
+    end
 
     if Entity.ChamsModel then
         Entity.ChamsModel:Destroy()
@@ -644,17 +721,18 @@ function ESP.RemoveTarget(TargetOrEntity)
     Clear(Entity.ChamsParts)
     Clear(Entity.BodyParts)
 
-    if Entity.FadeTween then
-        Entity.FadeTween:Cancel()
+    if Entity.Objects then
+        if Entity.Objects.FadeValue then
+            Entity.Objects.FadeValue:Destroy()
+        end
+
+        if Entity.Objects.Holder then
+            Entity.Objects.Holder:Destroy()
+        end
     end
 
-    if Entity.Objects and Entity.Objects.FadeValue then
-        Entity.Objects.FadeValue:Destroy()
-    end
-
-    if Entity.Objects and Entity.Objects.Holder then
-        Entity.Objects.Holder:Destroy()
-    end
+    Entity.Target = nil
+    Entity.Humanoid = nil
 end
 
 function ESP.ApplyAllPlayer()
@@ -686,7 +764,7 @@ function ESP.ApplyAllPlayer()
         ESP.Entities[Player] = Entity
 
         if Player.Character then
-            _ESPConnectCharacter(Player, Entity)
+            ConnectCharacter(Player, Entity)
         end
 
         Library:GiveSignal(Player.CharacterAdded:Connect(function()
@@ -694,7 +772,7 @@ function ESP.ApplyAllPlayer()
                 return
             end
 
-            _ESPConnectCharacter(Player, Entity)
+            ConnectCharacter(Player, Entity)
         end))
 
         Library:GiveSignal(Player.CharacterRemoving:Connect(function()
@@ -702,10 +780,13 @@ function ESP.ApplyAllPlayer()
                 return
             end
 
-            _ESPDisconnectTarget(Entity)
+            DisconnectTarget(Entity)
+
             Entity.Target = nil
             Entity.Humanoid = nil
+
             Clear(Entity.BodyParts)
+
             ESP.ChamsRemove(Entity)
         end))
     end
@@ -719,7 +800,31 @@ function ESP.GetBoundingBox(Model: {}, Character)
     local OnScreen = false
 
     if Toggles["esp/settings/custombound"].Value then
-        local Root = Character.PrimaryPart
+        local Root
+
+        if Character and Character:IsA("BasePart") then
+            Root = Character
+        elseif Character and Character:IsA("Model") then
+            Root = Character.PrimaryPart
+
+            if not Root then
+                local HumanoidRootPart = Character:FindFirstChild("HumanoidRootPart")
+
+                if HumanoidRootPart and HumanoidRootPart:IsA("BasePart") then
+                    Root = HumanoidRootPart
+                end
+            end
+        end
+
+        if not Root then
+            for _, Part in Model do
+                if Part.Parent then
+                    Root = Part
+                    break
+                end
+            end
+        end
+
         if Root and Root.Parent then
             local Width = Options["esp/settings/custombound/width"].Value
             local Height = Options["esp/settings/custombound/height"].Value
@@ -727,11 +832,10 @@ function ESP.GetBoundingBox(Model: {}, Character)
             local OffsetY = Options["esp/settings/custombound/offsety"].Value
 
             local HalfSize = NewVector3(Width, Height, Width) * 0.5
-            local RootCFrame = Root.CFrame * CFrame.new(OffsetX, OffsetY, 0)
+            local RootCFrame = Root.CFrame * NewCFrame(OffsetX, OffsetY, 0)
 
             for _, Signs in Corners do
-                local ScreenPoint, Visible = WorldToViewportPoint(
-                    CurrentCamera,
+                local ScreenPoint, Visible = CurrentCamera:WorldToViewportPoint(
                     RootCFrame * NewVector3(
                         HalfSize.X * Signs[1],
                         HalfSize.Y * Signs[2],
@@ -740,6 +844,7 @@ function ESP.GetBoundingBox(Model: {}, Character)
                 )
 
                 OnScreen = OnScreen or Visible
+
                 LowestX = Minimum(LowestX, ScreenPoint.X)
                 HighestX = Maximum(HighestX, ScreenPoint.X)
                 LowestY = Minimum(LowestY, ScreenPoint.Y)
@@ -756,8 +861,7 @@ function ESP.GetBoundingBox(Model: {}, Character)
             local HalfSize = Part.Size * 0.5
 
             for _, Signs in Corners do
-                local ScreenPoint, Visible = WorldToViewportPoint(
-                    CurrentCamera,
+                local ScreenPoint, Visible = CurrentCamera:WorldToViewportPoint(
                     PartCFrame * NewVector3(
                         HalfSize.X * Signs[1],
                         HalfSize.Y * Signs[2],
@@ -766,6 +870,7 @@ function ESP.GetBoundingBox(Model: {}, Character)
                 )
 
                 OnScreen = OnScreen or Visible
+
                 LowestX = Minimum(LowestX, ScreenPoint.X)
                 HighestX = Maximum(HighestX, ScreenPoint.X)
                 LowestY = Minimum(LowestY, ScreenPoint.Y)
@@ -788,7 +893,7 @@ function ESP.RenderLastPosition(Entity: {})
         return false
     end
 
-    local ScreenPoint, Visible = WorldToViewportPoint(CurrentCamera, Position)
+    local ScreenPoint, Visible = CurrentCamera:WorldToViewportPoint(Position)
 
     if not Visible or ScreenPoint.Z <= 0 then
         Entity.Objects.Holder.Visible = false
@@ -801,7 +906,11 @@ function ESP.RenderLastPosition(Entity: {})
         ScreenPoint.X + Rect.OffsetX * Scale,
         ScreenPoint.Y + Rect.OffsetY * Scale
     )
-    Entity.Objects.Holder.Size = FromOffset(Rect.Width * Scale, Rect.Height * Scale)
+
+    Entity.Objects.Holder.Size = FromOffset(
+        Rect.Width * Scale,
+        Rect.Height * Scale
+    )
 
     return true
 end
@@ -811,16 +920,23 @@ local function TweenFade(Entity: {}, Target: number)
         Entity.FadeTween:Cancel()
     end
 
-    local Tween = TweenService:Create(Entity.Objects.FadeValue, FadeInfo, {Value = Target})
+    local Tween = TweenService:Create(
+        Entity.Objects.FadeValue,
+        FadeInfo,
+        {Value = Target}
+    )
+
     Entity.FadeTween = Tween
 
     Tween.Completed:Connect(function(State)
-        if State == Enum.PlaybackState.Completed and not Entity.Shown then
-            local Holder = Entity.Objects.Holder
+        if State ~= Enum.PlaybackState.Completed or Entity.Shown then
+            return
+        end
 
-            if Holder and Holder.Parent then
-                Holder.Visible = false
-            end
+        local Holder = Entity.Objects.Holder
+
+        if Holder and Holder.Parent then
+            Holder.Visible = false
         end
     end)
 
@@ -835,6 +951,7 @@ function ESP.FadeIn(Entity: {}, DeltaTime: number)
     end
 
     Entity.Shown = true
+
     TweenFade(Entity, 0)
 end
 
@@ -960,9 +1077,12 @@ function ESP.ChamsRender(Entity: {})
             ChamsPart.Material = Material
         end
 
-        local Transparency = Picker.Transparency + (1 - Picker.Transparency) * (Entity.ChamsFade or 0)
+        local Transparency =
+            Picker.Transparency
+            + (1 - Picker.Transparency) * (Entity.ChamsFade or 0)
 
-        if ChamsPart.Transparency ~= Transparency and RealPart.Transparency < 1 then
+        if ChamsPart.Transparency ~= Transparency
+            and RealPart.Transparency < 1 then
             ChamsPart.Transparency = Transparency
         end
     end
@@ -989,12 +1109,12 @@ function ESP.Render(Entity: {}, DeltaTime: number)
         Character = Player and Utility.GetCharacter(Player)
     end
 
-    if Entity.IsCustom and (not RealCharacter or not RealCharacter.Parent) then
-        ESP.RemoveTarget(Entity)
-        return
-    end
-
-    if not RealCharacter then
+    if Entity.IsCustom then
+        if not RealCharacter or not RealCharacter.Parent then
+            ESP.RemoveTarget(Entity)
+            return
+        end
+    elseif not RealCharacter then
         ESP.FadeOut(Entity, DeltaTime)
         return
     end
@@ -1043,7 +1163,9 @@ function ESP.Render(Entity: {}, DeltaTime: number)
 
     local TargetRoot
 
-    if RealCharacter:IsA("BasePart") then
+    if Entity.IsCustom then
+        TargetRoot = GetTargetRoot(RealCharacter, Entity.BodyParts)
+    elseif RealCharacter:IsA("BasePart") then
         TargetRoot = RealCharacter
     elseif RealCharacter:IsA("Model") then
         TargetRoot = RealCharacter.PrimaryPart or RealCharacter:FindFirstChild("HumanoidRootPart")
@@ -1053,13 +1175,15 @@ function ESP.Render(Entity: {}, DeltaTime: number)
         TargetRoot = Character.PrimaryPart or Character:FindFirstChild("HumanoidRootPart")
     end
 
-    local Distance = TargetRoot
-        and (CurrentCamera.CFrame.Position - TargetRoot.Position).Magnitude
-        or 0
+    if not TargetRoot then
+        TargetRoot = GetTargetRoot(RealCharacter, Entity.BodyParts)
+    end
+
+    local Distance = TargetRoot and (CurrentCamera.CFrame.Position - TargetRoot.Position).Magnitude or 0
 
     if TargetRoot then
         local RootPosition = TargetRoot.Position
-        local RootPoint = WorldToViewportPoint(CurrentCamera, RootPosition)
+        local RootPoint = CurrentCamera:WorldToViewportPoint(RootPosition)
 
         Entity.LastPosition = RootPosition
         Entity.LastRect = {
@@ -1104,27 +1228,30 @@ function ESP.Render(Entity: {}, DeltaTime: number)
 
             Objects.TopLeftInlineHorizontal.BackgroundColor3 = BoxColor
             Objects.TopLeftInlineVertical.BackgroundColor3 = BoxColor
-
             Objects.TopRightInlineHorizontal.BackgroundColor3 = BoxColor
             Objects.TopRightInlineVertical.BackgroundColor3 = BoxColor
-
             Objects.BottomLeftInlineHorizontal.BackgroundColor3 = BoxColor
             Objects.BottomLeftInlineVertical.BackgroundColor3 = BoxColor
-
             Objects.BottomRightInlineHorizontal.BackgroundColor3 = BoxColor
             Objects.BottomRightInlineVertical.BackgroundColor3 = BoxColor
         end
 
-        if Objects.GlowHolder.Visible ~= Toggles["esp/box/glow"].Value then
-            Objects.GlowHolder.Visible = Toggles["esp/box/glow"].Value
+        local GlowEnabled = Toggles["esp/box/glow"].Value
+
+        if Objects.GlowHolder.Visible ~= GlowEnabled then
+            Objects.GlowHolder.Visible = GlowEnabled
         end
 
-        if Objects.BoundingBoxGlow.ImageColor3 ~= Options["esp/box/glowcolor"].Value then
-            Objects.BoundingBoxGlow.ImageColor3 = Options["esp/box/glowcolor"].Value
+        local GlowColor = Options["esp/box/glowcolor"].Value
+
+        if Objects.BoundingBoxGlow.ImageColor3 ~= GlowColor then
+            Objects.BoundingBoxGlow.ImageColor3 = GlowColor
         end
 
-        if Objects.BoundingBoxGlow.ImageTransparency ~= Options["esp/box/glowcolor"].Transparency then
-            Objects.BoundingBoxGlow.ImageTransparency = Options["esp/box/glowcolor"].Transparency
+        local GlowTransparency = Options["esp/box/glowcolor"].Transparency
+
+        if Objects.BoundingBoxGlow.ImageTransparency ~= GlowTransparency then
+            Objects.BoundingBoxGlow.ImageTransparency = GlowTransparency
         end
 
         if Toggles["esp/box/fill"].Value then
@@ -1199,28 +1326,15 @@ function ESP.Render(Entity: {}, DeltaTime: number)
     if Toggles["esp/healthbar"].Value and (not Entity.IsCustom or Humanoid) then
         Objects.HealthBar.Visible = true
 
-        local HealthPercent = MaxHealth > 0
-            and Clamp(Health / MaxHealth, 0, 1)
-            or 1
-
+        local HealthPercent = MaxHealth > 0 and Clamp(Health / MaxHealth, 0, 1) or 1
         local HealthBarThickness = Options["esp/healthbar/thickness"].Value
 
         if Objects.HealthBar.Size.X.Offset ~= HealthBarThickness then
             Objects.HealthBar.Size = UDim2New(0, HealthBarThickness, 1, 4)
-            Objects.HealthBar.Position = UDim2New(
-                0,
-                -5 - HealthBarThickness,
-                0,
-                -2
-            )
+            Objects.HealthBar.Position = UDim2New(0, -5 - HealthBarThickness, 0, -2)
         end
 
-        Objects.HealthBarCover.Size = UDim2New(
-            1,
-            0,
-            1 - HealthPercent,
-            0
-        )
+        Objects.HealthBarCover.Size = UDim2New(1, 0, 1 - HealthPercent, 0)
 
         if Toggles["esp/healthtext"].Value then
             local HealthText = tostring(Floor(Health))
@@ -1230,13 +1344,7 @@ function ESP.Render(Entity: {}, DeltaTime: number)
                 Objects.HealthTextHolder.Visible = false
             else
                 Objects.HealthTextHolder.Visible = true
-
-                Objects.HealthTextHolder.Position = UDim2New(
-                    0,
-                    -10 - HealthBarThickness,
-                    0,
-                    (HighY - LowY) * (1 - HealthPercent)
-                )
+                Objects.HealthTextHolder.Position = UDim2New(0, -10 - HealthBarThickness, 0, (HighY - LowY) * (1 - HealthPercent))
             end
 
             if Objects.HealthText.Text ~= HealthText then
@@ -1289,13 +1397,12 @@ function ESP.Render(Entity: {}, DeltaTime: number)
     ESP.ChamsRender(Entity)
 
     Objects.Holder.Position = FromOffset(LowX, LowY)
-    Objects.Holder.Size = FromOffset(
-        HighX - LowX,
-        HighY - LowY
-    )
+    Objects.Holder.Size = FromOffset(HighX - LowX, HighY - LowY)
 
     ESP.FadeIn(Entity, DeltaTime)
 end
+
+--# Update
 
 function ESP.Update(DeltaTime)
     if not Toggles["esp/enabled"].Value then
@@ -1305,12 +1412,14 @@ function ESP.Update(DeltaTime)
             for _, Entity in ESP.Entities do
                 if Entity.FadeTween then
                     Entity.FadeTween:Cancel()
+                    Entity.FadeTween = nil
                 end
 
                 Entity.Shown = false
                 Entity.Objects.FadeValue.Value = 1
 
                 ESP.ChamsRemove(Entity)
+
                 Entity.Objects.Holder.Visible = false
             end
 
@@ -1325,11 +1434,7 @@ function ESP.Update(DeltaTime)
 
     ESP.ApplyAllPlayer()
 
-    local Hertz = Maximum(
-        1,
-        Options["esp/settings/renderhz"].Value
-    )
-
+    local Hertz = Maximum(1, Options["esp/settings/renderhz"].Value)
     local Interval = 1 / Hertz
 
     LastHz += DeltaTime

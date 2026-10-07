@@ -922,55 +922,53 @@ moehack.load_module("moehack.net/modules/hooks.luau", true)
 
 if moehack.data.game_name == "Operation One" then
     local function AddViewmodelTarget(PlayerViewmodel: Model)
-        if PlayerViewmodel.Name ~= "Viewmodel" then
+        if PlayerViewmodel.Name ~= "Viewmodel" or not ESP then
             return
         end
+        
+        local Retry = 0
+        repeat
+            task.wait()
+            Retry += 1
+        until Retry >= 100 or FindFirstChild(PlayerViewmodel, "torso")
 
-        if not ESP then
-            return
-        end
-
-        local Torso = WaitForChild(PlayerViewmodel, "torso")
+        local Torso = FindFirstChild(PlayerViewmodel, "torso")
         if not Torso then
             return
         end
-
+    
         local JointMotor = Torso:FindFirstChildOfClass("Motor6D")
         if not JointMotor then
             return
         end
-
+    
         local HumanoidRootPart = JointMotor.Part0
         if not HumanoidRootPart then
             return
         end
-
+    
         local RealCharacter = HumanoidRootPart.Parent
         if not RealCharacter then
             return
         end
-
+    
         local RealPlayer = Players:GetPlayerFromCharacter(RealCharacter)
         local Humanoid = FindFirstChild(RealCharacter, "Humanoid")
-
+    
         ESP.AddTarget(PlayerViewmodel, {
             Player = RealPlayer,
-            Humanoid = Humanoid,
+            Humanoid = Humanoid
         })
     end
-
-    Library:GiveSignal(
-        workspace.Viewmodels.ChildAdded:Connect(function(PlayerViewmodel: Model)
-            AddViewmodelTarget(PlayerViewmodel)
-        end)
-    )
-
-    Library:GiveSignal(
-        workspace.Viewmodels.ChildRemoved:Connect(function(PlayerViewmodel: Model)
-            pcall(ESP.RemoveTarget, PlayerViewmodel)
-        end)
-    )
-
+    
+    Library:GiveSignal(workspace.Viewmodels.ChildAdded:Connect(function(PlayerViewmodel: Model)
+        AddViewmodelTarget(PlayerViewmodel)
+    end))
+    
+    Library:GiveSignal(workspace.Viewmodels.ChildRemoved:Connect(function(PlayerViewmodel: Model)
+        ESP.RemoveTarget(PlayerViewmodel)
+    end))
+    
     for _, PlayerViewmodel in workspace.Viewmodels:GetChildren() do
         AddViewmodelTarget(PlayerViewmodel)
     end
