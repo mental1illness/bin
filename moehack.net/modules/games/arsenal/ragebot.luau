@@ -188,24 +188,18 @@ function Ragebot:OriginScan(TargetCharacter, Hitbox)
 
     local RootPosition = RootPart.Position
     local TargetPosition = Hitbox.Position
-
-    local VerticalDifference = RootPosition.Y - TargetPosition.Y
-    local VerticalBias = 0
-
-    if VerticalDifference > 2 then
-        VerticalBias = Minimum(VerticalDifference, MaxDist)
-    end
-
-    local ScanPosition = RootPosition + NewVector3(0, VerticalBias, 0)
-    local Direction = ScanPosition - TargetPosition
-    local Distance = Direction.Magnitude
+    local ToTarget = TargetPosition - RootPosition
+    local Distance = ToTarget.Magnitude
 
     if Distance <= 0.001 then
-        return ScanPosition
+        return RootPosition
     end
 
-    Direction /= Distance
+    if Distance > MaxDist then
+        return nil
+    end
 
+    local Direction = ToTarget / Distance
     local Right = Direction:Cross(Vector3.yAxis)
 
     if Right.Magnitude <= 0.001 then
@@ -215,14 +209,32 @@ function Ragebot:OriginScan(TargetCharacter, Hitbox)
     Right = Right.Unit
 
     local Up = Right:Cross(Direction).Unit
-    local StepDistance = MaxDist / MaxOrigins
+
+    local Candidates = {
+        RootPosition,
+        RootPosition + Up * 1.5,
+        RootPosition - Up * 1.5,
+        RootPosition + Right * 1.5,
+        RootPosition - Right * 1.5
+    }
+
+    for Index = 1, #Candidates do
+        local Origin = Candidates[Index]
+        local Result = Raycast(workspace, Origin, TargetPosition - Origin, OriginParams)
+
+        if Result and Result.Instance == Hitbox then
+            return Origin
+        end
+    end
+
+    local StepDistance = Distance / MaxOrigins
 
     for Index = 1, MaxOrigins do
-        local DistanceBack = StepDistance * Index
+        local Forward = StepDistance * Index
         local Spread = ((Index % 3) - 1) * 1.5
         local Height = ((Index % 5) - 2) * 1
 
-        local Origin = TargetPosition + Direction * DistanceBack + Right * Spread + Up * Height
+        local Origin = RootPosition + Direction * Forward + Right * Spread + Up * Height
 
         if (Origin - RootPosition).Magnitude > MaxDist then
             continue
