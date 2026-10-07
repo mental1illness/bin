@@ -988,11 +988,13 @@ if moehack.data.game_name == "Arsenal" then
     local HitObj; HitObj = Utility:Hook(Bridge.HitObject.Fire, function(Target, HitPos, Normal, Gun, ...)
         if Toggles["visuals/world/bullettracers"].Value and HitPos then
             local Origin = GetOrigin()
-            if Origin then
+            if Origin and Target ~= nil and typeof(Target) == "Instance" then
                 Visuals:BulletTracers(Origin, HitPos)
                 Handled = true
+                return HitObj(Target, HitPos, Normal, Gun, ...)
             end
         end
+        Handled = false
         return HitObj(Target, HitPos, Normal, Gun, ...)
     end)
 
