@@ -883,12 +883,12 @@ do -- Other funcs
     
         local Start = Utility.Create("Attachment", {
             WorldPosition = Origin,
-            Parent        = Terrain
+            Parent = Terrain
         })
     
         local End = Utility.Create("Attachment", {
             WorldPosition = Origin,
-            Parent        = Terrain
+            Parent = Terrain
         })
     
         local Beam = Utility.Create("Beam", {
@@ -909,18 +909,22 @@ do -- Other funcs
     
         local Elapsed = 0
         local Connection
+    
         Connection = RunService.Heartbeat:Connect(function(dt)
             Elapsed += dt
     
-            if Elapsed < TravelTime then
+            if TravelTime > 0 and Elapsed < TravelTime then
                 End.WorldPosition = Origin:Lerp(HitPos, Elapsed / TravelTime)
                 return
             end
+    
             End.WorldPosition = HitPos
     
-            local SinceArrival = Elapsed - TravelTime
+            local SinceArrival = TravelTime > 0 and Elapsed - TravelTime or Elapsed
+    
             if SinceArrival > LifeTime then
                 local Alpha = FadeTime > 0 and (SinceArrival - LifeTime) / FadeTime or 1
+    
                 if Alpha >= 1 then
                     Connection:Disconnect()
                     Beam:Destroy()
@@ -933,7 +937,9 @@ do -- Other funcs
                     Beam.Width0 = Thickness * (1 - Alpha)
                     Beam.Width1 = EndThickness * (1 - Alpha)
                 else
-                    Beam.Transparency = NumberSequence.new(Transparency + (1 - Transparency) * Alpha)
+                    Beam.Transparency = NumberSequence.new(
+                        Transparency + (1 - Transparency) * Alpha
+                    )
                 end
             end
         end)

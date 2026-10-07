@@ -68,12 +68,28 @@ local CanHitFXPls = false
 local EmptyVec3 = NewVector3()
 
 local OriginPresets = {
-	NewVector3(0, 0, 0),
-	NewVector3(0, 2, 0),
-	NewVector3(0, -2, 0),
-	NewVector3(2, 0, 0),
-	NewVector3(-2, 0, 0),
-	NewVector3(0, 0, 2)
+    NewVector3(0, 0, 0),
+
+    NewVector3(0, 2, 0),
+    NewVector3(0, -2, 0),
+
+    NewVector3(2, 0, 0),
+    NewVector3(-2, 0, 0),
+
+    NewVector3(0, 0, 2),
+    NewVector3(0, 0, -2),
+
+    NewVector3(2, 2, 0),
+    NewVector3(-2, 2, 0),
+
+    NewVector3(2, -2, 0),
+    NewVector3(-2, -2, 0),
+
+    NewVector3(0, 2, 2),
+    NewVector3(0, 2, -2),
+
+    NewVector3(0, -2, 2),
+    NewVector3(0, -2, -2)
 }
 
 local OriginCache = {}
