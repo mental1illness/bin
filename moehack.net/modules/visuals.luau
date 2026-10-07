@@ -446,6 +446,14 @@ Visuals.Camera = {} do
             end
         end
 
+        if Toggles["visuals/camera/fovchanger"].Value then
+            local FOV = Options["visuals/camera/fovchanger/value"].Value
+            if Camera.FieldOfView ~= FOV then
+                Camera.FieldOfView = FOV
+            end
+        end
+
+
         if Toggles["visuals/camera/waifu"].Value then
             local Link = Options["visuals/camera/waifu/link"].Value
 
