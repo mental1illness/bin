@@ -182,8 +182,8 @@ local Library, SaveManager, ThemeManager = moehack.load_module("moehack.net/inte
                     end
                     local HealthBar = Main:AddToggle("esp/healthbar", { Text = "Health Bar", Default = false }) do
 
-                        HealthBar:AddColorPicker('esp/healthbar/colora', { Default = Color3.fromRGB(255, 105, 180), Title = 'Health Bar A' })
-                        HealthBar:AddColorPicker('esp/healthbar/colorb', { Default = Color3.fromRGB(255, 20, 147),  Title = 'Health Bar B' })
+                        HealthBar:AddColorPicker('esp/healthbar/colora', { Default = Color3.fromRGB(0, 255, 0), Title = 'Health Bar A' })
+                        HealthBar:AddColorPicker('esp/healthbar/colorb', { Default = Color3.fromRGB(255, 0, 0),  Title = 'Health Bar B' })
 
                         local HealthDepBox = Main:AddDependencyBox()
                         HealthDepBox:AddToggle("esp/healthtext", { Text = "Health Text", Default = false }):AddColorPicker('esp/healthtext/color', { Default = Color3.fromRGB(255, 255, 255), Title = 'Health Text Color' })
