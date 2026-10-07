@@ -40,6 +40,8 @@ local Library = getgenv().Library or FakeLibrary
 local Toggles, Options = getgenv().Toggles or Flags, getgenv().Options or Flags
 local Camera = workspace.CurrentCamera
 
+local Terrain    = workspace.Terrain
+
 local DefaultLighting = {
     Ambient = Lighting.Ambient,
     OutdoorAmbient = Lighting.OutdoorAmbient,
@@ -864,7 +866,59 @@ end
 
 do -- Other funcs
     function Visuals:BulletTracers(Origin, HitPos)
- 
+        local LifeTime   = Options["visuals/world/bullettracers/lifetime"].Value
+        local FadeTime   = Options["visuals/world/bullettracers/fadetime"].Value
+        local TravelTime = Options["visuals/world/bullettracers/traveltime"].Value
+        local Color      = Options["visuals/world/bullettracers/color"].Value
+    
+        local Start = Utility.Create("Attachment", {
+            WorldPosition = Origin,
+            Parent        = Terrain
+        })
+    
+        local End = Utility.Create("Attachment", {
+            WorldPosition = Origin,
+            Parent        = Terrain
+        })
+    
+        local Beam = Utility.Create("Beam", {
+            Attachment0    = Start,
+            Attachment1    = End,
+            Color          = ColorSequence.new(Color),
+            Width0         = 0.1,
+            Width1         = 0.1,
+            FaceCamera     = true,
+            LightEmission  = 1,
+            LightInfluence = 0,
+            Segments       = 1,
+            Transparency   = NumberSequence.new(0),
+            Parent         = Terrain
+        })
+    
+        local Elapsed = 0
+        local Connection
+        Connection = RunService.Heartbeat:Connect(function(dt)
+            Elapsed += dt
+    
+            if Elapsed < TravelTime then
+                End.WorldPosition = Origin:Lerp(HitPos, Elapsed / TravelTime)
+                return
+            end
+            End.WorldPosition = HitPos
+    
+            local SinceArrival = Elapsed - TravelTime
+            if SinceArrival > LifeTime then
+                local Alpha = FadeTime > 0 and (SinceArrival - LifeTime) / FadeTime or 1
+                if Alpha >= 1 then
+                    Connection:Disconnect()
+                    Beam:Destroy()
+                    Start:Destroy()
+                    End:Destroy()
+                    return
+                end
+                Beam.Transparency = NumberSequence.new(Alpha)
+            end
+        end)
     end
 end
 
@@ -885,17 +939,23 @@ if moehack.data.game_name == "Arsenal" then
         end
         return Fallback
     end
+
+    local function GetHitboxPlayer(Target)
+        if Target == nil or typeof(Target) ~= "Instance" then return nil end
+        local Character = Target:FindFirstAncestorOfClass("Model")
+        if Character == nil then return nil end
+        return Players:GetPlayerFromCharacter(Character)
+    end
+
     local CanSex = false
     NetLogger:On("Outgoing", "HitPart", function(Target, GunId, Flags, Pen, CamPos, HitPos, Dt)
-        if Toggles["visuals/world/bullettracers"].Value and CanSex then
-            Visuals:BulletTracers(
-                GetMuzzlePos(CamPos), HitPos,
-                Options["visuals/world/bullettracers/lifetime"].Value,
-                Options["visuals/world/bullettracers/fadetime"].Value,
-                Options["visuals/world/bullettracers/traveltime"].Value,
-                Options["visuals/world/bullettracers/mode"].Value,
-                Options["visuals/world/bullettracers/color"].Value
-            )
+        if Toggles["visuals/world/bullettracers"].Value and CanSex and GetHitboxPlayer(Target) then
+            Visuals:BulletTracers( GetMuzzlePos(CamPos), HitPos )
+            return
+        end
+
+        if Toggles["visuals/world/bullettracers"].Value then
+            Visuals:BulletTracers( GetMuzzlePos(CamPos), HitPos )
         end
     end)
 
