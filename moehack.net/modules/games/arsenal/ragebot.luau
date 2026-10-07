@@ -182,9 +182,9 @@ end
 function Ragebot:OriginScan(TargetCharacter)
 	local Character = LocalPlayer.Character
 	local RootPart = Character and Character.PrimaryPart
-	local TargetRoot = TargetCharacter and TargetCharacter.PrimaryPart
+	local Head = TargetCharacter and (FindFirstChild(TargetCharacter, "HeadHB") or FindFirstChild(TargetCharacter, "Head"))
 
-	if not RootPart or not TargetRoot then return nil end
+	if not RootPart or not Head then return nil end
 
 	local Now = tick()
 	local Cached = OriginCache[TargetCharacter]
@@ -198,10 +198,9 @@ function Ragebot:OriginScan(TargetCharacter)
 	local MaxOrigins = Minimum(Options["combat/originscan/maxorigin"].Value, #OriginPresets)
 	local MaxDistance = Options["combat/originscan/maxdist"].Value
 	local MaxDistanceSq = MaxDistance * MaxDistance
-
 	local RootCFrame = RootPart.CFrame
 	local RootPosition = RootPart.Position
-	local TargetPosition = TargetRoot.Position
+	local TargetPosition = Head.Position
 
 	for Index = 1, MaxOrigins do
 		local Offset = OriginPresets[Index]
@@ -209,9 +208,10 @@ function Ragebot:OriginScan(TargetCharacter)
 
 		if WorldOffset:Dot(WorldOffset) <= MaxDistanceSq then
 			local Origin = RootPosition + WorldOffset
-			local Result = Raycast(workspace, Origin, TargetPosition - Origin, OriginParams)
+			local Direction = TargetPosition - Origin
+			local Result = Raycast(workspace, Origin, Direction, OriginParams)
 
-			if Result and Result.Instance:IsDescendantOf(TargetCharacter) then
+			if not Result or Result.Instance:IsDescendantOf(TargetCharacter) then
 				OriginCache[TargetCharacter] = {
 					Time = Now,
 					Origin = Origin
