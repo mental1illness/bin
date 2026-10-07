@@ -162,6 +162,7 @@ local Library, SaveManager, ThemeManager = moehack.load_module("moehack.net/inte
                     if moehack.data.game_name == "Flick" then
                         local Ragebot = Tabs.Combat:AddGroupbox({ Side = 2, Name = "Ragebot" })
                         Ragebot:AddToggle("combat/ragebot", { Text = "Enabled", Default = false })
+                        moehack.load_module("moehack.net/modules/games/flick/ragebot.luau")
                     end
                 end
 
