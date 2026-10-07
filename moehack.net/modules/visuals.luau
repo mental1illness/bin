@@ -951,6 +951,7 @@ if moehack.data.game_name == "Arsenal" then
     local Particles = require(ReplicatedFirst.Client.Game.Particles)
 
     NetLogger:On("Incoming", "TrailBounce", function(StartPos, EndPos)
+        if not Toggles["visuals/world/bullettracers"].Value then return end
         Visuals:BulletTracers( StartPos, EndPos )
     end)
 end
