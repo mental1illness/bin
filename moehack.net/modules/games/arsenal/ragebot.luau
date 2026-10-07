@@ -71,6 +71,33 @@ local CanHitFXPls = false
 -- local Offset = NewCFrame(0, 0, -1)
 
 local EmptyVec3 = NewVector3()
+
+local OriginPresets = {
+    NewVector3(0, 0, 0),
+    NewVector3(0, 2, 0),
+    NewVector3(0, -2, 0),
+    NewVector3(2, 0, 0),
+    NewVector3(-2, 0, 0),
+    NewVector3(0, 0, 2),
+    NewVector3(0, 0, -2),
+    NewVector3(2, 2, 0),
+    NewVector3(-2, 2, 0),
+    NewVector3(2, -2, 0),
+    NewVector3(-2, -2, 0),
+    NewVector3(0, 2, 2),
+    NewVector3(0, 2, -2),
+    NewVector3(0, -2, 2),
+    NewVector3(0, -2, -2),
+    NewVector3(3, 0, 3),
+    NewVector3(-3, 0, 3),
+    NewVector3(3, 0, -3),
+    NewVector3(-3, 0, -3),
+    NewVector3(3, 2, 3),
+    NewVector3(-3, 2, 3),
+    NewVector3(3, 2, -3),
+    NewVector3(-3, 2, -3)
+}
+
 --# Main
 local Ragebot = { LastTimeFired = 0 }
 Ragebot.__index = Ragebot
@@ -142,35 +169,29 @@ function Ragebot:OriginScan(TargetCharacter)
     local RootPart = Character and Character.PrimaryPart
     local TargetRoot = TargetCharacter and TargetCharacter.PrimaryPart
 
-    if not RootPart or not TargetRoot then
-        return nil
-    end
+    if not RootPart or not TargetRoot then return nil end
 
     OriginParams.FilterDescendantsInstances = { Character }
 
-    local MaxOrigins = Options["combat/originscan/maxorigin"].Value
+    local MaxOrigins = Minimum(Options["combat/originscan/maxorigin"].Value, #OriginPresets)
     local MaxDistance = Options["combat/originscan/maxdist"].Value
     local MaxDistanceSq = MaxDistance * MaxDistance
 
+    local RootCFrame = RootPart.CFrame
     local RootPosition = RootPart.Position
     local TargetPosition = TargetRoot.Position
 
     for Index = 1, MaxOrigins do
-        local X = math.random(-1500, 1500) * 0.01
-        local Y = math.random(-1500, 1500) * 0.01
-        local Z = math.random(-1500, 1500) * 0.01
+        local Offset = OriginPresets[Index]
+        local WorldOffset = RootCFrame:VectorToWorldSpace(Offset)
 
-        local Offset = Vector3.new(X, Y, Z)
+        if WorldOffset:Dot(WorldOffset) <= MaxDistanceSq then
+            local Origin = RootPosition + WorldOffset
+            local Result = Raycast(workspace, Origin, TargetPosition - Origin, OriginParams)
 
-        if Offset:Dot(Offset) > MaxDistanceSq then
-            Offset = Offset.Unit * MaxDistance
-        end
-
-        local Origin = RootPosition + Offset
-        local Result = Raycast(workspace, Origin, TargetPosition - Origin, OriginParams)
-
-        if Result and Result.Instance:IsDescendantOf(TargetCharacter) then
-            return Origin
+            if Result and Result.Instance:IsDescendantOf(TargetCharacter) then
+                return Origin
+            end
         end
     end
 
