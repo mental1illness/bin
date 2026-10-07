@@ -38,7 +38,7 @@ local BulletHandler = require(ReplicatedStorage.ModuleScripts.GunModules:WaitFor
 local ProjectileRender = ReplicatedStorage.ModuleScripts.GunModules.Remote.ProjectileRender
 local ProjectileFinished = ReplicatedStorage.ModuleScripts.GunModules.Remote.ProjectileFinished
 
-local Ragebot = { Seed = nil, ShotCount = 0, AmmoLeft = nil, ToolRef = nil, LastShot = 0 }
+local Ragebot = { Seed = nil, ShotCount = 0, AmmoLeft = nil, ToolRef = nil, LastShot = 0, ReloadingUntil = 0 }
 
 function Ragebot:IsVisible(CameraPosition, Head, Character)
     RaycastParameters.FilterDescendantsInstances = {LocalPlayer.Character}
@@ -80,7 +80,8 @@ function Ragebot:GetBestTarget()
 end
 
 function Ragebot:Scan()
-    if not Toggles["combat/ragebot"].Value then return end
+    local Toggle = Toggles and Toggles["combat/ragebot"]
+    if Toggle and not Toggle.Value then return end
 
     local CameraObject = Camera or workspace.CurrentCamera
     if not CameraObject then return end
@@ -106,12 +107,14 @@ function Ragebot:Scan()
     local Spread = Tool:GetAttribute("spread")
     local ReloadTime = Tool:GetAttribute("reloadTime")
     local Force = Tool:GetAttribute("BulletForce")
-    local Gravity = Tool:GetAttribute("Gravity") or 0
+    local Gravity = Tool:GetAttribute("Gravity")
+    if Gravity == nil then Gravity = 0 end
 
     if FireRate == nil or MaxAmmo == nil or Spread == nil or ReloadTime == nil or Force == nil then return end
 
     local Now = Tick()
     if Now - self.LastShot < FireRate then return end
+    if Now < self.ReloadingUntil then return end
 
     local Target = self:GetBestTarget()
     if not Target then return end
@@ -128,6 +131,19 @@ function Ragebot:Scan()
         local SeedObj = Tool:FindFirstChild("Seed")
         self.Seed = SeedObj and SeedObj.Value or 0
         self.ShotCount = 0
+    end
+
+    if self.AmmoLeft <= 0 then
+        local CR0 = LocalPlayer:WaitForChild("ClientRemotes")
+        local Reload0 = CR0:FindFirstChild("Reload")
+        if Reload0 then
+            self.ReloadingUntil = Now + ReloadTime
+            task.delay(ReloadTime, function()
+                self.AmmoLeft = MaxAmmo
+                pcall(Reload0.FireServer, Reload0)
+            end)
+        end
+        return
     end
 
     local CR = LocalPlayer:WaitForChild("ClientRemotes")
@@ -157,30 +173,36 @@ function Ragebot:Scan()
         Force = Force,
         Gravity = Gravity,
         BulletId = T,
-        Visuals = {BulletType = Tool:GetAttribute("Bullet"), HitEffect = Tool:GetAttribute("HitEffect")},
+        Visuals = {
+            BulletType = Tool:GetAttribute("Bullet") or "Bullet",
+            HitEffect = Tool:GetAttribute("HitEffect") or "Gib_T",
+        },
         Logic = {
-            IsExplosive = Tool:GetAttribute("isExplosive"),
-            ExplosionRadius = Tool:GetAttribute("ExplosionRadius"),
-            ExplosionColor = Tool:GetAttribute("ExplosionColor"),
-            ExplosionSoundId = Tool:GetAttribute("ExplosionSoundId"),
+            IsExplosive = Tool:GetAttribute("isExplosive") or false,
+            ExplosionRadius = Tool:GetAttribute("ExplosionRadius") or 15,
+            ExplosionColor = Tool:GetAttribute("ExplosionColor") or Color3.new(1, 0.6, 0.2),
+            ExplosionSoundId = Tool:GetAttribute("ExplosionSoundId") or "rbxassetid://2814354338",
             HitSound = nil,
             HitMarker = nil,
-            IsLaser = Tool:GetAttribute("IsLaser"),
-            LaserColor = Tool:GetAttribute("LaserColor"),
-            LaserWidth = Tool:GetAttribute("LaserWidth"),
-            LaserTime = Tool:GetAttribute("LaserFadeTime"),
-            LaserTexture = Tool:GetAttribute("LaserTexture"),
-            LaserSpeed = Tool:GetAttribute("LaserTextureSpeed"),
-            LaserLength = Tool:GetAttribute("LaserTextureLength"),
-            LaserEmission = Tool:GetAttribute("LaserLightEmission"),
+            IsLaser = Tool:GetAttribute("IsLaser") or false,
+            LaserColor = Tool:GetAttribute("LaserColor") or Color3.new(0, 1, 1),
+            LaserWidth = Tool:GetAttribute("LaserWidth") or 3,
+            LaserTime = Tool:GetAttribute("LaserFadeTime") or 0.7,
+            LaserTexture = Tool:GetAttribute("LaserTexture") or "rbxassetid://4813348676",
+            LaserSpeed = Tool:GetAttribute("LaserTextureSpeed") or 10,
+            LaserLength = Tool:GetAttribute("LaserTextureLength") or 5,
+            LaserEmission = Tool:GetAttribute("LaserLightEmission") or 1,
         },
         Network = {Player = LocalPlayer, Character = MyChar, RenderEvent = ProjectileRender, CheckShotEvent = CheckShot, FinishedEvent = ProjectileFinished},
         Misc = {AmmoCount = self.AmmoLeft, MaxAmmo = MaxAmmo, Spread = Spread, ReloadTime = ReloadTime, CamCFrame = FakeCam, NewSeed = self.Seed, ShotID = T},
     })
 
-    if Reload and Reload.Parent then
-        self.AmmoLeft = MaxAmmo
-        Reload:FireServer()
+    if Reload and self.AmmoLeft <= 0 then
+        self.ReloadingUntil = Now + ReloadTime
+        --task.delay(ReloadTime, function()
+            self.AmmoLeft = MaxAmmo
+            pcall(Reload.FireServer, Reload)
+        --end)
     end
 end
 
