@@ -985,10 +985,10 @@ if moehack.data.game_name == "Arsenal" then
         return Camera.CFrame.Position
     end
     
-    HitObj = Utility:Hook(Bridge.HitObject.Fire, function(Self, Target, HitPos, Normal, Gun, ...)
+    local HitObj; HitObj = Utility:Hook(Bridge.HitObject.Fire, function(Self, Target, HitPos, Normal, Gun, ...)
         if Toggles["visuals/world/bullettracers"].Value and HitPos then
             local Origin = GetOrigin()
-            if Origin and (HitPos - Origin).Magnitude > 0.05 then
+            if Origin then
                 Visuals:BulletTracers(Origin, HitPos)
                 Handled = true
             end
