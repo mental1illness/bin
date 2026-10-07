@@ -963,8 +963,44 @@ end))
 if moehack.data.game_name == "Arsenal" then
     local NetLogger = moehack.load_module("moehack.net/modules/games/arsenal/netlogger.luau")
     local Particles = require(ReplicatedFirst.Client.Game.Particles)
+    local Bridge = require(ReplicatedFirst.Client.Utility.Bridge)
+    local State = require(ReplicatedFirst.Client.Utility.State)
+    local Handled = false
+
+    local function GetOrigin()
+
+        local Arms = FindFirstChild(Camera, "Arms")
+        if Arms then
+            if State.Alt == 1 then
+                local SecondFlash = FindFirstChild(Arms, "2Flash")
+                if SecondFlash then
+                    return SecondFlash.Position
+                end
+            end
+            local Muzzle = FindFirstChild(Arms, "Particles") or FindFirstChild(Arms, "Flash")
+            if Muzzle then
+                return Muzzle.Position
+            end
+        end
+        return Camera.CFrame.Position
+    end
+    
+    HitObj = Utility:Hook(Bridge.HitObject.Fire, function(Self, Target, HitPos, Normal, Gun, ...)
+        if Toggles["visuals/world/bullettracers"].Value and HitPos then
+            local Origin = GetOrigin()
+            if Origin and (HitPos - Origin).Magnitude > 0.05 then
+                Visuals:BulletTracers(Origin, HitPos)
+                Handled = true
+            end
+        end
+        return HitObj(Self, Target, HitPos, Normal, Gun, ...)
+    end)
 
     NetLogger:On("Incoming", "TrailBounce", function(StartPos, EndPos)
+        if Handled == true then
+            Handled = false
+            return
+        end
         if not Toggles["visuals/world/bullettracers"].Value then return end
         Visuals:BulletTracers( StartPos, EndPos )
     end)
