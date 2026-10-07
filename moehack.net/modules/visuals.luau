@@ -16,6 +16,7 @@ local GetService = Game.GetService
 --# Services
 local MarketplaceService = GetService(Game, "MarketplaceService")
 local ReplicatedStorage  = GetService(Game, "ReplicatedStorage")
+local ReplicatedFirst = GetService(Game, "ReplicatedFirst")
 local RunService         = GetService(Game, "RunService")
 local Stats              = GetService(Game, "Stats")
 local InputService       = GetService(Game, "UserInputService")
@@ -930,6 +931,7 @@ end))
 
 if moehack.data.game_name == "Arsenal" then
     local NetLogger = moehack.load_module("moehack.net/modules/games/arsenal/netlogger.luau")
+    local Particles = require(ReplicatedFirst.Client.Game.Particles)
 
     local function GetMuzzlePos(Fallback)
         local Arms = FindFirstChild(Camera, "Arms")
@@ -947,23 +949,14 @@ if moehack.data.game_name == "Arsenal" then
         return Players:GetPlayerFromCharacter(Character)
     end
 
-    local CanSex = false
-    NetLogger:On("Outgoing", "HitPart", function(Target, GunId, Flags, Pen, CamPos, HitPos, Dt)
-        if Toggles["visuals/world/bullettracers"].Value and CanSex and GetHitboxPlayer(Target) then
-            Visuals:BulletTracers( GetMuzzlePos(CamPos), HitPos )
+    local CreateTrail; CreateTrail = hookfunction(Particles.CreateTrail, function(Origin, HitPos, ...)
+        if Toggles["visuals/world/bullettracers"].Value then
+            Visuals:BulletTracers( Origin, HitPos )
             return
         end
 
-        if Toggles["visuals/world/bullettracers"].Value then
-            Visuals:BulletTracers( GetMuzzlePos(CamPos), HitPos )
-        end
+        return CreateTrail(Origin, HitPos, ...)
     end)
-
-    Library:GiveSignal(
-        LocalPlayer.Damage.Changed:Connect(function()
-            CanSex = true
-        end)
-    )
 end
 
 function Visuals.Tick()
