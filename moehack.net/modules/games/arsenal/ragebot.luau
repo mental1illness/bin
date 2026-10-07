@@ -82,8 +82,6 @@ local VisibilityCache = {}
 local OriginCacheTime = 0.075
 local VisibilityCacheTime = 0.05
 
-local HitboxCache = setmetatable({}, { __mode = "k" })
-
 --# Main
 
 local Ragebot = { LastTimeFired = 0 }
@@ -146,50 +144,6 @@ function Ragebot:IsVisible(Target: BasePart, Origin: Vector3?): boolean
 	}
 
 	return Visible
-end
-
-function Ragebot:GetBestHitbox(Character, Origin)
-	if not Character or not Origin then return nil end
-
-	local Hitboxes = HitboxCache[Character]
-
-	if not Hitboxes then
-		Hitboxes = {
-			{ Part = FindFirstChild(Character, "HeadHB"), Priority = 100 },
-			{ Part = FindFirstChild(Character, "Head"), Priority = 95 },
-			{ Part = FindFirstChild(Character, "UpperTorso"), Priority = 80 },
-			{ Part = FindFirstChild(Character, "Torso"), Priority = 80 },
-			{ Part = FindFirstChild(Character, "LowerTorso"), Priority = 70 },
-			{ Part = FindFirstChild(Character, "HumanoidRootPart"), Priority = 50 }
-		}
-
-		HitboxCache[Character] = Hitboxes
-	end
-
-	local BestHitbox = nil
-	local BestScore = -math.huge
-
-	for _, Entry in Hitboxes do
-		local Part = Entry.Part
-
-		if Part and Part.Parent then
-			local Direction = Part.Position - Origin
-			local Distance = Direction.Magnitude
-
-			if Distance > 0 and self:IsVisible(Part, Origin) then
-				local DirectionUnit = Direction / Distance
-				local AimDot = DirectionUnit:Dot(Camera.CFrame.LookVector)
-				local Score = AimDot * 100 + Entry.Priority - Distance * 0.001
-
-				if Score > BestScore then
-					BestScore = Score
-					BestHitbox = Part
-				end
-			end
-		end
-	end
-
-	return BestHitbox
 end
 
 function Ragebot:HitFX(Head: BasePart, Origin: Vector3, HeadBits: number)
@@ -273,9 +227,7 @@ function Ragebot:Hit(Character, PenIndex, SharedCFrame, ForcedOrigin)
 	if not Character then return end
 
 	local Self = self
-	local Origin = ForcedOrigin or self:GetOrigin(Character)
-	local Head = self:GetBestHitbox(Character, Origin)
-
+	local Head = FindFirstChild(Character, "HeadHB") or FindFirstChild(Character, "Head")
 	if not Head then return end
 
 	local Gun = State.gun
@@ -317,6 +269,7 @@ function Ragebot:Hit(Character, PenIndex, SharedCFrame, ForcedOrigin)
 
 		Speed *= Options["combat/ragebot/projectilespeedmult"].Value
 
+		local Origin = ForcedOrigin or self:GetOrigin(Character)
 		local Aim = Head.Position
 		local LegitTarget = Camera.CFrame.Position + Camera.CFrame.LookVector * 1000
 		local Muzzle = (Camera.CFrame * NewCFrame(1.5, -0.65, 0)).Position
@@ -376,6 +329,7 @@ function Ragebot:Hit(Character, PenIndex, SharedCFrame, ForcedOrigin)
 	end
 
 	local GunId = Gun:GetAttribute("Id") or 4
+	local Origin = ForcedOrigin or self:GetOrigin(Character)
 	local Spoofed = SharedCFrame or NewCFrame(Origin, Head.Position)
 	local Cx, Cy, Cz, R00, R01, R02, R10, R11, R12, R20, R21, R22 = Spoofed:GetComponents()
 	local IsCrit = FindFirstChild(Gun, "Scoped") or FindFirstChild(Gun, "Crit")
@@ -475,9 +429,7 @@ end
 function Ragebot:Stab(Character, ForcedOrigin)
 	if not Character then return end
 
-	local Origin = ForcedOrigin or self:GetOrigin(Character)
-	local Head = self:GetBestHitbox(Character, Origin)
-
+	local Head = FindFirstChild(Character, "HeadHB") or FindFirstChild(Character, "Head") or FindFirstChild(Character, "Hitbox")
 	if not Head then return end
 
 	local Gun = State.gun
@@ -491,6 +443,7 @@ function Ragebot:Stab(Character, ForcedOrigin)
 
 	if (Head.Position - RealOrigin).Magnitude > Range + 1 then return end
 
+	local Origin = ForcedOrigin or self:GetOrigin(Character)
 	local FakeOrigin = Origin
 	local Root = Character.PrimaryPart
 
@@ -588,16 +541,18 @@ function Ragebot:Scan()
 			local MaxHealth, Health = Utility.GetHealth(Player, Character)
 
 			if Health and Health > 0 then
+				local Head = FindFirstChild(Character, "HeadHB") or FindFirstChild(Character, "Head")
+
+				if not Head then continue end
 				if Character:FindFirstChildOfClass("ForceField") then continue end
 
 				local Origin = self:GetOrigin(Character)
-				local Hitbox = self:GetBestHitbox(Character, Origin)
 
-				if Hitbox then
+				if self:IsVisible(Head, Origin) then
 					Insert(Sorted, {
 						Character = Character,
-						Head = Hitbox,
-						Dist = (Hitbox.Position - Origin).Magnitude,
+						Head = Head,
+						Dist = (Head.Position - Origin).Magnitude,
 						Origin = Origin
 					})
 				end
@@ -680,13 +635,7 @@ end))
 
 Library:GiveSignal(Players.PlayerRemoving:Connect(function(Player)
 	PlayersCache = Players:GetPlayers()
-
-	local Character = Player.Character
-
-	if Character then
-		HitboxCache[Character] = nil
-		OriginCache[Character] = nil
-	end
+	OriginCache[Player.Character] = nil
 end))
 
 return Ragebot
