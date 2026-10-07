@@ -950,29 +950,16 @@ if moehack.data.game_name == "Arsenal" then
     local NetLogger = moehack.load_module("moehack.net/modules/games/arsenal/netlogger.luau")
     local Particles = require(ReplicatedFirst.Client.Game.Particles)
 
-    local function GetMuzzlePos(Fallback)
-        local Arms = FindFirstChild(Camera, "Arms")
-        if Arms then
-            local Part = FindFirstChild(Arms, "Particles") or FindFirstChild(Arms, "Flash")
-            if Part and IsA(Part, "BasePart") then return Part.Position end
-        end
-        return Fallback
-    end
-
-    local function GetHitboxPlayer(Target)
-        if Target == nil or typeof(Target) ~= "Instance" then return nil end
-        local Character = Target:FindFirstAncestorOfClass("Model")
-        if Character == nil then return nil end
-        return Players:GetPlayerFromCharacter(Character)
-    end
-
     local CreateTrail; CreateTrail = hookfunction(Particles.CreateTrail, function(Origin, HitPos, ...)
         if Toggles["visuals/world/bullettracers"].Value then
-            Visuals:BulletTracers( Origin, HitPos )
             return
         end
 
         return CreateTrail(Origin, HitPos, ...)
+    end)
+
+    NetLogger:On("Incoming", "TrailBounce", function(StartPos, EndPos)
+        Visuals:BulletTracers( StartPos, EndPos )
     end)
 end
 
