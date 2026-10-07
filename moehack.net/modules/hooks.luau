@@ -243,6 +243,19 @@ local __Namecall = newcclosure(function(Self, ...)
     return Hooks.__Namecall(Self, ...)
 end)
 
+local __NewIndex = newcclosure(function(Self, Key, Value, ...)
+
+    if Self == Camera and not checkcaller() then
+        if Key == "FieldOfView" then
+            if Toggles["visuals/camera/fovchanger"].Value then
+                return
+            end
+        end
+    end
+
+    return Hooks.__NewIndex(Self, Key, Value, ...)
+end)
+
 if setstackhidden then
     setstackhidden(__Namecall, true)
 
@@ -258,6 +271,8 @@ end
 if not moehack.data.use_custom_silent_aim then
     Hooks.__Namecall = hookmetamethod(game, "__namecall", __Namecall)
 end
+
+Hooks.__NewIndex = hookmetamethod(game, "__newindex", __NewIndex)
 
 if moehack.data.game_name == "Operation One" then
     type UMod = {

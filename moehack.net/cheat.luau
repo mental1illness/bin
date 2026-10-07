@@ -55,6 +55,8 @@ local FrameRate, Ping = 0, 0
 moehack.load_module("moehack.net/modules/bypass.luau")
 local Storage = moehack.load_module("globals/storage.luau")
 
+local Camera = workspace.CurrentCamera
+
 --# UI Library
 Storage.Preload()
 local Library, SaveManager, ThemeManager = moehack.load_module("moehack.net/interface/library.luau", true), moehack.load_module("moehack.net/interface/addons/SaveManager.lua", true), moehack.load_module("moehack.net/interface/addons/ThemeManager.lua", true) do
@@ -417,8 +419,6 @@ local Library, SaveManager, ThemeManager = moehack.load_module("moehack.net/inte
                         World:AddSlider("visuals/world/bullettracers/lifetime", { Text = "Life Time", Min = 0, Max = 10, Rounding = 1, Default = 2 })
                         World:AddSlider("visuals/world/bullettracers/fadetime", { Text = "Fade Time", Min = 0, Max = 10, Rounding = 1, Default = 1 })
                         World:AddToggle("visuals/world/bullettracers/shrinkfade", { Text = "Shrink Fade", Default = false })
-
-
                     end
                 end
 
@@ -455,6 +455,13 @@ local Library, SaveManager, ThemeManager = moehack.load_module("moehack.net/inte
 
                 
                 do -- Camera
+
+                    Camera:AddToggle("visuals/camera/fovchanger", { Text = "FOV Changer", Default = false })
+                    Camera:AddSlider("visuals/camera/fovchanger/value", { Text = "FOV", Min = 0, Max = 120, Rounding = 0, Default = Camera.FieldOfView, Compact = true, Callback = function(fov)
+                        if not Toggles["visuals/camera/fovchanger"].Value then return end
+                        Camera.FieldOfView = fov
+                    end })
+
                     Camera:AddToggle("visuals/camera/waifu", { Text = "Waifu", Default = false }) do
                         local DepBox = Camera:AddDependencyBox()
 
