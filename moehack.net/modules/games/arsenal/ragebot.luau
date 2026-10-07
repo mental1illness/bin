@@ -222,7 +222,7 @@ function Ragebot:OriginScan(TargetCharacter, Hitbox)
         local Origin = Candidates[Index]
         local Result = Raycast(workspace, Origin, TargetPosition - Origin, OriginParams)
 
-        if Result and Result.Instance == Hitbox then
+        if Result and Result.Instance and Result.Instance:IsDescendantOf(TargetCharacter) then
             return Origin
         end
     end
@@ -242,7 +242,7 @@ function Ragebot:OriginScan(TargetCharacter, Hitbox)
 
         local Result = Raycast(workspace, Origin, TargetPosition - Origin, OriginParams)
 
-        if Result and Result.Instance == Hitbox then
+        if Result and Result.Instance and Result.Instance:IsDescendantOf(TargetCharacter) then
             return Origin
         end
     end
