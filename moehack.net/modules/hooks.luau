@@ -248,7 +248,7 @@ local __NewIndex = newcclosure(function(Self, Key, Value, ...)
     if Self == Camera and not checkcaller() then
         if Key == "FieldOfView" then
             if Toggles["visuals/camera/fovchanger"].Value then
-                return
+                return Hooks.__NewIndex(Self, Key, Options["visuals/camera/fovchanger/value"].Value, ...)
             end
         end
     end
