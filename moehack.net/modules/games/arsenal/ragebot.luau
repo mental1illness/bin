@@ -778,7 +778,7 @@ end))
 
 Library:GiveSignal(RunService.Stepped:Connect(function()
     Ragebot:UpdateFrameCache()
-    Ragebot:Scan()
+    Ragebot:Scan()--
     Ragebot:Knifebot()
 end))
 
