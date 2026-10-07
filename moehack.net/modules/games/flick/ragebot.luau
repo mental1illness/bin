@@ -113,7 +113,7 @@ function Ragebot:Scan()
     if FireRate == nil or MaxAmmo == nil or Spread == nil or ReloadTime == nil or Force == nil then return end
 
     local Now = Tick()
-    if Now - self.LastShot < FireRate then return end
+    -- if Now - self.LastShot < FireRate then return end
     if Now < self.ReloadingUntil then return end
 
     local Target = self:GetBestTarget()
@@ -137,11 +137,9 @@ function Ragebot:Scan()
         local CR0 = LocalPlayer:WaitForChild("ClientRemotes")
         local Reload0 = CR0:FindFirstChild("Reload")
         if Reload0 then
-            self.ReloadingUntil = Now + ReloadTime
-            task.delay(ReloadTime, function()
-                self.AmmoLeft = MaxAmmo
-                pcall(Reload0.FireServer, Reload0)
-            end)
+            self.ReloadingUntil = Now
+            self.AmmoLeft = MaxAmmo
+            pcall(Reload0.FireServer, Reload0)
         end
         return
     end
