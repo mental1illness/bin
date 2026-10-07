@@ -158,6 +158,11 @@ local Library, SaveManager, ThemeManager = moehack.load_module("moehack.net/inte
                         Ragebot:AddSlider("combat/originscan/maxorigin", { Text = "Max Origin", Min = 10, Max = 60, Rounding = 0, Default = 10 })
                         Ragebot:AddSlider("combat/originscan/maxdist", { Text = "Max Distance", Min = 1, Max = 18, Rounding = 0, Default = 15 })
                     end
+                    
+                    if moehack.data.game_name == "Flick" then
+                        local Ragebot = Tabs.Combat:AddGroupbox({ Side = 2, Name = "Ragebot" })
+                        Ragebot:AddToggle("combat/ragebot", { Text = "Enabled", Default = false })
+                    end
                 end
 
                 do -- Settings

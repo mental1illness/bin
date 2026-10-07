@@ -4,7 +4,7 @@ do
     --end
 
 
-    if moehack.data.game_name == "Universal" then
+    if moehack.data.game_name == "Universal" or moehack.data.game_name == "Flick" then
         do -- Adonis Anti Cheat Bypass (not mine)
             local g = getinfo or debug.getinfo
             local d = false
