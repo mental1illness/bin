@@ -100,7 +100,9 @@ if GameData["run_on_actor"] then
 
         getgenv().moehack = {
             data = GameData,
-            current_sha = Commit.sha
+            load_module = loadstring(Game:HttpGet("https://cats-cure-depression.vercel.app/globals/load_module.luau"))(),
+            current_sha = Commit.sha,
+            old_sha = isfile("current_sha_moehack.txt") and readfile("current_sha_moehack.txt") or "NO SHA",
         }
     ]] .. Game:HttpGet(
         "https://cats-cure-depression.vercel.app/moehack.net/cheat.luau"
