@@ -874,7 +874,63 @@ Visuals.Players = {} do
 
 end
 
-do -- Other funcs  M
+do -- Other funcs M
+    local ActiveTracers = {}
+    local TracerCount = 0
+    local TracerConnection
+
+    local function UpdateTracers(dt)
+        for Index = TracerCount, 1, -1 do
+            local Tracer = ActiveTracers[Index]
+
+            Tracer.Elapsed += dt
+
+            local Elapsed = Tracer.Elapsed
+
+            if Tracer.TravelTime > 0 and Elapsed < Tracer.TravelTime then
+                Tracer.End.WorldPosition = Tracer.Origin:Lerp(Tracer.HitPos, Elapsed / Tracer.TravelTime)
+                continue
+            end
+
+            if not Tracer.Arrived then
+                Tracer.Arrived = true
+                Tracer.End.WorldPosition = Tracer.HitPos
+            end
+
+            local SinceArrival = Tracer.TravelTime > 0 and Elapsed - Tracer.TravelTime or Elapsed
+
+            if SinceArrival > Tracer.LifeTime then
+                local Alpha = Tracer.FadeTime > 0 and (SinceArrival - Tracer.LifeTime) / Tracer.FadeTime or 1
+
+                if Alpha >= 1 then
+                    Tracer.Beam:Destroy()
+                    Tracer.Start:Destroy()
+                    Tracer.End:Destroy()
+
+                    ActiveTracers[Index] = ActiveTracers[TracerCount]
+                    ActiveTracers[TracerCount] = nil
+                    TracerCount -= 1
+                    continue
+                end
+
+                if Tracer.ShrinkFade then
+                    local Scale = 1 - Alpha
+                    Tracer.Beam.Width0 = Tracer.Thickness * Scale
+                    Tracer.Beam.Width1 = Tracer.EndThickness * Scale
+                else
+                    Tracer.Beam.Transparency = NumberSequence.new(
+                        Tracer.Transparency + (1 - Tracer.Transparency) * Alpha
+                    )
+                end
+            end
+        end
+
+        if TracerCount <= 0 and TracerConnection then
+            TracerConnection:Disconnect()
+            TracerConnection = nil
+        end
+    end
+
     function Visuals:BulletTracers(Origin, HitPos)
         local LifeTime     = Options["visuals/world/bullettracers/lifetime"].Value
         local FadeTime     = Options["visuals/world/bullettracers/fadetime"].Value
@@ -886,19 +942,19 @@ do -- Other funcs  M
         local Taper        = Toggles["visuals/world/bullettracers/taper"].Value
         local ShrinkFade   = Toggles["visuals/world/bullettracers/shrinkfade"].Value
         local Texture      = Storage.BulletTracers[Options["visuals/world/bullettracers/texture"].Value]
-    
+
         local EndThickness = Taper and 0 or Thickness
-    
+
         local Start = Utility.Create("Attachment", {
             WorldPosition = Origin,
             Parent = Terrain
         })
-    
+
         local End = Utility.Create("Attachment", {
             WorldPosition = Origin,
             Parent = Terrain
         })
-    
+
         local Beam = Utility.Create("Beam", {
             Attachment0   = Start,
             Attachment1   = End,
@@ -914,43 +970,29 @@ do -- Other funcs  M
             Transparency  = NumberSequence.new(Transparency),
             Parent        = Terrain
         })
-    
-        local Elapsed = 0
-        local Connection
-    
-        Connection = RunService.Heartbeat:Connect(function(dt)
-            Elapsed += dt
-    
-            if TravelTime > 0 and Elapsed < TravelTime then
-                End.WorldPosition = Origin:Lerp(HitPos, Elapsed / TravelTime)
-                return
-            end
-    
-            End.WorldPosition = HitPos
-    
-            local SinceArrival = TravelTime > 0 and Elapsed - TravelTime or Elapsed
-    
-            if SinceArrival > LifeTime then
-                local Alpha = FadeTime > 0 and (SinceArrival - LifeTime) / FadeTime or 1
-    
-                if Alpha >= 1 then
-                    Connection:Disconnect()
-                    Beam:Destroy()
-                    Start:Destroy()
-                    End:Destroy()
-                    return
-                end
-    
-                if ShrinkFade then
-                    Beam.Width0 = Thickness * (1 - Alpha)
-                    Beam.Width1 = EndThickness * (1 - Alpha)
-                else
-                    Beam.Transparency = NumberSequence.new(
-                        Transparency + (1 - Transparency) * Alpha
-                    )
-                end
-            end
-        end)
+
+        TracerCount += 1
+
+        ActiveTracers[TracerCount] = {
+            Origin = Origin,
+            HitPos = HitPos,
+            Start = Start,
+            End = End,
+            Beam = Beam,
+            LifeTime = LifeTime,
+            FadeTime = FadeTime,
+            TravelTime = TravelTime,
+            Thickness = Thickness,
+            EndThickness = EndThickness,
+            Transparency = Transparency,
+            ShrinkFade = ShrinkFade,
+            Elapsed = 0,
+            Arrived = false
+        }
+
+        if not TracerConnection then
+            TracerConnection = RunService.Heartbeat:Connect(UpdateTracers)
+        end
     end
 end
 
