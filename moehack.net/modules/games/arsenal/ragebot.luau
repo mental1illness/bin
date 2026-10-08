@@ -772,13 +772,14 @@ function Ragebot:Scan()
 end
 
 Library:GiveSignal(LocalPlayer.Damage.Changed:Connect(function()
+    if not Toggles["combat/ragebot"].Value then return end
     Ragebot:ReplicateShoot()
     CanHitFXPls = true
 end))
 
 Library:GiveSignal(RunService.Stepped:Connect(function()
     Ragebot:UpdateFrameCache()
-    Ragebot:Scan()--
+    Ragebot:Scan()
     Ragebot:Knifebot()
 end))
 
